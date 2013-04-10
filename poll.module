@@ -835,7 +835,7 @@ function poll_view_results($node, $view_mode, $block = FALSE) {
       '#max' => $total_votes,
       '#value' => $chvotes,
       '#percentage' => $percentage,
-      '#attributes' => array('class' => 'bar'),
+      '#attributes' => array('class' => array('bar')),
     );
   }
 
