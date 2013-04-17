@@ -486,7 +486,7 @@ function poll_load($nodes) {
       else {
         // Finally, query the database for an existing vote based on anonymous
         // user's hostname.
-        $poll->allowvotes = !db_query("SELECT 1 FROM {poll_vote} WHERE nid = :nid AND hostname = :hostname AND uid = 0", array(':nid' => $node->nid, ':hostname' => ip_address()))->fetchField();
+        $poll->allowvotes = !db_query("SELECT 1 FROM {poll_vote} WHERE nid = :nid AND hostname = :hostname AND uid = 0", array(':nid' => $node->nid, ':hostname' => Drupal::request()->getClientIp()))->fetchField();
       }
     }
     foreach ($poll as $key => $value) {
@@ -749,7 +749,7 @@ function poll_vote($form, &$form_state) {
       'nid' => $node->nid,
       'chid' => $choice,
       'uid' => $user->uid,
-      'hostname' => ip_address(),
+      'hostname' => Drupal::request()->getClientIp(),
       'timestamp' => REQUEST_TIME,
     ))
     ->execute();
@@ -960,7 +960,7 @@ function poll_cancel($form, &$form_state) {
 
   db_delete('poll_vote')
     ->condition('nid', $node->nid)
-    ->condition($user->uid ? 'uid' : 'hostname', $user->uid ? $user->uid : ip_address())
+    ->condition($user->uid ? 'uid' : 'hostname', $user->uid ? $user->uid : Drupal::request()->getClientIp())
     ->execute();
 
   // Subtract from the votes.
