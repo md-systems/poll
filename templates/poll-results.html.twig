@@ -1,5 +1,4 @@
-<?php
-
+{#
 /**
  * @file
  * Default theme implementation to display the poll results in a block.
@@ -18,21 +17,22 @@
  *
  * @ingroup themeable
  */
-?>
+#}
+
 <div class="poll">
-  <?php if ($block): ?>
-    <h3 class="poll-title"><?php print $title; ?></h3>
-  <?php endif; ?>
-  <dl>
-    <?php print $results; ?>
-  </dl>
-  <div class="total">
-    <?php print t('Total votes: @votes', array('@votes' => $votes)); ?>
-  </div>
-  <?php if (!empty($cancel_form)): ?>
-    <?php print $cancel_form; ?>
-  <?php endif; ?>
+    {% if block %}
+    <h3 class="poll-title">{{ title }}</h3>
+    {% endif %}
+    <dl>
+        {{ results }}
+    </dl>
+    <div class="total">
+        {{ 'Total votes: '|t }} {{ votes }}
+    </div>
+    {% if cancel_form is not empty %}
+        {{ cancel_form }}
+    {% endif %}
 </div>
-<?php if ($block): ?>
-  <div class="links"><?php print $links; ?></div>
-<?php endif; ?>
+{% if block %}
+<div class="links"> {{ links }} </div>
+{% endif %}

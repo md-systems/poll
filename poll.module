@@ -45,6 +45,10 @@ function poll_theme() {
       'template' => 'poll-results',
       'variables' => array('raw_title' => NULL, 'results' => NULL, 'votes' => NULL, 'raw_links' => NULL, 'block' => NULL, 'nid' => NULL, 'vote' => NULL),
     ),
+    'poll_meter' => array(
+      'variables' => array('display_value' => NULL, 'form' => NULL, 'high' => NULL, 'low' => NULL, 'max' => NULL, 'min' => NULL, 'optimum' => NULL, 'value' => NULL, 'percentage' => NULL, 'attributes' => array()),
+      'template' => 'meter',
+    ),
   );
 
   return $theme_hooks;
@@ -812,7 +816,7 @@ function poll_view_results($node, $view_mode, $block = FALSE) {
     $display_votes = !$block ? ' (' . format_plural($chvotes, '1 vote', '@count votes') . ')' : '';
 
     $poll_results[] = array(
-      '#theme' => 'meter',
+      '#theme' => 'poll_meter',
       '#prefix' => '<dt class="choice-title">' . check_plain($choice['chtext']) . "</dt>\n" . '<dd class="choice-result">',
       '#suffix' => "</dd>\n",
       '#display_value' =>  t('!percentage%', array('!percentage' => $percentage)) . $display_votes,
@@ -880,6 +884,33 @@ function theme_poll_choices($variables) {
   $output = theme('table', array('header' => $headers, 'rows' => $rows, 'attributes' => array('id' => 'poll-choice-table')));
   $output .= drupal_render_children($form);
   return $output;
+}
+
+/**
+ * Prepares variables for meter templates.
+ *
+ * Default template: meter.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - display_value: The textual representation of the meter bar.
+ *   - form: A string specifying one or more forms to which the <meter> element
+ *   - attributes: Associative array of attributes to be placed in the meter
+ *     tag.
+ */
+function template_preprocess_meter(&$variables) {
+  $attributes = $variables['attributes'];
+
+  foreach (array('form', 'high', 'low', 'max', 'min', 'optimum', 'value') as $key) {
+    if (isset($variables[$key])) {
+      // This function was initially designed for the <meter> tag, but due to
+      // the lack of browser and styling support for it, we're currently using
+      // its attributes as HTML5 data attributes.
+      $attributes['data-' . $key] = $variables[$key];
+    }
+  }
+
+  $variables['attributes'] = new Attribute($attributes);
 }
 
 /**
