@@ -8,6 +8,8 @@
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\node\Plugin\Core\Entity\Node;
 use Drupal\entity\Plugin\Core\Entity\EntityDisplay;
+use Symfony\Component\HttpFoundation\Request;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Implements hook_help().
@@ -183,14 +185,15 @@ function poll_field_extra_fields() {
 }
 
 /**
- * Implements hook_form().
+ * Implements hook_form_BASE_FORM_ID_alter() for node_form().
  */
-function poll_form(Node $node, &$form_state) {
-  global $user;
+function poll_form_node_form_alter(&$form, &$form_state, $form_id) {
 
-  $admin = user_access('bypass node access') || user_access('edit any poll content') || (user_access('edit own poll content') && $user->uid == $node->uid);
-
+  $node = $form_state['controller']->getEntity();
   $type = node_type_load($node->type);
+
+  $account = Drupal::request()->attributes->get('_account');
+  $admin = $account->hasPermission('bypass node access') || $account->hasPermission('edit any poll content') || ($account->hasPermission('edit own poll content') && $user->uid == $form['nid']['#value']);
 
   // The submit handlers to add more poll choices require that this form is
   // cached, regardless of whether Ajax is used.
@@ -305,7 +308,6 @@ function poll_form(Node $node, &$form_state) {
 
   $form['#entity_builders'][] = 'poll_node_form_submit';
 
-  return $form;
 }
 
 /**
@@ -406,20 +408,22 @@ function poll_node_form_submit($entity_type, $entity, &$form, &$form_state) {
 }
 
 /**
- * Implements hook_validate().
+ * Implements hook_node_validate().
  */
-function poll_validate($node, $form) {
-  if ($node->label()) {
-    // Check for at least two options and validate amount of votes.
-    $realchoices = 0;
-    foreach ($node->choice as $i => $choice) {
-      if ($choice['chtext'] != '') {
-        $realchoices++;
+function poll_node_validate($node, $form) {
+  if ($node->getType() == 'poll') {
+    if ($node->label()) {
+      // Check for at least two options and validate amount of votes.
+      $realchoices = 0;
+      foreach ($node->choice as $i => $choice) {
+        if ($choice['chtext'] != '') {
+          $realchoices++;
+        }
       }
-    }
 
-    if ($realchoices < 2) {
-      form_set_error("choice][$realchoices][chtext", t('You must fill in at least two choices.'));
+      if ($realchoices < 2) {
+        form_set_error("choice][$realchoices][chtext", t('You must fill in at least two choices.'));
+      }
     }
   }
 }
@@ -437,145 +441,156 @@ function poll_field_attach_prepare_translation_alter(EntityInterface $entity, $c
 }
 
 /**
- * Implements hook_load().
+ * Implements hook_node_load().
  */
-function poll_load($nodes) {
+function poll_node_load($nodes) {
   global $user;
   foreach ($nodes as $node) {
-    $poll = db_query("SELECT runtime, active FROM {poll} WHERE nid = :nid", array(':nid' => $node->nid))->fetchObject();
+    if ($node->getType() == 'poll') {
 
-    if (empty($poll)) {
-      $poll = new stdClass();
-    }
 
-    // Load the appropriate choices into the $poll object.
-    $poll->choice = db_select('poll_choice', 'c')
-      ->addTag('translatable')
-      ->fields('c', array('chid', 'chtext', 'chvotes', 'weight'))
-      ->condition('c.nid', $node->nid)
-      ->orderBy('weight')
-      ->execute()->fetchAllAssoc('chid', PDO::FETCH_ASSOC);
+      $poll = db_query("SELECT runtime, active FROM {poll} WHERE nid = :nid", array(':nid' => $node->id()))->fetchObject();
+      if (empty($poll)) {
+        $poll = new stdClass();
+      }
 
-    // Determine whether or not this user is allowed to vote.
-    $poll->allowvotes = FALSE;
-    if (user_access('vote on polls') && $poll->active) {
-      if ($user->uid) {
-        // If authenticated, find existing vote based on uid.
-        $poll->vote = db_query('SELECT chid FROM {poll_vote} WHERE nid = :nid AND uid = :uid', array(':nid' => $node->nid, ':uid' => $user->uid))->fetchField();
-        if (empty($poll->vote)) {
-          $poll->vote = -1;
-          $poll->allowvotes = TRUE;
+      // Load the appropriate choices into the $poll object.
+      $poll->choice = db_select('poll_choice', 'c')
+        ->addTag('translatable')
+        ->fields('c', array('chid', 'chtext', 'chvotes', 'weight'))
+        ->condition('c.nid', $node->nid)
+        ->orderBy('weight')
+        ->execute()->fetchAllAssoc('chid', PDO::FETCH_ASSOC);
+
+      // Determine whether or not this user is allowed to vote.
+      $poll->allowvotes = FALSE;
+      $account = Drupal::request()->attributes->get('_account');
+      if ($account->hasPermission('vote on polls') && $poll->active) {
+        if ($account->id()) {
+          // If authenticated, find existing vote based on uid.
+          $poll->vote = db_query('SELECT chid FROM {poll_vote} WHERE nid = :nid AND uid = :uid', array(':nid' => $node->id(), ':uid' => $account->id()))->fetchField();
+          if (empty($poll->vote)) {
+            $poll->vote = -1;
+            $poll->allowvotes = TRUE;
+          }
+        }
+        elseif (!empty($_SESSION['poll_vote'][$node->nid])) {
+          // Otherwise the user is anonymous. Look for an existing vote in the
+          // user's session.
+          $poll->vote = $_SESSION['poll_vote'][$node->nid];
+        }
+        else {
+          // Finally, query the database for an existing vote based on anonymous
+          // user's hostname.
+          $poll->allowvotes = !db_query("SELECT 1 FROM {poll_vote} WHERE nid = :nid AND hostname = :hostname AND uid = 0", array(':nid' => $node->nid, ':hostname' => Drupal::request()->getClientIp()))->fetchField();
         }
       }
-      elseif (!empty($_SESSION['poll_vote'][$node->nid])) {
-        // Otherwise the user is anonymous. Look for an existing vote in the
-        // user's session.
-        $poll->vote = $_SESSION['poll_vote'][$node->nid];
+      foreach ($poll as $key => $value) {
+        $nodes[$node->id()]->$key = $value;
+      }
+    }
+  }
+
+}
+
+/**
+ * Implements hook_node_insert().
+ */
+function poll_node_insert($node) {
+  if ($node->getType() == 'poll') {
+    if (!user_access('administer nodes')) {
+      // Make sure all votes are 0 initially
+      foreach ($node->choice as $i => $choice) {
+        $node->choice[$i]['chvotes'] = 0;
+      }
+      $node->active = 1;
+    }
+
+    db_insert('poll')
+      ->fields(array(
+        'nid' => $node->nid,
+        'runtime' => $node->runtime,
+        'active' => $node->active,
+      ))
+      ->execute();
+
+    foreach ($node->choice as $choice) {
+      if ($choice['chtext'] != '') {
+        db_insert('poll_choice')
+          ->fields(array(
+            'nid' => $node->nid,
+            'chtext' => $choice['chtext'],
+            'chvotes' => $choice['chvotes'],
+            'weight' => $choice['weight'],
+          ))
+          ->execute();
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_node_update().
+ */
+function poll_node_update($node) {
+  if ($node->getType() == 'poll') {
+    // Update poll settings.
+    db_update('poll')
+      ->fields(array(
+        'runtime' => $node->runtime,
+        'active' => $node->active,
+      ))
+      ->condition('nid', $node->nid)
+      ->execute();
+
+    // Poll choices with empty titles signifies removal. We remove all votes to
+    // the removed options, so people who voted on them can vote again.
+    foreach ($node->choice as $key => $choice) {
+      if (!empty($choice['chtext'])) {
+        db_merge('poll_choice')
+          ->key(array('chid' => $choice['chid']))
+          ->fields(array(
+            'chtext' => $choice['chtext'],
+            'chvotes' => (int) $choice['chvotes'],
+            'weight' => $choice['weight'],
+          ))
+          ->insertFields(array(
+            'nid' => $node->nid,
+            'chtext' => $choice['chtext'],
+            'chvotes' => (int) $choice['chvotes'],
+            'weight' => $choice['weight'],
+          ))
+          ->execute();
       }
       else {
-        // Finally, query the database for an existing vote based on anonymous
-        // user's hostname.
-        $poll->allowvotes = !db_query("SELECT 1 FROM {poll_vote} WHERE nid = :nid AND hostname = :hostname AND uid = 0", array(':nid' => $node->nid, ':hostname' => Drupal::request()->getClientIp()))->fetchField();
+        db_delete('poll_vote')
+          ->condition('nid', $node->nid)
+          ->condition('chid', $key)
+          ->execute();
+        db_delete('poll_choice')
+          ->condition('nid', $node->nid)
+          ->condition('chid', $choice['chid'])
+          ->execute();
       }
     }
-    foreach ($poll as $key => $value) {
-      $nodes[$node->nid]->$key = $value;
-    }
   }
 }
 
 /**
- * Implements hook_insert().
+ * Implements hook_node_delete().
  */
-function poll_insert($node) {
-  if (!user_access('administer nodes')) {
-    // Make sure all votes are 0 initially
-    foreach ($node->choice as $i => $choice) {
-      $node->choice[$i]['chvotes'] = 0;
-    }
-    $node->active = 1;
+function poll_node_delete($node) {
+  if ($node->getType() == 'poll') {
+    db_delete('poll')
+      ->condition('nid', $node->nid)
+      ->execute();
+    db_delete('poll_choice')
+      ->condition('nid', $node->nid)
+      ->execute();
+    db_delete('poll_vote')
+      ->condition('nid', $node->nid)
+      ->execute();
   }
-
-  db_insert('poll')
-    ->fields(array(
-      'nid' => $node->nid,
-      'runtime' => $node->runtime,
-      'active' => $node->active,
-    ))
-    ->execute();
-
-  foreach ($node->choice as $choice) {
-    if ($choice['chtext'] != '') {
-      db_insert('poll_choice')
-        ->fields(array(
-          'nid' => $node->nid,
-          'chtext' => $choice['chtext'],
-          'chvotes' => $choice['chvotes'],
-          'weight' => $choice['weight'],
-        ))
-        ->execute();
-    }
-  }
-}
-
-/**
- * Implements hook_update().
- */
-function poll_update($node) {
-  // Update poll settings.
-  db_update('poll')
-    ->fields(array(
-      'runtime' => $node->runtime,
-      'active' => $node->active,
-    ))
-    ->condition('nid', $node->nid)
-    ->execute();
-
-  // Poll choices with empty titles signifies removal. We remove all votes to
-  // the removed options, so people who voted on them can vote again.
-  foreach ($node->choice as $key => $choice) {
-    if (!empty($choice['chtext'])) {
-      db_merge('poll_choice')
-        ->key(array('chid' => $choice['chid']))
-        ->fields(array(
-          'chtext' => $choice['chtext'],
-          'chvotes' => (int) $choice['chvotes'],
-          'weight' => $choice['weight'],
-        ))
-        ->insertFields(array(
-          'nid' => $node->nid,
-          'chtext' => $choice['chtext'],
-          'chvotes' => (int) $choice['chvotes'],
-          'weight' => $choice['weight'],
-        ))
-        ->execute();
-    }
-    else {
-      db_delete('poll_vote')
-        ->condition('nid', $node->nid)
-        ->condition('chid', $key)
-        ->execute();
-      db_delete('poll_choice')
-        ->condition('nid', $node->nid)
-        ->condition('chid', $choice['chid'])
-        ->execute();
-    }
-  }
-}
-
-/**
- * Implements hook_delete().
- */
-function poll_delete($node) {
-  db_delete('poll')
-    ->condition('nid', $node->nid)
-    ->execute();
-  db_delete('poll_choice')
-    ->condition('nid', $node->nid)
-    ->execute();
-  db_delete('poll_vote')
-    ->condition('nid', $node->nid)
-    ->execute();
 }
 
 /**
@@ -627,20 +642,23 @@ function poll_block_latest_poll_view(Node $node) {
 
 
 /**
- * Implements hook_view().
+ * Implements hook_node_view().
  *
  * @see poll_view_results()
  */
-function poll_view($node, EntityDisplay $display, $view_mode) {
-  if (!empty($node->allowvotes) && empty($node->show_results)) {
-    if ($display->getComponent('poll_view_voting')) {
-      $node->content['poll_view_voting'] = drupal_get_form('poll_view_voting', $node);
+function poll_node_view($node, $display, $view_mode) {
+  if ($node->getType() == 'poll') {
+    if (!empty($node->allowvotes) && empty($node->show_results)) {
+      if ($display->getComponent('poll_view_voting')) {
+        $form = drupal_get_form('poll_view_voting', $node);
+        $node->content['poll_view_voting'] = $form;
+      }
     }
+    elseif ($display->getComponent('poll_view_results')) {
+      $node->content['poll_view_results'] = array('#markup' => poll_view_results($node, $view_mode));
+    }
+    return $node;
   }
-  elseif ($display->getComponent('poll_view_results')) {
-    $node->content['poll_view_results'] = array('#markup' => poll_view_results($node, $view_mode));
-  }
-  return $node;
 }
 
 /**
@@ -732,12 +750,12 @@ function poll_vote($form, &$form_state) {
   $node = $form['#node'];
   $choice = $form_state['values']['choice'];
 
-  global $user;
+  $account = Drupal::request()->attributes->get('_account');
   db_insert('poll_vote')
     ->fields(array(
       'nid' => $node->nid,
       'chid' => $choice,
-      'uid' => $user->uid,
+      'uid' => $account->id(),
       'hostname' => Drupal::request()->getClientIp(),
       'timestamp' => REQUEST_TIME,
     ))
@@ -751,7 +769,7 @@ function poll_vote($form, &$form_state) {
 
   cache_invalidate_tags(array('content' => TRUE));
 
-  if (!$user->uid) {
+  if (!$account->id()) {
     // The vote is recorded so the user gets the result view instead of the
     // voting form when viewing the poll. Saving a value in $_SESSION has the
     // convenient side effect of preventing the user from hitting the page
@@ -971,12 +989,12 @@ function poll_cancel_form($form, &$form_state, $nid) {
  * Form submission handler for poll_cancel_form().
  */
 function poll_cancel($form, &$form_state) {
-  global $user;
+  $account = Drupal::request()->attributes->get('_account');
   $node = node_load($form['#nid']);
 
   db_delete('poll_vote')
     ->condition('nid', $node->nid)
-    ->condition($user->uid ? 'uid' : 'hostname', $user->uid ? $user->uid : Drupal::request()->getClientIp())
+    ->condition($account->id() ? 'uid' : 'hostname', $account->id() ? $account->id() : Drupal::request()->getClientIp())
     ->execute();
 
   // Subtract from the votes.
