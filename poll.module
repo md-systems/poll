@@ -1,0 +1,117 @@
+<?php
+
+/**
+ * @file
+ * Collects votes on different topics in the form of multiple choice questions.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+
+//use Drupal\node\Plugin\Core\Entity\Node;
+use Drupal\entity\Plugin\Core\Entity\EntityDisplay;
+use Symfony\Component\HttpFoundation\Request;
+use Drupal\Core\Session\AccountInterface;
+
+/**
+ * Denotes that the poll is not published.
+ */
+const POLL_NOT_PUBLISHED = 0;
+
+/**
+ * Denotes that the poll is published.
+ */
+const POLL_PUBLISHED = 1;
+
+/**
+ * Implements hook_help().
+ */
+function poll_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#poll':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Poll module can be used to create simple surveys or questionnaires that display cumulative results. A poll is a good way to receive feedback from site users and community members. For more information, see the online handbook entry for the <a href="@poll">Poll module</a>.', array('@poll' => 'http://drupal.org/documentation/modules/poll/')) . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Creating a poll') . '</dt>';
+      $output .= '<dd>' . t('Users can create a poll by clicking on Poll on the <a href="@add-content">Add new content</a> page, and entering the question being posed, the answer choices, and beginning vote counts for each choice. The status (closed or active) and duration (length of time the poll remains active for new votes) can also be specified.', array('@add-content' => url('node/add'))) . '</dd>';
+      $output .= '<dt>' . t('Viewing polls') . '</dt>';
+      $output .= '<dd>' . t('You can visit the <a href="@poll">Polls</a> page to view all current polls, or alternately enable the <em>Most recent poll</em> Block on the <a href="@blocks">Blocks administration page</a>. To vote in or view the results of a specific poll, you can click on the poll itself.', array(
+          '@poll' => url('poll'),
+          '@blocks' => url('admin/structure/Block')
+        )) . '</dd>';
+      $output .= '</dl>';
+      return $output;
+  }
+}
+
+
+/**
+ * Implements hook_menu().
+ */
+function poll_menu() {
+
+  $items['admin/structure/poll'] = array(
+    'title' => 'Polls',
+    'description' => 'Manage Polls for your site.',
+    'route_name' => 'poll_list',
+  );
+  $items['admin/structure/poll/add'] = array(
+    'route_name' => 'poll_add',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * Entity URI callback.
+ */
+function poll_uri($poll) {
+  return array(
+    'path' => 'poll/' . $poll->id(),
+  );
+}
+
+
+/**
+ * Create choice field for the poll entity.
+ */
+function poll_install_choice_field() {
+  // TODO: better way of creating fields?
+  $field = array(
+    'name' => 'field_choice',
+    'entity_type' => 'poll',
+    'module' => 'poll',
+    'type' => 'poll_choice',
+    'cardinality' => '-1',
+    'locked' => FALSE,
+  );
+  entity_create('field_entity', $field)->save();
+
+  $instance = array(
+    'field_name' => 'field_choice',
+    'entity_type' => 'poll',
+    'label' => 'Choice',
+    'bundle' => 'poll',
+    'description' => t('Enter a poll choice and default vote.'),
+    'required' => FALSE,
+    'settings' => array(
+      'max_length' => 255,
+    ),
+  );
+  entity_create('field_instance', $instance)->save();
+
+  // Assign form display settings for the 'default' view mode.
+  entity_get_form_display('poll', 'poll', 'default')
+    ->setComponent('field_choice', array(
+      'type' => 'poll_choice_default',
+      'settings' => array(
+        'size' => '60',
+        'placeholder' => '',
+      ),
+      'weight' => 0,
+    ))
+    ->save();
+
+}

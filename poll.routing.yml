@@ -1,0 +1,13 @@
+poll_list:
+  pattern: '/admin/structure/poll'
+  defaults:
+    _entity_list: 'poll'
+  requirements:
+    _permission: 'administer content'
+
+poll_add:
+  pattern: '/admin/structure/poll/add'
+  defaults:
+    _entity_form: poll.add
+  requirements:
+    _permission: 'administer content'

@@ -1,0 +1,144 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the Poll module.
+ */
+
+
+/**
+ * Implements hook_schema().
+ */
+function poll_schema() {
+  $schema['poll'] = array(
+    'description' => 'Stores poll-specific information for poll entities.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique poll ID.',
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The {user}.id of poll author.',
+      ),
+      'uuid' => array(
+        'description' => 'Unique Key: Universally unique identifier for this entity.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+      ),
+      'question' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The poll question.',
+      ),
+      'langcode' => array(
+        'description' => 'The {language}.langcode of this poll.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'features' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
+        'description' => 'Features of the poll',
+      ),
+      'runtime' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The number of seconds past {poll}.created during which the poll is open.',
+      ),
+      'status' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
+        'size' => 'tiny',
+        'description' => 'The status of a poll. (0 = Not Active, 1 = Active)',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the poll was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'uuid' => array('uuid'),
+    ),
+  );
+
+  $schema['poll_vote'] = array(
+    'description' => 'Stores per-{users} votes for each {poll}.',
+    'fields' => array(
+      'chid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => "The {users}'s vote for this poll.",
+      ),
+      'pid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The {poll} entity this vote is for.',
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The {users}.uid this vote is from unless the voter is anonymous.',
+      ),
+      'hostname' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The IP address this vote is from unless the voter was logged in.',
+      ),
+      'timestamp' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The timestamp of the vote creation.',
+      ),
+    ),
+    'primary key' => array('pid', 'uid', 'hostname'),
+    'foreign keys' => array(
+      'poll_entity' => array(
+        'table' => 'poll',
+        'columns' => array('pid' => 'pid'),
+      ),
+      'voter' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+    ),
+    'indexes' => array(
+      'chid' => array('chid'),
+      'hostname' => array('hostname'),
+      'uid' => array('uid'),
+    ),
+  );
+
+  return $schema;
+}
+
+
+/**
+ * Implements hook_install().
+ */
+function poll_install() {
+  poll_install_choice_field();
+}

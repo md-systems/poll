@@ -1,0 +1,5 @@
+poll_add:
+  route_name: poll_add
+  title: 'Add poll'
+  appears_on:
+    - poll_list
