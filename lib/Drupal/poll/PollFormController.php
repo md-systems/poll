@@ -46,7 +46,8 @@ class PollFormController extends EntityFormControllerNG {
     $form['status'] = array(
       '#type' => 'radios',
       '#title' => $this->t('Status'),
-      '#default_value' => ($poll->isNew()) ? 1 : $poll->get('status')->getValue(),
+      '#default_value' => ($poll->isNew()) ? 1 : $poll->get('status')
+        ->getValue(),
       '#options' => array($this->t('Closed'), $this->t('Active')),
       '#weight' => 1,
     );
@@ -54,11 +55,22 @@ class PollFormController extends EntityFormControllerNG {
     // Poll attributes
     $duration = array(
       // 1-6 days.
-      86400, 2 * 86400, 3 * 86400, 4 * 86400, 5 * 86400, 6 * 86400,
+      86400,
+      2 * 86400,
+      3 * 86400,
+      4 * 86400,
+      5 * 86400,
+      6 * 86400,
       // 1-3 weeks (7 days).
-      604800, 2 * 604800, 3 * 604800,
+      604800,
+      2 * 604800,
+      3 * 604800,
       // 1-3,6,9 months (30 days).
-      2592000, 2 * 2592000, 3 * 2592000, 6 * 2592000, 9 * 2592000,
+      2592000,
+      2 * 2592000,
+      3 * 2592000,
+      6 * 2592000,
+      9 * 2592000,
       // 1 year (365 days).
       31536000,
     );
@@ -76,21 +88,24 @@ class PollFormController extends EntityFormControllerNG {
     $form['anonymous_vote_allow'] = array(
       '#type' => 'radios',
       '#title' => $this->t('Anonymous votes allowed'),
-      '#default_value' => ($poll->isNew()) ? 0 : $poll->get('anonymous_vote_allowed')->getValue(),
+      '#default_value' => ($poll->isNew()) ? 0 : $poll
+        ->get('anonymous_vote_allowed')->getValue(),
       '#options' => array($this->t('No'), $this->t('Yes')),
       '#weight' => 3,
     );
     $form['cancel_vote_allow'] = array(
       '#type' => 'radios',
       '#title' => $this->t('Cancel votes allowed'),
-      '#default_value' => ($poll->isNew()) ? 0 : $poll->get('cancel_vote_allowed')->getValue(),
+      '#default_value' => ($poll->isNew()) ? 0 : $poll
+        ->get('cancel_vote_allowed')->getValue(),
       '#options' => array($this->t('No'), $this->t('Yes')),
       '#weight' => 4,
     );
     $form['result_vote_allow'] = array(
       '#type' => 'radios',
       '#title' => $this->t('View results allowed'),
-      '#default_value' => ($poll->isNew()) ? 0 : $poll->get('result_vote_allowed')->getValue(),
+      '#default_value' => ($poll->isNew()) ? 0 : $poll
+        ->get('result_vote_allowed')->getValue(),
       '#options' => array($this->t('No'), $this->t('Yes')),
       '#weight' => 5,
     );

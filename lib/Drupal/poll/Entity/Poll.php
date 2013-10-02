@@ -40,6 +40,7 @@ use Drupal\poll\PollInterface;
  *   },
  *   base_table = "poll",
  *   uri_callback = "poll_uri",
+ *   route_base_path = "admin/structure/types/manage/{bundle}",
  *   fieldable = TRUE,
  *   translatable = TRUE,
  *   entity_keys = {

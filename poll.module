@@ -5,12 +5,11 @@
  * Collects votes on different topics in the form of multiple choice questions.
  */
 
-use Drupal\Core\Entity\EntityInterface;
-
+//use Drupal\Core\Entity\EntityInterface;
 //use Drupal\node\Plugin\Core\Entity\Node;
-use Drupal\entity\Plugin\Core\Entity\EntityDisplay;
+//use Drupal\entity\Plugin\Core\Entity\EntityDisplay;
 use Symfony\Component\HttpFoundation\Request;
-use Drupal\Core\Session\AccountInterface;
+use Drupal\field\Field;
 
 /**
  * Denotes that the poll is not published.
@@ -78,40 +77,43 @@ function poll_uri($poll) {
  * Create choice field for the poll entity.
  */
 function poll_install_choice_field() {
-  // TODO: better way of creating fields?
-  $field = array(
-    'name' => 'field_choice',
-    'entity_type' => 'poll',
-    'module' => 'poll',
-    'type' => 'poll_choice',
-    'cardinality' => '-1',
-    'locked' => FALSE,
-  );
-  entity_create('field_entity', $field)->save();
+  $poll_choice_field = Field::fieldInfo()->getField('poll', 'field_choice');
+  if (empty($poll_choice_field)) {
+    $field = array(
+      'name' => 'field_choice',
+      'entity_type' => 'poll',
+      'module' => 'poll',
+      'type' => 'poll_choice',
+      'cardinality' => '-1',
+      'locked' => FALSE,
+    );
+    entity_create('field_entity', $field)->save();
 
-  $instance = array(
-    'field_name' => 'field_choice',
-    'entity_type' => 'poll',
-    'label' => 'Choice',
-    'bundle' => 'poll',
-    'description' => t('Enter a poll choice and default vote.'),
-    'required' => FALSE,
-    'settings' => array(
-      'max_length' => 255,
-    ),
-  );
-  entity_create('field_instance', $instance)->save();
-
-  // Assign form display settings for the 'default' view mode.
-  entity_get_form_display('poll', 'poll', 'default')
-    ->setComponent('field_choice', array(
-      'type' => 'poll_choice_default',
+    $instance = array(
+      'field_name' => 'field_choice',
+      'entity_type' => 'poll',
+      'label' => 'Choice',
+      'bundle' => 'poll',
+      'description' => t('Enter a poll choice and default vote.'),
+      'required' => FALSE,
       'settings' => array(
-        'size' => '60',
-        'placeholder' => '',
+        'max_length' => 255,
       ),
-      'weight' => 0,
-    ))
-    ->save();
+    );
+    entity_create('field_instance', $instance)->save();
 
+    // Assign form display settings for the 'default' view mode.
+    entity_get_form_display('poll', 'poll', 'default')
+      ->setComponent('field_choice', array(
+        'type' => 'poll_choice_default',
+        'settings' => array(
+          'size' => '60',
+          'placeholder' => '',
+        ),
+        'weight' => 0,
+      ))
+      ->save();
+
+    // TODO: other display settings?
+  }
 }

@@ -134,11 +134,3 @@ function poll_schema() {
 
   return $schema;
 }
-
-
-/**
- * Implements hook_install().
- */
-function poll_install() {
-  poll_install_choice_field();
-}
