@@ -252,6 +252,13 @@ class Poll extends EntityNG implements PollInterface {
   /**
    * {@inheritdoc}
    */
+  public function getCreated() {
+    return $this->get('created')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function sort($a, $b) {
 
     // Sort by label.
@@ -270,7 +277,7 @@ class Poll extends EntityNG implements PollInterface {
     );
     $properties['uid'] = array(
       'label' => t('User ID'),
-      'description' => t('The user ID of the node author.'),
+      'description' => t('The user ID of the poll author.'),
       'type' => 'entity_reference_field',
       'settings' => array(
         'target_type' => 'user',
@@ -297,13 +304,20 @@ class Poll extends EntityNG implements PollInterface {
       'description' => t('The poll language code.'),
       'type' => 'language_field',
     );
-    $properties['features'] = array(
-      'label' => t('Features'),
-      'description' => t('The properties of the poll.'),
-      'type' => 'string_field',
-      'settings' => array(
-        'default_value' => '',
-      ),
+    $properties['anonymous_vote_allow'] = array(
+      'label' => t('Anonymous voteS allowed'),
+      'description' => t('A boolean indicating whether anonymous users are allowed to vote.'),
+      'type' => 'boolean_field',
+    );
+    $properties['cancel_vote_allow'] = array(
+      'label' => t('Cancel votes allowed'),
+      'description' => t('A boolean indicating whether users may cancel their vote.'),
+      'type' => 'boolean_field',
+    );
+    $properties['result_vote_allow'] = array(
+      'label' => t('View results allowed'),
+      'description' => t('A boolean indicating whether users may see the results before voting.'),
+      'type' => 'boolean_field',
     );
     $properties['runtime'] = array(
       'label' => t('Runtime'),

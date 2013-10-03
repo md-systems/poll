@@ -34,10 +34,11 @@ class PollChoiceDefaultFormatter extends FormatterBase {
    */
   public function viewElements(EntityInterface $entity, $langcode, FieldInterface $items) {
     $elements = array();
-    $allowed_values = Drupal::service('poll_manager')->getList();
     foreach ($items as $delta => $item) {
-      $elements[$delta] = array('#markup' => $allowed_values[$item->value]);
+      $elements[$delta] = array('#markup' => $item->choice);
     }
     return $elements;
   }
+
+
 }

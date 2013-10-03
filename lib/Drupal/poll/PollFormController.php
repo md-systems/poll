@@ -117,86 +117,67 @@ class PollFormController extends EntityFormControllerNG {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, array &$form_state) {
-    parent::validate($form, $form_state);
+  public function buildEntity(array $form, array &$form_state) {
+    //$poll = $this->entity;
+    $poll = parent::buildEntity($form, $form_state);
 
+//    $poll->entity_type->value;
+//    $poll->entity_type = 'poll';
+
+
+    $string = check_plain(print_r($poll, TRUE));
+    $string = '<pre>' . $string . '</pre>';
+    trigger_error(trim($string));
+    die('pollBuildEntity:');
+
+
+    $poll->question->value = $form_state['values']['question'];
+    $poll->anonymous_vote_allow->value = $form_state['values']['anonymous_vote_allow'];;
+    $poll->cancel_vote_allow->value = $form_state['values']['cancel_vote_allow'];
+    $poll->result_vote_allow->value = $form_state['values']['result_vote_allow'];
+    $poll->created->value = REQUEST_TIME;
+    $poll->langcode->value = 'und';
+    $poll->runtime->value = $form_state['values']['runtime'];
+
+//    $poll->field_choice[0]->choice = "first choice";
+//    $poll->field_choice[0]->vote = 3;
+
+    return $poll;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function save(array $form, array &$form_state) {
+    $poll = $this->entity;
+
+    $string = check_plain(print_r($poll, TRUE));
+    $string = '<pre>' . $string . '</pre>';
+    trigger_error(trim($string));
+    die('here:');
+
+    $poll->save();
+    $form_state['redirect'] = 'admin/structure/poll/add';
 
   }
 
-//  /**
-//   * {@inheritdoc}
-//   */
-//  public function buildEntity(array $form, array &$form_state) {
-//    $term = parent::buildEntity($form, $form_state);
+
+//  public function submit(array $form, array &$form_state) {
+//    // Build the block object from the submitted values.
+//    $poll = parent::submit($form, $form_state);
+//    $poll->question->value = 'Lorem lispum dolor amet vici xxx!!!';
+//    $poll->anonymous_vote_allowed->value = 1;
+//    $poll->cancel_vote_allowed->value = 0;
+//    $poll->result_vote_allowed->value = 1;
+//    $poll->created->value = strtotime('now');
+//    $poll->langcode->value = 'und';
+//    $poll->runtime->value = 4 * 86400;
 //
-//    // Prevent leading and trailing spaces in term names.
-//    $term->name->value = trim($term->name->value);
+////    $poll->field_choice[0]->choice = "first choice";
+////    $poll->field_choice[0]->vote = 3;
 //
-//    // Convert text_format field into values expected by
-//    // \Drupal\Core\Entity\Entity::save() method.
-//    $description = $form_state['values']['description'];
-//    $term->description->value = $description['value'];
-//    $term->format->value = $description['format'];
-//
-//    // Assign parents with proper delta values starting from 0.
-//    $term->parent = array_keys($form_state['values']['parent']);
-//
-//    return $term;
+//    return $poll;
 //  }
-//
-//  /**
-//   * {@inheritdoc}
-//   */
-//  public function save(array $form, array &$form_state) {
-//    $term = $this->entity;
-//
-//    switch ($term->save()) {
-//      case SAVED_NEW:
-//        drupal_set_message($this->t('Created new term %term.', array('%term' => $term->label())));
-//        watchdog('poll', 'Created new term %term.', array('%term' => $term->label()), WATCHDOG_NOTICE, l($this->t('edit'), 'poll/term/' . $term->id() . '/edit'));
-//        break;
-//      case SAVED_UPDATED:
-//        drupal_set_message($this->t('Updated term %term.', array('%term' => $term->label())));
-//        watchdog('poll', 'Updated term %term.', array('%term' => $term->label()), WATCHDOG_NOTICE, l($this->t('edit'), 'poll/term/' . $term->id() . '/edit'));
-//        // Clear the page and block caches to avoid stale data.
-//        Cache::invalidateTags(array('content' => TRUE));
-//        break;
-//    }
-//
-//    $current_parent_count = count($form_state['values']['parent']);
-//    $previous_parent_count = count($form_state['poll']['parent']);
-//    // Root doesn't count if it's the only parent.
-//    if ($current_parent_count == 1 && isset($form_state['values']['parent'][0])) {
-//      $current_parent_count = 0;
-//      $form_state['values']['parent'] = array();
-//    }
-//
-//    // If the number of parents has been reduced to one or none, do a check on the
-//    // parents of every term in the vocabulary value.
-//    if ($current_parent_count < $previous_parent_count && $current_parent_count < 2) {
-//      poll_check_vocabulary_hierarchy($form_state['poll']['vocabulary'], $form_state['values']);
-//    }
-//    // If we've increased the number of parents and this is a single or flat
-//    // hierarchy, update the vocabulary immediately.
-//    elseif ($current_parent_count > $previous_parent_count && $form_state['poll']['vocabulary']->hierarchy != TAXONOMY_HIERARCHY_MULTIPLE) {
-//      $form_state['poll']['vocabulary']->hierarchy = $current_parent_count == 1 ? TAXONOMY_HIERARCHY_SINGLE : TAXONOMY_HIERARCHY_MULTIPLE;
-//      $form_state['poll']['vocabulary']->save();
-//    }
-//
-//    $form_state['values']['tid'] = $term->id();
-//    $form_state['tid'] = $term->id();
-//  }
-//
-//  /**
-//   * {@inheritdoc}
-//   */
-//  public function delete(array $form, array &$form_state) {
-//    $destination = array();
-//    if (isset($_GET['destination'])) {
-//      $destination = drupal_get_destination();
-//      unset($_GET['destination']);
-//    }
-//    $form_state['redirect'] = array('poll/term/' . $this->entity->id() . '/delete', array('query' => $destination));
-//  }
+
 
 }

@@ -34,6 +34,7 @@ class PollListController extends ConfigEntityListController {
    */
   public function __construct($entity_type, array $entity_info, EntityStorageControllerInterface $storage, ModuleHandlerInterface $module_handler) {
     parent::__construct($entity_type, $entity_info, $storage, $module_handler);
+    // TODO: Move to a better place
     poll_install_choice_field();
   }
 
@@ -53,20 +54,18 @@ class PollListController extends ConfigEntityListController {
    * Overrides Drupal\Core\Entity\EntityListController::buildRow().
    */
   public function buildRow(EntityInterface $entity) {
-    $row['question'] = $this->getQuestion($entity);
-    $row['status'] = $this->getStatus($entity);
-    $row['created'] = $this->getCreated($entity);
-    $row['votes'] = $this->getVotes($entity); // TODO:
+    $row['question'] = $entity->getQuestion();
+    $row['status'] = ($entity->isActive()) ? 'Y' : 'N';
+    $row['created'] = $entity->getCreated();
+    $row['votes'] = 5; // TODO: add up all votes submitted
     return $row + parent::buildRow($entity);
   }
 
   /**
    * {@inheritdoc}
    */
-  // TODO:
   public function getOperations(EntityInterface $entity) {
     $operations = parent::getOperations($entity);
-
     return $operations;
   }
 

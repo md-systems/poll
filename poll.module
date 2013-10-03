@@ -57,7 +57,7 @@ function poll_menu() {
   );
   $items['admin/structure/poll/add'] = array(
     'route_name' => 'poll_add',
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_LOCAL_ACTION,
   );
 
   return $items;
@@ -71,7 +71,6 @@ function poll_uri($poll) {
     'path' => 'poll/' . $poll->id(),
   );
 }
-
 
 /**
  * Create choice field for the poll entity.
