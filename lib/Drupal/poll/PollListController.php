@@ -57,7 +57,7 @@ class PollListController extends ConfigEntityListController {
     $row['question'] = $entity->getQuestion();
     $row['status'] = ($entity->isActive()) ? 'Y' : 'N';
     $row['created'] = $entity->getCreated();
-    $row['votes'] = 5; // TODO: add up all votes submitted
+    $row['votes'] = 5; // TODO: add up all votes submitted for this poll
     return $row + parent::buildRow($entity);
   }
 

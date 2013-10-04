@@ -46,9 +46,6 @@ use Drupal\poll\PollInterface;
  *   entity_keys = {
  *     "id" = "id",
  *     "uuid" = "uuid"
- *   },
- *   bundle_keys = {
- *     "bundle" = "bundle"
  *   }
  * )
  */

@@ -121,16 +121,6 @@ class PollFormController extends EntityFormControllerNG {
     //$poll = $this->entity;
     $poll = parent::buildEntity($form, $form_state);
 
-//    $poll->entity_type->value;
-//    $poll->entity_type = 'poll';
-
-
-    $string = check_plain(print_r($poll, TRUE));
-    $string = '<pre>' . $string . '</pre>';
-    trigger_error(trim($string));
-    die('pollBuildEntity:');
-
-
     $poll->question->value = $form_state['values']['question'];
     $poll->anonymous_vote_allow->value = $form_state['values']['anonymous_vote_allow'];;
     $poll->cancel_vote_allow->value = $form_state['values']['cancel_vote_allow'];
@@ -150,11 +140,6 @@ class PollFormController extends EntityFormControllerNG {
    */
   public function save(array $form, array &$form_state) {
     $poll = $this->entity;
-
-    $string = check_plain(print_r($poll, TRUE));
-    $string = '<pre>' . $string . '</pre>';
-    trigger_error(trim($string));
-    die('here:');
 
     $poll->save();
     $form_state['redirect'] = 'admin/structure/poll/add';
