@@ -58,9 +58,6 @@ class PollListController extends ConfigEntityListController {
    * Overrides Drupal\Core\Entity\EntityListController::buildRow().
    */
   public function buildRow(EntityInterface $entity) {
-
-    var_dump($entity->get('field_choice'));
-
     $row['question'] = $entity->getQuestion();
     $row['status'] = ($entity->isActive()) ? 'Y' : 'N';
     $row['created'] = Drupal::service('date')->format($entity->getCreated(), 'long');
