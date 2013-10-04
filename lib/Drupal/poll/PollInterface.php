@@ -38,17 +38,17 @@ interface PollInterface extends ContentEntityInterface {
 
   public function setRuntime($runtime);
 
-  public function setAnonymousVoteAllowed($anonymousVoteAllowed);
+  public function setAnonymousVoteAllow($anonymousVoteAllow);
 
-  public function setCancelVoteAllowed($cancelVoteAllowed);
+  public function setCancelVoteAllow($cancelVoteAllow);
 
-  public function setResultVoteAllowed($resultVoteAllowed);
+  public function setResultVoteAllow($resultVoteAllow);
 
-  public function isAnonymousVoteAllowed();
+  public function isAnonymousVoteAllow();
 
-  public function isCancelVoteAllowed();
+  public function isCancelVoteAllow();
 
-  public function isResultVoteAllowed();
+  public function isResultVoteAllow();
 
   /**
    * Returns TRUE if the user is active.

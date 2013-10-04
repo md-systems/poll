@@ -32,31 +32,21 @@ class PollChoiceDefaultWidget extends WidgetBase {
    * {@inheritdoc}
    */
   public function formElement(FieldInterface $items, $delta, array $element, $langcode, array &$form, array &$form_state) {
-    $element['#attributes']['class'][] = 'container-inline';
-
-    $element['parent'] = array(
-      '#prefix' => '<div class="container-inline">',
-      '#suffix' => '</div>',
-    );
-
-    $element['parent']['choice'] = array(
+    $element['choice'] = array(
       '#type' => 'textfield',
-      //'#title' => t('Choice'),
       '#placeholder' => t('Choice'),
       '#empty_value' => '',
-      '#default_value' => isset($items[$delta]->choice) ? $items[$delta]->choice : NULL,
+      '#default_value' => isset($items[$delta]->choice) ? $items[$delta]->choice : '',
+      '#prefix' => '<div class="container-inline">',
     );
-    $element['parent']['vote'] = array(
+    $element['vote'] = array(
       '#type' => 'number',
-      //'#title' => t('Vote'),
       '#placeholder' => t('Vote'),
       '#empty_value' => '',
-      '#default_value' => isset($items[$delta]->vote) ? $items[$delta]->vote : NULL,
+      '#default_value' => isset($items[$delta]->vote) ? $items[$delta]->vote : '',
       '#min' => 0,
+      '#suffix' => '</div>',
     );
-
     return $element;
   }
-
-
 }

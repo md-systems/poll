@@ -10,6 +10,8 @@ use Drupal\Core\Config\Entity\ConfigEntityListController;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal;
 
 
 /**
@@ -34,8 +36,10 @@ class PollListController extends ConfigEntityListController {
    */
   public function __construct($entity_type, array $entity_info, EntityStorageControllerInterface $storage, ModuleHandlerInterface $module_handler) {
     parent::__construct($entity_type, $entity_info, $storage, $module_handler);
+
     // TODO: Move to a better place
     poll_install_choice_field();
+
   }
 
   /**
@@ -45,7 +49,7 @@ class PollListController extends ConfigEntityListController {
     $header['question'] = t('Question');
     $header['status'] = t('Status');
     $header['created'] = t('Created');
-    $header['votes'] = t('Votes'); // TODO: computed field?
+    $header['votes'] = t('Votes');
     $header['operations'] = t('Operations');
     return $header + parent::buildHeader();
   }
@@ -54,9 +58,12 @@ class PollListController extends ConfigEntityListController {
    * Overrides Drupal\Core\Entity\EntityListController::buildRow().
    */
   public function buildRow(EntityInterface $entity) {
+
+    var_dump($entity->get('field_choice'));
+
     $row['question'] = $entity->getQuestion();
     $row['status'] = ($entity->isActive()) ? 'Y' : 'N';
-    $row['created'] = $entity->getCreated();
+    $row['created'] = Drupal::service('date')->format($entity->getCreated(), 'long');
     $row['votes'] = 5; // TODO: add up all votes submitted for this poll
     return $row + parent::buildRow($entity);
   }

@@ -7,6 +7,7 @@
 
 namespace Drupal\poll;
 
+use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\EntityFormControllerNG;
@@ -89,7 +90,7 @@ class PollFormController extends EntityFormControllerNG {
       '#type' => 'radios',
       '#title' => $this->t('Anonymous votes allowed'),
       '#default_value' => ($poll->isNew()) ? 0 : $poll
-        ->get('anonymous_vote_allowed')->getValue(),
+        ->get('anonymous_vote_allow')->getValue(),
       '#options' => array($this->t('No'), $this->t('Yes')),
       '#weight' => 3,
     );
@@ -97,7 +98,7 @@ class PollFormController extends EntityFormControllerNG {
       '#type' => 'radios',
       '#title' => $this->t('Cancel votes allowed'),
       '#default_value' => ($poll->isNew()) ? 0 : $poll
-        ->get('cancel_vote_allowed')->getValue(),
+        ->get('cancel_vote_allow')->getValue(),
       '#options' => array($this->t('No'), $this->t('Yes')),
       '#weight' => 4,
     );
@@ -105,7 +106,7 @@ class PollFormController extends EntityFormControllerNG {
       '#type' => 'radios',
       '#title' => $this->t('View results allowed'),
       '#default_value' => ($poll->isNew()) ? 0 : $poll
-        ->get('result_vote_allowed')->getValue(),
+        ->get('result_vote_allow')->getValue(),
       '#options' => array($this->t('No'), $this->t('Yes')),
       '#weight' => 5,
     );
@@ -118,19 +119,17 @@ class PollFormController extends EntityFormControllerNG {
    * {@inheritdoc}
    */
   public function buildEntity(array $form, array &$form_state) {
-    //$poll = $this->entity;
+    global $user;
     $poll = parent::buildEntity($form, $form_state);
 
-    $poll->question->value = $form_state['values']['question'];
-    $poll->anonymous_vote_allow->value = $form_state['values']['anonymous_vote_allow'];;
-    $poll->cancel_vote_allow->value = $form_state['values']['cancel_vote_allow'];
-    $poll->result_vote_allow->value = $form_state['values']['result_vote_allow'];
-    $poll->created->value = REQUEST_TIME;
-    $poll->langcode->value = 'und';
-    $poll->runtime->value = $form_state['values']['runtime'];
-
-//    $poll->field_choice[0]->choice = "first choice";
-//    $poll->field_choice[0]->vote = 3;
+    $poll->setQuestion($form_state['values']['question']);
+    $poll->setAnonymousVoteAllow($form_state['values']['anonymous_vote_allow']);
+    $poll->setCancelVoteAllow($form_state['values']['cancel_vote_allow']);
+    $poll->setResultVoteAllow($form_state['values']['result_vote_allow']);
+    $poll->setCreated(REQUEST_TIME);
+    $poll->setRuntime($form_state['values']['runtime']);
+    $poll->setAuthorId($user->id());
+    ((bool) $form_state['values']['status']) ? $poll->activate() : $poll->close();
 
     return $poll;
   }
@@ -139,30 +138,9 @@ class PollFormController extends EntityFormControllerNG {
    * {@inheritdoc}
    */
   public function save(array $form, array &$form_state) {
-    $poll = $this->entity;
-
+    $poll = parent::buildEntity($form, $form_state);
     $poll->save();
-    $form_state['redirect'] = 'admin/structure/poll/add';
-
+    $form_state['redirect'] = 'admin/structure/poll';
   }
-
-
-//  public function submit(array $form, array &$form_state) {
-//    // Build the block object from the submitted values.
-//    $poll = parent::submit($form, $form_state);
-//    $poll->question->value = 'Lorem lispum dolor amet vici xxx!!!';
-//    $poll->anonymous_vote_allowed->value = 1;
-//    $poll->cancel_vote_allowed->value = 0;
-//    $poll->result_vote_allowed->value = 1;
-//    $poll->created->value = strtotime('now');
-//    $poll->langcode->value = 'und';
-//    $poll->runtime->value = 4 * 86400;
-//
-////    $poll->field_choice[0]->choice = "first choice";
-////    $poll->field_choice[0]->vote = 3;
-//
-//    return $poll;
-//  }
-
 
 }

@@ -9,6 +9,7 @@ namespace Drupal\poll\Entity;
 
 // this?
 use Drupal\Core\Entity\EntityNG;
+
 // or this?
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
@@ -87,12 +88,11 @@ class Poll extends EntityNG implements PollInterface {
   public $langcode;
 
 
-  public $anonymousVoteAllowed;
+  public $anonymous_vote_allow;
 
-  public $cancelVoteAllowed;
+  public $cancel_vote_allow;
 
-  public $resultVoteAllowed;
-
+  public $result_vote_allow;
 
   /**
    * @var integer
@@ -111,6 +111,32 @@ class Poll extends EntityNG implements PollInterface {
    * @var \Drupal\Core\Entity\Field\FieldInterface
    */
   public $created;
+
+
+  public $field_choice = array();
+
+
+  /**
+   * Overrides Drupal\Core\Entity\EntityNG::init().
+   */
+  public function init() {
+    parent::init();
+
+    // We unset all defined properties, so magic getters apply.
+    unset($this->id);
+    unset($this->uid);
+    unset($this->uuid);
+    unset($this->question);
+    unset($this->langcode);
+    unset($this->anonymous_vote_allow);
+    unset($this->cancel_vote_allow);
+    unset($this->result_vote_allow);
+    unset($this->runtime);
+    unset($this->status);
+    unset($this->created);
+    unset($this->field_choice);
+  }
+
 
   /**
    * Implements Drupal\Core\Entity\EntityInterface::id().
@@ -137,45 +163,45 @@ class Poll extends EntityNG implements PollInterface {
   /**
    * {@inheritdoc}
    */
-  public function setAnonymousVoteAllowed($anonymousVoteAllowed) {
-    $this->set('anonymous_vote_allow', $anonymousVoteAllowed);
+  public function setAnonymousVoteAllow($anonymousVoteAllow) {
+    $this->set('anonymous_vote_allow', $anonymousVoteAllow);
     return $this;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setCancelVoteAllowed($cancelVoteAllowed) {
-    $this->set('cancel_vote_allow', $cancelVoteAllowed);
+  public function setCancelVoteAllow($cancelVoteAllow) {
+    $this->set('cancel_vote_allow', $cancelVoteAllow);
     return $this;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setResultVoteAllowed($resultVoteAllowed) {
-    $this->set('result_vote_allow', $resultVoteAllowed);
+  public function setResultVoteAllow($resultVoteAllow) {
+    $this->set('result_vote_allow', $resultVoteAllow);
     return $this;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function isAnonymousVoteAllowed() {
+  public function isAnonymousVoteAllow() {
     return (bool) $this->get('anonymous_vote_allow')->value;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function isCancelVoteAllowed() {
+  public function isCancelVoteAllow() {
     return (bool) $this->get('cancel_vote_allow')->value;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function isResultVoteAllowed() {
+  public function isResultVoteAllow() {
     return (bool) $this->get('result_vote_allow')->value;
   }
 
@@ -226,6 +252,14 @@ class Poll extends EntityNG implements PollInterface {
   /**
    * {@inheritdoc}
    */
+  public function setAuthorId($uid) {
+    $this->set('uid', $uid);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function isClosed() {
     return $this->get('status')->value == 0;
   }
@@ -251,6 +285,16 @@ class Poll extends EntityNG implements PollInterface {
    */
   public function getCreated() {
     return $this->get('created')->value;
+  }
+
+  public function setCreated($created = NULL) {
+    $this->set('created', isset($created) ? $created : REQUEST_TIME);
+    return $this;
+  }
+
+  public function setFieldChoice($fieldChoice) {
+    $this->set('field_choice', $fieldChoice);
+    return $this;
   }
 
   /**
@@ -302,7 +346,7 @@ class Poll extends EntityNG implements PollInterface {
       'type' => 'language_field',
     );
     $properties['anonymous_vote_allow'] = array(
-      'label' => t('Anonymous voteS allowed'),
+      'label' => t('Anonymous votes allowed'),
       'description' => t('A boolean indicating whether anonymous users are allowed to vote.'),
       'type' => 'boolean_field',
     );

@@ -6,7 +6,7 @@ poll_list:
     _permission: 'administer content'
 
 poll_add:
-  pattern: '/admin/structure/poll/add'
+  pattern: '/poll/add'
   defaults:
     _entity_form: poll.add
   requirements:

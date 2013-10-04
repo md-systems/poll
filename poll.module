@@ -55,7 +55,7 @@ function poll_menu() {
     'description' => 'Manage Polls for your site.',
     'route_name' => 'poll_list',
   );
-  $items['admin/structure/poll/add'] = array(
+  $items['poll/add'] = array(
     'route_name' => 'poll_add',
     'type' => MENU_LOCAL_ACTION,
   );
@@ -113,6 +113,33 @@ function poll_install_choice_field() {
       ))
       ->save();
 
-    // TODO: other display settings?
+    entity_get_display('poll', 'poll', 'default')
+      ->setComponent('field_choice', array(
+        'label' => 'Choice',
+        'type' => 'poll_choice_default',
+        'settings' => array(),
+      ))
+      ->save();
+  }
+}
+
+
+/**
+ * Implements hook_admin_paths().
+ */
+function poll_admin_paths() {
+  if (Drupal::config('node.settings')->get('use_admin_theme')) {
+    $paths = array(
+      'poll/*/edit' => TRUE,
+      'poll/*/delete' => TRUE,
+      'poll/*/revisions' => TRUE,
+      'poll/*/revisions/*/revert' => TRUE,
+      'poll/*/revisions/*/delete' => TRUE,
+      'poll/*/translations' => TRUE,
+      'poll/*/translations/*' => TRUE,
+      'poll/add' => TRUE,
+      'poll/add/*' => TRUE,
+    );
+    return $paths;
   }
 }
