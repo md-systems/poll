@@ -11,3 +11,10 @@ poll_add:
     _entity_form: poll.add
   requirements:
     _permission: 'administer content'
+
+poll_edit:
+  pattern: '/poll/{poll}/edit'
+  defaults:
+    _entity_form: poll.edit
+  requirements:
+    _permission: 'administer content'

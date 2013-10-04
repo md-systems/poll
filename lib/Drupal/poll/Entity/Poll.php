@@ -35,7 +35,9 @@ use Drupal\poll\PollInterface;
  *     "render" = "Drupal\poll\PollRenderController",
  *     "access" = "Drupal\poll\PollAccessController",
  *     "form" = {
- *       "add" = "Drupal\poll\PollFormController",
+ *      "default" = "Drupal\poll\PollFormController",
+ *      "add" = "Drupal\poll\PollFormController",
+ *      "edit" = "Drupal\poll\PollFormController",
  *     },
  *     "translation" = "Drupal\poll\PollTranslationController"
  *   },
@@ -188,21 +190,21 @@ class Poll extends EntityNG implements PollInterface {
    * {@inheritdoc}
    */
   public function isAnonymousVoteAllow() {
-    return (bool) $this->get('anonymous_vote_allow')->value;
+    return $this->get('anonymous_vote_allow')->value;
   }
 
   /**
    * {@inheritdoc}
    */
   public function isCancelVoteAllow() {
-    return (bool) $this->get('cancel_vote_allow')->value;
+    return $this->get('cancel_vote_allow')->value;
   }
 
   /**
    * {@inheritdoc}
    */
   public function isResultVoteAllow() {
-    return (bool) $this->get('result_vote_allow')->value;
+    return $this->get('result_vote_allow')->value;
   }
 
   /**

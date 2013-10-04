@@ -10,9 +10,7 @@ use Drupal\Core\Config\Entity\ConfigEntityListController;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal;
-
 
 /**
  * Provides a listing of contact categories.
@@ -70,6 +68,15 @@ class PollListController extends ConfigEntityListController {
    */
   public function getOperations(EntityInterface $entity) {
     $operations = parent::getOperations($entity);
+    $uri = $entity->uri();
+
+    if (isset($operations['edit'])) {
+      $operations['edit']['href'] = str_replace('entity/', '', $uri['path']) . '/edit';
+    }
+    if (isset($operations['delete'])) {
+      $operations['delete']['href'] = str_replace('entity/', '', $uri['path']) . '/delete';
+    }
+
     return $operations;
   }
 

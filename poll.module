@@ -49,15 +49,22 @@ function poll_help($path, $arg) {
  * Implements hook_menu().
  */
 function poll_menu() {
-
   $items['admin/structure/poll'] = array(
     'title' => 'Polls',
     'description' => 'Manage Polls for your site.',
     'route_name' => 'poll_list',
   );
+
   $items['poll/add'] = array(
     'route_name' => 'poll_add',
     'type' => MENU_LOCAL_ACTION,
+  );
+
+  $items['poll/%poll/edit'] = array(
+    'title' => 'Edit',
+    'route_name' => 'poll_edit',
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
   );
 
   return $items;
