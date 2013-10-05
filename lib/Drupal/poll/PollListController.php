@@ -6,16 +6,17 @@
 
 namespace Drupal\poll;
 
+use Drupal;
 use Drupal\Core\Config\Entity\ConfigEntityListController;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal;
 
 /**
  * Provides a listing of contact categories.
  */
 class PollListController extends ConfigEntityListController {
+
 
   /**
    * Constructs a new ConfigEntityListController object.
@@ -56,7 +57,7 @@ class PollListController extends ConfigEntityListController {
    * Overrides Drupal\Core\Entity\EntityListController::buildRow().
    */
   public function buildRow(EntityInterface $entity) {
-    $row['question'] = $entity->getQuestion();
+    $row['question'] = l($entity->getQuestion(), 'poll/' . $entity->id()); // TODO:
     $row['status'] = ($entity->isActive()) ? 'Y' : 'N';
     $row['created'] = Drupal::service('date')->format($entity->getCreated(), 'long');
     $row['votes'] = 5; // TODO: add up all votes submitted for this poll

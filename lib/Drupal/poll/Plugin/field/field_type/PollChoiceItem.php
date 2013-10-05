@@ -98,8 +98,6 @@ class PollChoiceItem extends ConfigFieldItemBase {
       ),
     ));
 
-    // TODO: vote can not be negative/ >=0
-
     return $constraints;
   }
 
