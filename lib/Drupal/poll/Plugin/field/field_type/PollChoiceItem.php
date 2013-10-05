@@ -77,8 +77,8 @@ class PollChoiceItem extends ConfigFieldItemBase {
    * {@inheritdoc}
    */
   public function isEmpty() {
-    $value = $this->field_choice;
-    return $value === NULL || count($value) === 0;
+    $value = $this->get('choice')->getValue();
+    return $value === NULL || $value === '';
   }
 
   /**

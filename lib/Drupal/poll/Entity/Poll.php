@@ -115,7 +115,7 @@ class Poll extends EntityNG implements PollInterface {
   public $created;
 
 
-  public $field_choice = array();
+  public $field_choice;
 
 
   /**
@@ -226,7 +226,7 @@ class Poll extends EntityNG implements PollInterface {
    * {@inheritdoc}
    */
   public function isActive() {
-    return (bool) $this->get('status')->value;
+    return $this->get('status')->value;
   }
 
   /**
@@ -296,6 +296,14 @@ class Poll extends EntityNG implements PollInterface {
 
   public function setFieldChoice($fieldChoice) {
     $this->set('field_choice', $fieldChoice);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setLangcode($langcode) {
+    $this->set('langcode', $langcode);
     return $this;
   }
 

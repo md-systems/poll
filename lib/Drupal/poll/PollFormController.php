@@ -36,13 +36,6 @@ class PollFormController extends EntityFormControllerNG {
   public function form(array $form, array &$form_state) {
     $poll = $this->entity;
 
-//    $form = parent::form($form, $form_state, $poll);
-//
-//    $data = $form['field_choice']['und'][0]['#entity']->field_choice;
-//    $string = check_plain(print_r($data, TRUE));
-//    $string = '<pre>' . $string . '</pre>';
-//    trigger_error(trim($string));
-
     $form['question'] = array(
       '#type' => 'textfield',
       '#title' => t('Question'),
@@ -55,7 +48,7 @@ class PollFormController extends EntityFormControllerNG {
     $form['status'] = array(
       '#type' => 'radios',
       '#title' => $this->t('Status'),
-      '#default_value' => $poll->isActive(),
+      '#default_value' => ($poll->isNew()) ? 0 : $poll->isActive(),
       '#options' => array($this->t('Closed'), $this->t('Active')),
       '#weight' => 1,
     );
@@ -87,7 +80,7 @@ class PollFormController extends EntityFormControllerNG {
     $form['runtime'] = array(
       '#type' => 'select',
       '#title' => t('Poll duration'),
-      '#default_value' => ($poll->isNew()) ? 0 : $poll->getRuntime(),
+      '#default_value' => ($poll->isNew()) ? POLL_PUBLISHED : $poll->getRuntime(),
       '#options' => $duration,
       '#description' => t('After this period, the poll will be closed automatically.'),
       '#weight' => 2,
@@ -96,21 +89,21 @@ class PollFormController extends EntityFormControllerNG {
     $form['anonymous_vote_allow'] = array(
       '#type' => 'radios',
       '#title' => $this->t('Anonymous votes allowed'),
-      '#default_value' => $poll->isAnonymousVoteAllow(),
+      '#default_value' => ($poll->isNew()) ? 0 : $poll->isAnonymousVoteAllow(),
       '#options' => array($this->t('No'), $this->t('Yes')),
       '#weight' => 3,
     );
     $form['cancel_vote_allow'] = array(
       '#type' => 'radios',
       '#title' => $this->t('Cancel votes allowed'),
-      '#default_value' => $poll->isCancelVoteAllow(),
+      '#default_value' => ($poll->isNew()) ? 0 : $poll->isCancelVoteAllow(),
       '#options' => array($this->t('No'), $this->t('Yes')),
       '#weight' => 4,
     );
     $form['result_vote_allow'] = array(
       '#type' => 'radios',
       '#title' => $this->t('View results allowed'),
-      '#default_value' => $poll->isResultVoteAllow(),
+      '#default_value' => ($poll->isNew()) ? 0 : $poll->isResultVoteAllow(),
       '#options' => array($this->t('No'), $this->t('Yes')),
       '#weight' => 5,
     );
@@ -124,6 +117,7 @@ class PollFormController extends EntityFormControllerNG {
    */
   public function buildEntity(array $form, array &$form_state) {
     global $user;
+
     $poll = parent::buildEntity($form, $form_state);
 
     $poll->setQuestion($form_state['values']['question']);
@@ -142,7 +136,7 @@ class PollFormController extends EntityFormControllerNG {
    * {@inheritdoc}
    */
   public function save(array $form, array &$form_state) {
-    $poll = parent::buildEntity($form, $form_state);
+    $poll = $this->entity;
     $poll->save();
     $form_state['redirect'] = 'admin/structure/poll';
   }
