@@ -18,3 +18,10 @@ poll_edit:
     _entity_form: poll.edit
   requirements:
     _permission: 'administer content'
+
+poll_view:
+  pattern: '/poll/{poll}'
+  defaults:
+    _entity_form: poll.view
+  requirements:
+    _permission: 'administer content'

@@ -38,6 +38,7 @@ use Drupal\poll\PollInterface;
  *      "default" = "Drupal\poll\PollFormController",
  *      "add" = "Drupal\poll\PollFormController",
  *      "edit" = "Drupal\poll\PollFormController",
+ *      "view" = "Drupal\poll\Form\PollViewFormController",
  *     },
  *     "translation" = "Drupal\poll\PollTranslationController"
  *   },
@@ -145,6 +146,13 @@ class Poll extends EntityNG implements PollInterface {
    */
   public function id() {
     return $this->get('id')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLabel() {
+    return $this->getQuestion();
   }
 
   /**

@@ -5,9 +5,6 @@
  * Collects votes on different topics in the form of multiple choice questions.
  */
 
-//use Drupal\Core\Entity\EntityInterface;
-//use Drupal\node\Plugin\Core\Entity\Node;
-//use Drupal\entity\Plugin\Core\Entity\EntityDisplay;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\field\Field;
 
@@ -65,6 +62,11 @@ function poll_menu() {
     'route_name' => 'poll_edit',
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+
+  $items['poll/%poll'] = array(
+    'route_name' => 'poll_view',
+    'type' => MENU_LOCAL_ACTION,
   );
 
   return $items;
@@ -150,3 +152,92 @@ function poll_admin_paths() {
     return $paths;
   }
 }
+
+/**
+ * Implements hook_theme().
+ */
+function poll_theme() {
+  $theme_hooks = array(
+    'poll_vote' => array(
+      'template' => 'poll-vote',
+      'render element' => 'form',
+    ),
+    'poll_choices' => array(
+      'render element' => 'form',
+    ),
+    'poll_results' => array(
+      'template' => 'poll-results',
+      'variables' => array('raw_title' => NULL, 'results' => NULL, 'votes' => NULL, 'raw_links' => NULL, 'block' => NULL, 'nid' => NULL, 'vote' => NULL),
+    ),
+    'poll_meter' => array(
+      'variables' => array('display_value' => NULL, 'form' => NULL, 'high' => NULL, 'low' => NULL, 'max' => NULL, 'min' => NULL, 'optimum' => NULL, 'value' => NULL, 'percentage' => NULL, 'attributes' => array()),
+      'template' => 'meter',
+    ),
+  );
+
+  return $theme_hooks;
+}
+
+
+/**
+ * Implements template_preprocess_HOOK() for poll-vote.tpl.php.
+ */
+function template_preprocess_poll_vote(&$variables) {
+  $form = $variables['form'];
+
+//  unset($form['#node']);
+  //unset($form['#validate']);
+  //unset($form['#submit']);
+
+//  $data = $form;
+//$data = drupal_render($form['choice']);
+//  $string = check_plain(print_r($data, TRUE));
+//  $string = '<pre>' . $string . '</pre>';
+//  trigger_error($string);
+
+  $variables['title'] = check_plain($form['#node']->title);
+  $variables['choice'] = drupal_render($form['choice']);
+  $variables['vote'] = drupal_render($form['submit']);
+  $variables['rest'] = drupal_render_children($form);
+
+//  $variables['block'] = $form['#block'];
+//  if ($variables['block']) {
+//    $variables['theme_hook_suggestions'][] = 'poll_vote__block';
+//  }
+
+}
+
+
+///**
+// * Implements hook_theme().
+// */
+//function link_theme() {
+//  return array(
+//    'link_formatter_link_separate' => array(
+//      'variables' => array('title' => NULL, 'url_title' => NULL, 'href' => NULL, 'options' => array()),
+//      'template' => 'link-formatter-link-separate',
+//    ),
+//  );
+//}
+//
+///**
+// * Prepares variables for separated link field templates.
+// *
+// * This template outputs a separate title and link.
+// *
+// * Default template: link-formatter-link-separate.html.twig.
+// *
+// * @param array $variables
+// *   An associative array containing:
+// *   - title: (optional) A descriptive or alternate title for the link, which
+// *     may be different than the actual link text.
+// *   - url_title: The anchor text for the link.
+// *   - href: The link URL.
+// *   - options: (optional) An array of options to pass to l().
+// */
+//function template_preprocess_link_formatter_link_separate(&$variables) {
+//  if (!empty($variables['title'])) {
+//    $variables['title'] = check_plain($variables['title']);
+//  }
+//  $variables['link'] = l($variables['url_title'], $variables['href'], $variables['options']);
+//}
