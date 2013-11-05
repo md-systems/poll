@@ -7,19 +7,11 @@
 
 namespace Drupal\poll\Entity;
 
-// this?
-use Drupal\Core\Entity\EntityNG;
-
-// or this?
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
-use Drupal\Core\Entity\Annotation\EntityType;
-use Drupal\Core\Annotation\Translation;
-use Drupal\Core\Language\Language;
-
-use Drupal\Core\Session\AccountInterface;
-
 use Drupal\poll\PollInterface;
+use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Language\Language;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Defines the poll entity class.
@@ -53,7 +45,7 @@ use Drupal\poll\PollInterface;
  *   }
  * )
  */
-class Poll extends EntityNG implements PollInterface {
+class Poll extends ConfigEntityBase implements PollInterface {
 
   /**
    * The poll ID.
@@ -118,6 +110,12 @@ class Poll extends EntityNG implements PollInterface {
 
   public $field_choice;
 
+  /**
+   * Overrides \Drupal\Core\Config\Entity\ConfigEntityBase::__construct();
+   */
+  public function __construct(array $values, $entity_type) {
+    parent::__construct($values, $entity_type);
+  }
 
   /**
    * Overrides Drupal\Core\Entity\EntityNG::init().

@@ -9,12 +9,12 @@ namespace Drupal\poll;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Query\QueryInterface;
-use Drupal\Core\Entity\DatabaseStorageControllerNG;
+use Drupal\Core\Entity\DatabaseStorageController;
 
 /**
  * Defines a Controller class for poll terms.
  */
-class PollStorageController extends DatabaseStorageControllerNG implements PollStorageControllerInterface {
+class PollStorageController extends DatabaseStorageController implements PollStorageControllerInterface {
 
 
   public function deletePoll($poll) {
@@ -30,4 +30,9 @@ class PollStorageController extends DatabaseStorageControllerNG implements PollS
   public function updatePoll(EntityInterface $poll) {
 
   }
+
+  public function onFieldCreate(FieldInterface $field) {
+
+  }
+
 }

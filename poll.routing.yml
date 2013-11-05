@@ -1,26 +1,26 @@
 poll_list:
-  pattern: '/admin/structure/poll'
+  path: '/admin/structure/poll'
   defaults:
     _entity_list: 'poll'
   requirements:
     _permission: 'administer content'
 
 poll_add:
-  pattern: '/poll/add'
+  path: '/poll/add'
   defaults:
     _entity_form: poll.add
   requirements:
     _permission: 'administer content'
 
 poll_edit:
-  pattern: '/poll/{poll}/edit'
+  path: '/poll/{poll}/edit'
   defaults:
     _entity_form: poll.edit
   requirements:
     _permission: 'administer content'
 
 poll_view:
-  pattern: '/poll/{poll}'
+  path: '/poll/{poll}'
   defaults:
     _entity_form: poll.view
   requirements:
