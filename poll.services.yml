@@ -1,0 +1,5 @@
+services:
+  poll.subscriber:
+    class: Drupal\poll\EventSubscriber\PollSubscriber
+    tags:
+      - { name: event_subscriber }

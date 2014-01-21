@@ -5,7 +5,6 @@
  * Install, update, and uninstall functions for the Poll module.
  */
 
-
 /**
  * Implements hook_schema().
  */

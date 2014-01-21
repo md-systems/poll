@@ -5,12 +5,12 @@
  * Contains \Drupal\poll\Plugin\field\field_type\VoteChoiceItem.
  */
 
-namespace Drupal\poll\Plugin\field\field_type;
+namespace Drupal\poll\Plugin\Field\FieldType;
 
-use Drupal\Core\Entity\Annotation\FieldType;
-use Drupal\Core\Annotation\Translation;
-use Drupal\field\Plugin\Type\FieldType\ConfigFieldItemBase;
+use Drupal\Core\Field\ConfigFieldItemBase;
+use Drupal\Core\TypedData\DataDefinition;
 use Drupal\field\FieldInterface;
+use Drupal;
 
 /**
  * Plugin implementation of the 'poll_choice' field type.
@@ -25,6 +25,7 @@ use Drupal\field\FieldInterface;
  */
 class PollChoiceItem extends ConfigFieldItemBase {
 
+  const POLL_CHOICE_MAX_LENGTH = 255;
   /**
    * Definitions of the contained properties.
    *
@@ -37,14 +38,10 @@ class PollChoiceItem extends ConfigFieldItemBase {
    */
   public function getPropertyDefinitions() {
     if (!isset(static::$propertyDefinitions)) {
-      static::$propertyDefinitions['choice'] = array(
-        'type' => 'string',
-        'label' => t('Choice'),
-      );
-      static::$propertyDefinitions['vote'] = array(
-        'type' => 'integer',
-        'label' => t('Vote'),
-      );
+      static::$propertyDefinitions['choice'] = DataDefinition::create('string')
+        ->setLabel(t('Choice'));
+      static::$propertyDefinitions['vote'] = DataDefinition::create('integer')
+        ->setLabel(t('Vote'));
     }
     return static::$propertyDefinitions;
   }
@@ -87,17 +84,15 @@ class PollChoiceItem extends ConfigFieldItemBase {
   public function getConstraints() {
     $constraint_manager = \Drupal::typedData()->getValidationConstraintManager();
     $constraints = parent::getConstraints();
-
-    $max_length = 255;
     $constraints[] = $constraint_manager->create('ComplexData', array(
       'choice' => array(
         'Length' => array(
-          'max' => $max_length,
-          'maxMessage' => t('%name: the choice field may not be longer than @max characters.', array('%name' => $this->getFieldDefinition()->getFieldLabel(), '@max' => $max_length)),
+          'max' => static::POLL_CHOICE_MAX_LENGTH,
+          'maxMessage' => t('%name: the choice field may not be longer than @max characters.', array('%name' => $this->getFieldDefinition()->getLabel(), '@max' => static::POLL_CHOICE_MAX_LENGTH
+          )),
         )
       ),
     ));
-
     return $constraints;
   }
 

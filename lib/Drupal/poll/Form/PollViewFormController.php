@@ -10,16 +10,18 @@ namespace Drupal\poll\Form;
 use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\ConfigFactory;
-use Drupal\Core\Entity\EntityFormControllerNG;
 use Drupal\Core\Language\Language;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Entity\ContentEntityFormController;
+use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Language\LanguageManager;
 use Drupal;
 
 
 /**
  * Base for controller for poll term edit forms.
  */
-class PollViewFormController extends EntityFormControllerNG {
+class PollViewFormController extends ContentEntityFormController {
 
 
   /**
@@ -31,10 +33,6 @@ class PollViewFormController extends EntityFormControllerNG {
     // can user see vote before voting?
 
     $account = Drupal::request()->attributes->get('_account');
-    $data = $account;
-    $string = check_plain(print_r($data, TRUE));
-    $string = '<pre>' . $string . '</pre>';
-    trigger_error($string);
 
     drupal_set_title($this->entity->getLabel());
 
@@ -72,13 +70,6 @@ class PollViewFormController extends EntityFormControllerNG {
    * Returns the action form element for the current entity form.
    */
   protected function actionsElement(array $form, array &$form_state) {
-    //$form['#block'] = $block;
-
-//    $data = $this->entity->isResultVoteAllow();
-//    $string = check_plain(print_r($data, TRUE));
-//    $string = '<pre>' . $string . '</pre>';
-//    trigger_error($string);
-
     $elements = $this->actions($form, $form_state);
     if (count($elements)) {
       foreach ($elements as $name => $element) {

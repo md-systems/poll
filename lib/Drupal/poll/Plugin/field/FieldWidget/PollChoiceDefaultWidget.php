@@ -5,12 +5,10 @@
  * Definition of Drupal\poll\Plugin\field\widget\ChoiceVoteDefaultWidget.
  */
 
-namespace Drupal\poll\Plugin\field\widget;
+namespace Drupal\poll\Plugin\Field\FieldWidget;
 
-use Drupal\field\Annotation\FieldWidget;
-use Drupal\Core\Annotation\Translation;
-use Drupal\Core\Entity\Field\FieldInterface;
-use Drupal\field\Plugin\Type\Widget\WidgetBase;
+use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Field\WidgetBase;
 use Drupal;
 
 
@@ -31,7 +29,7 @@ class PollChoiceDefaultWidget extends WidgetBase {
   /**
    * {@inheritdoc}
    */
-  public function formElement(FieldInterface $items, $delta, array $element, $langcode, array &$form, array &$form_state) {
+  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, array &$form_state) {
     $element['choice'] = array(
       '#type' => 'textfield',
       '#placeholder' => t('Choice'),

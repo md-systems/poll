@@ -35,10 +35,6 @@ class PollListController extends ConfigEntityListController {
    */
   public function __construct($entity_type, array $entity_info, EntityStorageControllerInterface $storage, ModuleHandlerInterface $module_handler) {
     parent::__construct($entity_type, $entity_info, $storage, $module_handler);
-
-    // TODO: Move to a better place
-    poll_install_choice_field();
-
   }
 
   /**

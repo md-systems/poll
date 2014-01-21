@@ -7,12 +7,12 @@
 
 namespace Drupal\poll;
 
-use Drupal\Core\Config\Entity\ConfigEntityInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 
 /**
  * Provides an interface defining a block entity.
  */
-interface PollInterface extends ConfigEntityInterface {
+interface PollInterface extends ContentEntityInterface {
 
   /**
    * Returns the question being put to vote.

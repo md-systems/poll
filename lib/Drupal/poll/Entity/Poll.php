@@ -7,11 +7,12 @@
 
 namespace Drupal\poll\Entity;
 
-use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Field\FieldDefinition;
 use Drupal\poll\PollInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Language\Language;
-use Drupal\Core\Session\AccountInterface;
+
 
 /**
  * Defines the poll entity class.
@@ -36,16 +37,20 @@ use Drupal\Core\Session\AccountInterface;
  *   },
  *   base_table = "poll",
  *   uri_callback = "poll_uri",
- *   route_base_path = "admin/structure/types/manage/{bundle}",
  *   fieldable = TRUE,
  *   translatable = TRUE,
+ *   bundle_of = "poll",
  *   entity_keys = {
  *     "id" = "id",
  *     "uuid" = "uuid"
- *   }
+ *   },
+ *  links = {
+ *    "canonical" = "poll.poll_view",
+*     "edit-form" = "poll.poll_edit"
+ *  }
  * )
  */
-class Poll extends ConfigEntityBase implements PollInterface {
+class Poll extends ContentEntityBase implements PollInterface {
 
   /**
    * The poll ID.
@@ -103,19 +108,34 @@ class Poll extends ConfigEntityBase implements PollInterface {
   /**
    * The time that the poll was created.
    *
-   * @var \Drupal\Core\Entity\Field\FieldInterface
+   * @var \Drupal\Core\Field\FieldItemInterface
    */
   public $created;
 
 
   public $field_choice;
 
+
+  /**
+   * Implements Drupal\Core\Entity\EntityInterface::id().
+   */
+  public function id() {
+    return $this->get('uid')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isNew() {
+    return !empty($this->enforceIsNew) || $this->id() === 0;
+  }
+
   /**
    * Overrides \Drupal\Core\Config\Entity\ConfigEntityBase::__construct();
    */
-  public function __construct(array $values, $entity_type) {
-    parent::__construct($values, $entity_type);
-  }
+//  public function __construct(array $values, $entity_type) {
+//    parent::__construct($values, $entity_type);
+//  }
 
   /**
    * Overrides Drupal\Core\Entity\EntityNG::init().
@@ -138,19 +158,18 @@ class Poll extends ConfigEntityBase implements PollInterface {
     unset($this->field_choice);
   }
 
-
-  /**
-   * Implements Drupal\Core\Entity\EntityInterface::id().
-   */
-  public function id() {
-    return $this->get('id')->value;
-  }
-
   /**
    * {@inheritdoc}
    */
   public function getLabel() {
     return $this->getQuestion();
+  }
+
+  /**
+   * Implements Drupal\Core\Entity\EntityInterface::label().
+   */
+  public function label($langcode = NULL) {
+    return $this->get('question')->value;
   }
 
   /**
@@ -325,77 +344,86 @@ class Poll extends ConfigEntityBase implements PollInterface {
   /**
    * {@inheritdoc}
    */
+  public function prepareLangcode() {
+    $langcode = $this->language()->id;
+    // If the Language module is enabled, try to use the language from content
+    // negotiation.
+    if (\Drupal::moduleHandler()->moduleExists('language')) {
+      // Load languages the node exists in.
+      $node_translations = $this->getTranslationLanguages();
+      // Load the language from content negotiation.
+      $content_negotiation_langcode = \Drupal::languageManager()->getLanguage(Language::TYPE_CONTENT)->id;
+      // If there is a translation available, use it.
+      if (isset($node_translations[$content_negotiation_langcode])) {
+        $langcode = $content_negotiation_langcode;
+      }
+    }
+    return $langcode;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions($entity_type) {
-    $properties['id'] = array(
-      'label' => t('Poll ID'),
-      'description' => t('The poll ID.'),
-      'type' => 'integer_field',
-      'read-only' => TRUE,
-    );
-    $properties['uid'] = array(
-      'label' => t('User ID'),
-      'description' => t('The user ID of the poll author.'),
-      'type' => 'entity_reference_field',
-      'settings' => array(
+    $fields['id'] = FieldDefinition::create('integer')
+      ->setLabel(t('Poll ID'))
+      ->setDescription(t('The poll ID.'))
+      ->setReadOnly(TRUE);
+
+    $fields['uuid'] = FieldDefinition::create('uuid')
+      ->setLabel(t('UUID'))
+      ->setDescription(t('The poll UUID.'))
+      ->setReadOnly(TRUE);
+
+    $fields['uid'] = FieldDefinition::create('entity_reference')
+      ->setLabel(t('User ID'))
+      ->setDescription(t('The user ID of the poll author.'))
+      ->setSettings(array(
         'target_type' => 'user',
         'default_value' => 0,
-      ),
-    );
-    $properties['uuid'] = array(
-      'label' => t('UUID'),
-      'description' => t('The poll UUID.'),
-      'type' => 'uuid_field',
-      'read-only' => TRUE,
-    );
-    $properties['question'] = array(
-      'label' => t('Question'),
-      'description' => t('The poll question.'),
-      'type' => 'string_field',
-      'required' => TRUE,
-      'settings' => array(
-        'default_value' => '',
-      ),
-    );
-    $properties['langcode'] = array(
-      'label' => t('Language code'),
-      'description' => t('The poll language code.'),
-      'type' => 'language_field',
-    );
-    $properties['anonymous_vote_allow'] = array(
-      'label' => t('Anonymous votes allowed'),
-      'description' => t('A boolean indicating whether anonymous users are allowed to vote.'),
-      'type' => 'boolean_field',
-    );
-    $properties['cancel_vote_allow'] = array(
-      'label' => t('Cancel votes allowed'),
-      'description' => t('A boolean indicating whether users may cancel their vote.'),
-      'type' => 'boolean_field',
-    );
-    $properties['result_vote_allow'] = array(
-      'label' => t('View results allowed'),
-      'description' => t('A boolean indicating whether users may see the results before voting.'),
-      'type' => 'boolean_field',
-    );
-    $properties['runtime'] = array(
-      'label' => t('Runtime'),
-      'description' => t('The number of seconds after creation during which the poll is active'),
-      'type' => 'integer_field',
-    );
-    $properties['status'] = array(
-      'label' => t('Status'),
-      'description' => t('A boolean indicating whether the poll is active.'),
-      'type' => 'boolean_field',
-    );
-    $properties['created'] = array(
-      'label' => t('Created'),
-      'description' => t('The time that the poll was created.'),
-      'type' => 'integer_field',
-      'settings' => array(
-        'default_value' => '0',
-      ),
-    );
+      ));
 
-    return $properties;
+    $fields['question'] = FieldDefinition::create('text')
+      ->setLabel(t('Question'))
+      ->setDescription(t('The poll question.'))
+      ->setRequired(TRUE)
+      ->setTranslatable(TRUE)
+      ->setSettings(array(
+        'default_value' => '',
+        'max_length' => 255,
+        'text_processing' => 0,
+      ));
+
+    $fields['langcode'] = FieldDefinition::create('language')
+      ->setLabel(t('Language code'))
+      ->setDescription(t('The poll language code.'));
+
+    $fields['anonymous_vote_allow'] = FieldDefinition::create('boolean')
+      ->setLabel(t('Allow anonymous votes'))
+      ->setDescription(t('A boolean indicating whether anonymous users are allowed to vote.'));
+
+    $fields['cancel_vote_allow'] = FieldDefinition::create('boolean')
+      ->setLabel(t('Allow cancel votes'))
+      ->setDescription(t('A boolean indicating whether users may cancel their vote.'));
+
+    $fields['result_vote_allow'] = FieldDefinition::create('boolean')
+      ->setLabel(t('Allow view results'))
+      ->setDescription(t('A boolean indicating whether users may see the results before voting.'));
+
+    $fields['runtime'] = FieldDefinition::create('boolean')
+      ->setLabel(t('Runtime'))
+      ->setDescription(t('The number of seconds after creation during which the poll is active.'));
+
+    $fields['status'] = FieldDefinition::create('boolean')
+      ->setLabel(t('Status'))
+      ->setDescription(t('A boolean indicating whether the poll is active.'));
+
+    // @todo Convert to a "created" field in https://drupal.org/node/2145103.
+    $fields['created'] = FieldDefinition::create('integer')
+      ->setLabel(t('Created'))
+      ->setDescription(t('The time that the poll was created.'));
+
+    return $fields;
   }
 
 }

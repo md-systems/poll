@@ -5,15 +5,11 @@
  * Definition of Drupal\poll\Plugin\field\formatter\VoteChoiceDefaultFormatter.
  */
 
-namespace Drupal\poll\Plugin\field\formatter;
+namespace Drupal\poll\Plugin\Field\FieldFormatter;
 
-use Drupal\field\Annotation\FieldFormatter;
-use Drupal\Core\Annotation\Translation;
-use Drupal\field\Plugin\Type\Formatter\FormatterBase;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\Field\FieldInterface;
+use Drupal\Core\Field\FormatterBase;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal;
-
 
 /**
  * Plugin implementation of the 'poll_choice' formatter.
@@ -32,13 +28,11 @@ class PollChoiceDefaultFormatter extends FormatterBase {
   /**
    * {@inheritdoc}
    */
-  public function viewElements(EntityInterface $entity, $langcode, FieldInterface $items) {
+  public function viewElements(FieldItemListInterface $items) {
     $elements = array();
     foreach ($items as $delta => $item) {
       $elements[$delta] = array('#markup' => $item->choice);
     }
     return $elements;
   }
-
-
 }
