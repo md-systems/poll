@@ -2,8 +2,9 @@ poll.poll_list:
   path: '/admin/structure/poll'
   defaults:
     _entity_list: 'poll'
+    _title: 'Polls'
   requirements:
-    _permission: 'administer content'
+    _permission: 'administer polls'
 
 poll.poll_add:
   path: '/poll/add'
@@ -11,14 +12,14 @@ poll.poll_add:
     _content: '\Drupal\poll\Controller\PollController::pollAdd'
     _title: 'Add poll'
   requirements:
-    _permission: 'administer content'
+    _permission: 'administer polls'
 
 poll.poll_edit:
   path: '/poll/{poll}/edit'
   defaults:
     _entity_form: 'poll.edit'
   requirements:
-    _permission: 'administer content'
+    _permission: 'administer polls'
 
 poll.poll_delete:
   path: '/poll/{poll}/delete'
@@ -26,11 +27,11 @@ poll.poll_delete:
     _entity_form: 'poll.delete'
     _title: 'Delete form'
   requirements:
-    _permission: 'administer content'
+    _permission: 'administer polls'
 
 poll.poll_view:
   path: '/poll/{poll}'
   defaults:
     _entity_form: 'poll.view'
   requirements:
-    _permission: 'administer content'
+    _permission: 'access polls'
