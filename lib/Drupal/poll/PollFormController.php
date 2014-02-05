@@ -7,58 +7,16 @@
 
 namespace Drupal\poll;
 
-use Drupal\Core\Cache\Cache;
-use Drupal\Core\Config\ConfigFactory;
+use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\ContentEntityFormController;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Language\Language;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-
 /**
- * Base for controller for poll term edit forms.
+ * Form controller for the poll poll edit forms.
  */
 class PollFormController extends ContentEntityFormController {
-
-  /**
-   * The language manager.
-   *
-   * @var \Drupal\Core\Language\LanguageManager
-   */
-  protected $languageManager;
-
-  /**
-   * The config factory.
-   *
-   * @var \Drupal\Core\Config\ConfigFactory
-   */
-  protected $configFactory;
-
-  /**
-   * Constructs a new EntityFormController object.
-   *
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
-   *   The entity manager.
-   * @param \Drupal\Core\Language\LanguageManager $language_manager
-   *   The language manager.
-   */
-  public function __construct(EntityManagerInterface $entity_manager, LanguageManager $language_manager, ConfigFactory $config_factory) {
-    parent::__construct($entity_manager);
-    $this->languageManager = $language_manager;
-    $this->configFactory = $config_factory;
-  }
-
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('entity.manager'),
-      $container->get('language_manager'),
-      $container->get('config.factory')
-    );
-  }
 
   /**
    * {@inheritdoc}
@@ -146,9 +104,26 @@ class PollFormController extends ContentEntityFormController {
       '#weight' => 5,
     );
 
-//    echo '<pre>'; var_dump($poll); echo '</pre>';
-
     return parent::form($form, $form_state, $poll);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validate(array $form, array &$form_state) {
+    $poll = $this->buildEntity($form, $form_state);
+    // Check for duplicate titles.
+//    $poll_storage_controller = $this->entityManager->getStorageController('poll_poll');
+//    $result = $poll_storage_controller->getPollDuplicates($poll);
+//    foreach ($result as $item) {
+//      if (strcasecmp($item->title, $poll->label()) == 0) {
+//        $this->setFormError('title', $form_state, $this->t('A poll named %poll already exists. Enter a unique title.', array('%poll' => $poll->label())));
+//      }
+//      if (strcasecmp($item->url, $poll->url->value) == 0) {
+//        $this->setFormError('url', $form_state, $this->t('A poll with this URL %url already exists. Enter a unique URL.', array('%url' => $poll->url->value)));
+//      }
+//    }
+    parent::validate($form, $form_state);
   }
 
   /**
@@ -176,54 +151,28 @@ class PollFormController extends ContentEntityFormController {
    */
   public function save(array $form, array &$form_state) {
     $poll = $this->entity;
-
-
-    $data = $poll;
-    $string = check_plain(print_r($data, TRUE));
-    $string = '<pre>' . $string . '</pre>';
-    trigger_error($string);
-
-
-
+    $insert = (bool) $poll->id();
     $poll->save();
-    $form_state['redirect'] = 'admin/structure/poll';
+    if ($insert) {
+      drupal_set_message($this->t('The poll %poll has been updated.', array('%poll' => $poll->label())));
+    }
+    else {
+      watchdog('poll', 'Poll %poll added.', array('%poll' => $poll->label()), WATCHDOG_NOTICE, l($this->t('view'), 'admin/config/services/poll'));
+      drupal_set_message($this->t('The poll %poll has been added.', array('%poll' => $poll->label())));
+    }
+
+    $form_state['redirect_route']['route_name'] = 'poll.poll_list';
+
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function actions(array $form, array &$form_state) {
-    $element = parent::actions($form, $form_state);
-
-//    // The user account being edited.
-//    $account = $this->entity;
-//
-//    // The user doing the editing.
-//    $user = $this->currentUser();
-//    $element['delete']['#type'] = 'submit';
-//    $element['delete']['#value'] = $this->t('Cancel account');
-//    $element['delete']['#submit'] = array(array($this, 'editCancelSubmit'));
-//    $element['delete']['#access'] = $account->id() > 1 && (($account->id() == $user->id() && $user->hasPermission('cancel account')) || $user->hasPermission('administer users'));
-
-    return $element;
-  }
-
-  /**
-   * Provides a submit handler for the 'Cancel account' button.
-   */
-  public function editCancelSubmit($form, &$form_state) {
-    $destination = array();
-    $query = $this->getRequest()->query;
-//    if ($query->has('destination')) {
-//      $destination = array('destination' => $query->get('destination'));
-//      $query->remove('destination');
-//    }
-//    // We redirect from user/%/edit to user/%/cancel to make the tabs disappear.
-//    $form_state['redirect_route'] = array(
-//      'route_name' => 'user.cancel',
-//      'route_parameters' => array('user' => $this->entity->id()),
-//      'options' => array('query' => $destination),
-//    );
+  public function delete(array $form, array &$form_state) {
+    $form_state['redirect_route'] = array(
+      'route_name' => 'poll.poll_delete',
+      'route_parameters' => array('poll_poll' => $this->entity->id()),
+    );
   }
 
 }

@@ -9,10 +9,9 @@ namespace Drupal\poll\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Field\FieldDefinition;
-use Drupal\poll\PollInterface;
+use Symfony\Component\DependencyInjection\Container;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
-use Drupal\Core\Language\Language;
-
+use Drupal\poll\PollInterface;
 
 /**
  * Defines the poll entity class.
@@ -20,34 +19,26 @@ use Drupal\Core\Language\Language;
  * @EntityType(
  *   id = "poll",
  *   label = @Translation("Poll"),
- *   bundle_label = @Translation("Poll"),
- *   module = "poll",
  *   controllers = {
+ *    "access" = "Drupal\poll\PollAccessController",
  *     "list" = "Drupal\poll\PollListController",
  *     "storage" = "Drupal\poll\PollStorageController",
- *     "render" = "Drupal\poll\PollRenderController",
- *     "access" = "Drupal\poll\PollAccessController",
  *     "form" = {
  *      "default" = "Drupal\poll\PollFormController",
  *      "add" = "Drupal\poll\PollFormController",
  *      "edit" = "Drupal\poll\PollFormController",
+ *      "delete" = "Drupal\poll\Form\PollDeleteForm",
  *      "view" = "Drupal\poll\Form\PollViewFormController",
  *     },
- *     "translation" = "Drupal\poll\PollTranslationController"
  *   },
- *   base_table = "poll",
- *   uri_callback = "poll_uri",
+ *   base_table = "poll_poll",
  *   fieldable = TRUE,
  *   translatable = TRUE,
- *   bundle_of = "poll",
  *   entity_keys = {
  *     "id" = "id",
+ *     "label" = "question",
  *     "uuid" = "uuid"
- *   },
- *  links = {
- *    "canonical" = "poll.poll_view",
-*     "edit-form" = "poll.poll_edit"
- *  }
+ *   }
  * )
  */
 class Poll extends ContentEntityBase implements PollInterface {
@@ -115,30 +106,8 @@ class Poll extends ContentEntityBase implements PollInterface {
 
   public $field_choice;
 
-
-  /**
-   * Implements Drupal\Core\Entity\EntityInterface::id().
-   */
-  public function id() {
-    return $this->get('uid')->value;
-  }
-
   /**
    * {@inheritdoc}
-   */
-  public function isNew() {
-    return !empty($this->enforceIsNew) || $this->id() === 0;
-  }
-
-  /**
-   * Overrides \Drupal\Core\Config\Entity\ConfigEntityBase::__construct();
-   */
-//  public function __construct(array $values, $entity_type) {
-//    parent::__construct($values, $entity_type);
-//  }
-
-  /**
-   * Overrides Drupal\Core\Entity\EntityNG::init().
    */
   public function init() {
     parent::init();
@@ -159,17 +128,24 @@ class Poll extends ContentEntityBase implements PollInterface {
   }
 
   /**
-   * {@inheritdoc}
+   * Implements Drupal\Core\Entity\EntityInterface::id().
    */
-  public function getLabel() {
-    return $this->getQuestion();
+  public function id() {
+    return $this->get('id')->value;
   }
 
   /**
    * Implements Drupal\Core\Entity\EntityInterface::label().
    */
-  public function label($langcode = NULL) {
+  public function label() {
     return $this->get('question')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLabel() {
+    return $this->getQuestion();
   }
 
   /**
@@ -336,29 +312,7 @@ class Poll extends ContentEntityBase implements PollInterface {
    * {@inheritdoc}
    */
   public static function sort($a, $b) {
-
-    // Sort by label.
     return strcmp($a->getQuestion(), $b->getQuestion());
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function prepareLangcode() {
-    $langcode = $this->language()->id;
-    // If the Language module is enabled, try to use the language from content
-    // negotiation.
-    if (\Drupal::moduleHandler()->moduleExists('language')) {
-      // Load languages the node exists in.
-      $node_translations = $this->getTranslationLanguages();
-      // Load the language from content negotiation.
-      $content_negotiation_langcode = \Drupal::languageManager()->getLanguage(Language::TYPE_CONTENT)->id;
-      // If there is a translation available, use it.
-      if (isset($node_translations[$content_negotiation_langcode])) {
-        $langcode = $content_negotiation_langcode;
-      }
-    }
-    return $langcode;
   }
 
   /**

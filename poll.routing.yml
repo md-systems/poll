@@ -8,21 +8,29 @@ poll.poll_list:
 poll.poll_add:
   path: '/poll/add'
   defaults:
+    _content: '\Drupal\poll\Controller\PollController::pollAdd'
     _title: 'Add poll'
-    _entity_form: poll.add
   requirements:
     _permission: 'administer content'
 
 poll.poll_edit:
   path: '/poll/{poll}/edit'
   defaults:
-    _entity_form: poll.edit
+    _entity_form: 'poll.edit'
+  requirements:
+    _permission: 'administer content'
+
+poll.poll_delete:
+  path: '/poll/{poll}/delete'
+  defaults:
+    _entity_form: 'poll.delete'
+    _title: 'Delete form'
   requirements:
     _permission: 'administer content'
 
 poll.poll_view:
   path: '/poll/{poll}'
   defaults:
-    _entity_form: poll.view
+    _entity_form: 'poll.view'
   requirements:
     _permission: 'administer content'

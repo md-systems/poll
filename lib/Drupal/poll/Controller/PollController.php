@@ -7,28 +7,74 @@
 
 namespace Drupal\poll\Controller;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\Xss;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\node\NodeTypeInterface;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\poll\PollInterface;
+use Drupal\poll\ItemInterface;
+use Drupal\Core\Database\Connection;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
- * Returns responses for Node routes.
+ * Returns responses for poll module routes.
  */
-class PollController extends ControllerBase {
+class PollController extends ControllerBase implements ContainerInjectionInterface {
 
   /**
-   * The _title_callback for the node.add route.
+   * The database connection.
    *
-   * @param \Drupal\node\NodeTypeInterface $node_type
-   *   The current node.
+   * @var \Drupal\Core\Database\Connection;
+   */
+  protected $database;
+
+  /**
+   * Constructs a \Drupal\poll\Controller\PollController object.
+   *
+   * @param \Drupal\Core\Database\Connection $database
+   *   The database connection.
+   */
+  public function __construct(Connection $database) {
+    $this->database = $database;
+  }
+
+  /**
+   * {inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('database')
+    );
+  }
+
+  /**
+   * Presents the poll poll creation form.
+   *
+   * @return array
+   *   A form array as expected by drupal_render().
+   */
+  public function pollAdd() {
+    $entity_manager = $this->entityManager();
+    $poll = $entity_manager->getStorageController('poll')
+      ->create(array(
+        'refresh' => 3600,
+      ));
+    return $entity_manager->getForm($poll);
+  }
+
+  /**
+   * Route title callback.
+   *
+   * @param \Drupal\poll\PollInterface $poll_poll
+   *   The poll poll.
    *
    * @return string
-   *   The page title.
+   *   The poll label.
    */
-  public function addPollTitle(PollInterface $poll) {
-    return Xss::filter($poll->getLabel());
+  public function pollTitle(PollInterface $poll_poll) {
+    return Xss::filter($poll_poll->label());
   }
 
 }

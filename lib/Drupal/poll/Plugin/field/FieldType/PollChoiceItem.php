@@ -9,7 +9,7 @@ namespace Drupal\poll\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\ConfigFieldItemBase;
 use Drupal\Core\TypedData\DataDefinition;
-use Drupal\field\FieldInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal;
 
 /**
@@ -49,7 +49,7 @@ class PollChoiceItem extends ConfigFieldItemBase {
   /**
    * {@inheritdoc}
    */
-  public static function schema(FieldInterface $field) {
+  public static function schema(FieldDefinitionInterface $field_definition) {
     return array(
       'columns' => array(
         'choice' => array(
@@ -82,7 +82,7 @@ class PollChoiceItem extends ConfigFieldItemBase {
    * {@inheritdoc}
    */
   public function getConstraints() {
-    $constraint_manager = \Drupal::typedData()->getValidationConstraintManager();
+    $constraint_manager = \Drupal::typedDataManager()->getValidationConstraintManager();
     $constraints = parent::getConstraints();
     $constraints[] = $constraint_manager->create('ComplexData', array(
       'choice' => array(

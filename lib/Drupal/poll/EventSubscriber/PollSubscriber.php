@@ -12,9 +12,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-/**
- * Ban subscriber for controller requests.
- */
+
 class PollSubscriber implements EventSubscriberInterface {
 
   public function onKernelRequestPollChoiceFieldCheck(GetResponseEvent $event) {

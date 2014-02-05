@@ -2,9 +2,11 @@
 
 /**
  * @file
- * Collects votes on different topics in the form of multiple choice questions.
+ *
  */
 
+use Drupal\poll\Entity\Poll;
+use Drupal\Component\Plugin\Exception\PluginException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\field\Field;
@@ -62,21 +64,74 @@ function poll_menu() {
     'route_name' => 'poll.poll_edit',
   );
 
+  $items['poll/%poll/delete'] = array(
+    'title' => 'Delete a poll',
+    'route_name' => 'poll.poll_delete',
+  );
+
   $items['poll/%poll'] = array(
     'title' => 'View a poll',
     'route_name' => 'poll.poll_view',
-    //'type' => MENU_LOCAL_ACTION,
   );
 
   return $items;
 }
 
 /**
- * Entity URI callback.
+ * Implements hook_theme().
  */
-function poll_uri($poll) {
+function poll_theme() {
+  $theme_hooks = array(
+    'poll_vote' => array(
+      'template' => 'poll-vote',
+      'render element' => 'form',
+    ),
+    'poll_choices' => array(
+      'render element' => 'form',
+    ),
+    'poll_results' => array(
+      'template' => 'poll-results',
+      'variables' => array(
+        'raw_title' => NULL,
+        'results' => NULL,
+        'votes' => NULL,
+        'raw_links' => NULL,
+        'block' => NULL,
+        'nid' => NULL,
+        'vote' => NULL
+      ),
+    ),
+    'poll_meter' => array(
+      'variables' => array(
+        'display_value' => NULL,
+        'form' => NULL,
+        'high' => NULL,
+        'low' => NULL,
+        'max' => NULL,
+        'min' => NULL,
+        'optimum' => NULL,
+        'value' => NULL,
+        'percentage' => NULL,
+        'attributes' => array()
+      ),
+      'template' => 'meter',
+    ),
+  );
+
+  return $theme_hooks;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function poll_permission() {
   return array(
-    'path' => 'poll/' . $poll->id(),
+    'administer polls' => array(
+      'title' => t('Administer polls'),
+    ),
+    'access polls' => array(
+      'title' => t('View polls'),
+    ),
   );
 }
 
@@ -152,56 +207,10 @@ function poll_admin_paths() {
 }
 
 /**
- * Implements hook_theme().
+ * Entity URI callback.
  */
-function poll_theme() {
-  $theme_hooks = array(
-    'poll_vote' => array(
-      'template' => 'poll-vote',
-      'render element' => 'form',
-    ),
-    'poll_choices' => array(
-      'render element' => 'form',
-    ),
-    'poll_results' => array(
-      'template' => 'poll-results',
-      'variables' => array(
-        'raw_title' => NULL,
-        'results' => NULL,
-        'votes' => NULL,
-        'raw_links' => NULL,
-        'block' => NULL,
-        'nid' => NULL,
-        'vote' => NULL
-      ),
-    ),
-    'poll_meter' => array(
-      'variables' => array(
-        'display_value' => NULL,
-        'form' => NULL,
-        'high' => NULL,
-        'low' => NULL,
-        'max' => NULL,
-        'min' => NULL,
-        'optimum' => NULL,
-        'value' => NULL,
-        'percentage' => NULL,
-        'attributes' => array()
-      ),
-      'template' => 'meter',
-    ),
+function poll_uri($poll) {
+  return array(
+    'path' => 'poll/' . $poll->id(),
   );
-
-  return $theme_hooks;
-}
-
-/**
- * Implements template_preprocess_HOOK() for poll-vote.tpl.php.
- */
-function template_preprocess_poll_vote(&$variables) {
-  $form = $variables['form'];
-  $variables['title'] = check_plain($form['#node']->title);
-  $variables['choice'] = drupal_render($form['choice']);
-  $variables['vote'] = drupal_render($form['submit']);
-  $variables['rest'] = drupal_render_children($form);
 }

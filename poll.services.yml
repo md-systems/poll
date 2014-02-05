@@ -3,3 +3,9 @@ services:
     class: Drupal\poll\EventSubscriber\PollSubscriber
     tags:
       - { name: event_subscriber }
+
+  poll.breadcrumb:
+    class: Drupal\poll\PollBreadcrumbBuilder
+    tags:
+      - { name: breadcrumb_builder, priority: 1000 }
+    arguments: ['@entity.manager']

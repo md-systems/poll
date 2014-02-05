@@ -7,34 +7,27 @@
 namespace Drupal\poll;
 
 use Drupal;
-use Drupal\Core\Config\Entity\ConfigEntityListController;
+use Drupal\Core\Entity\EntityListController;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
-use Drupal\Core\Extension\ModuleHandlerInterface;
+
 
 /**
- * Provides a listing of contact categories.
+ * Provides a listing of polls.
  */
-class PollListController extends ConfigEntityListController {
-
+class PollListController extends EntityListController {
 
   /**
-   * Constructs a new ConfigEntityListController object.
+   * Constructs a new EntityListController object.
    *
-   * We are making sure the poll entity has been properly configured with the
-   * required poll_choice field type.
-   *
-   * @param string $entity_type
    *   The type of entity to be listed.
    * @param array $entity_info
    *   An array of entity info for the entity type.
    * @param \Drupal\Core\Entity\EntityStorageControllerInterface $storage
    *   The entity storage controller class.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
-   *   The module handler to invoke hooks on.
    */
-  public function __construct($entity_type, array $entity_info, EntityStorageControllerInterface $storage, ModuleHandlerInterface $module_handler) {
-    parent::__construct($entity_type, $entity_info, $storage, $module_handler);
+  public function __construct(EntityTypeInterface $entity_info, EntityStorageControllerInterface $storage) {
+    parent::__construct($entity_info, $storage);
   }
 
   /**
@@ -53,10 +46,12 @@ class PollListController extends ConfigEntityListController {
    * Overrides Drupal\Core\Entity\EntityListController::buildRow().
    */
   public function buildRow(EntityInterface $entity) {
-    $row['question'] = l($entity->getQuestion(), 'poll/' . $entity->id()); // TODO:
-    $row['status'] = ($entity->isActive()) ? 'Y' : 'N';
-    $row['created'] = Drupal::service('date')->format($entity->getCreated(), 'long');
-    $row['votes'] = 5; // TODO: add up all votes submitted for this poll
+    $poll_storage_controller = \Drupal::entityManager()->getStorageController($entity->entityType());
+
+    $row['question'] = l($entity->label(), 'poll/' . $entity->id());
+    $row['status'] = ($entity->isActive()) ? t('Y') : t('N');
+    $row['created'] = ($entity->getCreated()) ? Drupal::service('date')->format($entity->getCreated(), 'long') : t('n/a');
+    $row['votes'] = $poll_storage_controller->getTotalVotes($entity);
     return $row + parent::buildRow($entity);
   }
 

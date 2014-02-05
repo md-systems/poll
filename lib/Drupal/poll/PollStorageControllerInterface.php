@@ -7,28 +7,15 @@
 
 namespace Drupal\poll;
 
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\poll\PollInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 
 /**
- * Defines a common interface for poll term entity controller classes.
+ * Defines a common interface for poll entity controller classes.
  */
 interface PollStorageControllerInterface extends EntityStorageControllerInterface {
 
-  /**
-   * Removed reference to terms from term_hierarchy.
-   *
-   * @param array
-   *   Array of terms that need to be removed from hierarchy.
-   */
-  public function deletePoll($poll);
-
-  /**
-   * Updates terms hierarchy information with the hierarchy trail of it.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $term
-   *   Poll entity that needs to be added to term hierarchy information.
-   */
-  public function updatePoll(EntityInterface $poll);
+  public function getTotalVotes(PollInterface $poll);
+  public function deleteVotes(PollInterface $poll);
 
 }

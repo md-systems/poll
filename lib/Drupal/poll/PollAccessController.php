@@ -24,17 +24,16 @@ class PollAccessController extends EntityAccessController {
   protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
     switch ($operation) {
       case 'view':
-        return $account->hasPermission('access content');
+        return $account->hasPermission('access polls');
         break;
 
       case 'update':
-        return $account->hasPermission('administer poll');
+        return $account->hasPermission('administer polls');
         break;
 
       case 'delete':
-
         //return $account->hasPermission("delete terms in {$entity->bundle()}") || $account->hasPermission('administer poll');
-        return $account->hasPermission('administer poll');
+        return $account->hasPermission('administer polls');
         break;
     }
   }
@@ -43,7 +42,7 @@ class PollAccessController extends EntityAccessController {
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return $account->hasPermission('administer poll');
+    return $account->hasPermission('administer polls');
   }
 
 }

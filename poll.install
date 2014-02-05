@@ -5,11 +5,12 @@
  * Install, update, and uninstall functions for the Poll module.
  */
 
+
 /**
  * Implements hook_schema().
  */
 function poll_schema() {
-  $schema['poll'] = array(
+  $schema['poll_poll'] = array(
     'description' => 'Stores poll-specific information for poll entities.',
     'fields' => array(
       'id' => array(
