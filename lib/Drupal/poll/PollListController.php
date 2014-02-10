@@ -9,6 +9,7 @@ namespace Drupal\poll;
 use Drupal;
 use Drupal\Core\Entity\EntityListController;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 
 

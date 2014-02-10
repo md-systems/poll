@@ -25,7 +25,7 @@ use Drupal;
  */
 class PollChoiceItem extends ConfigFieldItemBase {
 
-  const POLL_CHOICE_MAX_LENGTH = 255;
+  const POLL_CHOICE_MAX_LENGTH = 512;
   /**
    * Definitions of the contained properties.
    *
@@ -38,6 +38,8 @@ class PollChoiceItem extends ConfigFieldItemBase {
    */
   public function getPropertyDefinitions() {
     if (!isset(static::$propertyDefinitions)) {
+      static::$propertyDefinitions['chid'] = DataDefinition::create('integer')
+        ->setLabel(t('Choice ID'));
       static::$propertyDefinitions['choice'] = DataDefinition::create('string')
         ->setLabel(t('Choice'));
       static::$propertyDefinitions['vote'] = DataDefinition::create('integer')
@@ -52,10 +54,15 @@ class PollChoiceItem extends ConfigFieldItemBase {
   public static function schema(FieldDefinitionInterface $field_definition) {
     return array(
       'columns' => array(
+        'chid' => array(
+          'type' => 'serial',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+        ),
         'choice' => array(
           'type' => 'varchar',
-          'length' => 255,
-          'not null' => FALSE,
+          'length' => 512,
+          'not null' => TRUE,
         ),
         'vote' => array(
           'type' => 'int',
@@ -64,9 +71,12 @@ class PollChoiceItem extends ConfigFieldItemBase {
         ),
       ),
       'indexes' => array(
-        'choice' => array('choice'),
-        'vote' => array('vote'),
+        'chid' => array('chid'),
       ),
+      'primary key' => array('chid'),
+//      'unique keys' => array(
+//        'chid' => array('chid'),
+//      ),
     );
   }
 
@@ -82,13 +92,16 @@ class PollChoiceItem extends ConfigFieldItemBase {
    * {@inheritdoc}
    */
   public function getConstraints() {
-    $constraint_manager = \Drupal::typedDataManager()->getValidationConstraintManager();
+    $constraint_manager = \Drupal::typedDataManager()
+      ->getValidationConstraintManager();
     $constraints = parent::getConstraints();
     $constraints[] = $constraint_manager->create('ComplexData', array(
       'choice' => array(
         'Length' => array(
           'max' => static::POLL_CHOICE_MAX_LENGTH,
-          'maxMessage' => t('%name: the choice field may not be longer than @max characters.', array('%name' => $this->getFieldDefinition()->getLabel(), '@max' => static::POLL_CHOICE_MAX_LENGTH
+          'maxMessage' => t('%name: the choice field may not be longer than @max characters.', array(
+            '%name' => $this->getFieldDefinition()->getLabel(),
+            '@max' => static::POLL_CHOICE_MAX_LENGTH
           )),
         )
       ),

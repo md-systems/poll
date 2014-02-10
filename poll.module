@@ -2,7 +2,7 @@
 
 /**
  * @file
- *
+ * Used to aggregate syndicated content (RSS, RDF, and Atom).
  */
 
 use Drupal\poll\Entity\Poll;
@@ -10,6 +10,10 @@ use Drupal\Component\Plugin\Exception\PluginException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\field\Field;
+use Drupal\Component\Utility\String;
+use Drupal\Core\Template\Attribute;
+
+//use Drupal;
 
 /**
  * Denotes that the poll is not published.
@@ -72,6 +76,7 @@ function poll_menu() {
   $items['poll/%poll'] = array(
     'title' => 'View a poll',
     'route_name' => 'poll.poll_view',
+    //'type' => MENU_LOCAL_ACTION,
   );
 
   return $items;
@@ -102,6 +107,7 @@ function poll_theme() {
       ),
     ),
     'poll_meter' => array(
+      'template' => 'poll-meter',
       'variables' => array(
         'display_value' => NULL,
         'form' => NULL,
@@ -114,12 +120,12 @@ function poll_theme() {
         'percentage' => NULL,
         'attributes' => array()
       ),
-      'template' => 'meter',
     ),
   );
 
   return $theme_hooks;
 }
+
 
 /**
  * Implements hook_permission().
@@ -133,6 +139,15 @@ function poll_permission() {
       'title' => t('View polls'),
     ),
   );
+}
+
+/**
+ * Implements hook_page_build().
+ */
+function poll_page_build(&$page) {
+  $path = drupal_get_path('module', 'poll') . '/css';
+  $page['#attached']['css'][$path . '/poll.base.css'] = array('every_page' => TRUE);
+  $page['#attached']['css'][$path . '/poll.theme.css'] = array('every_page' => TRUE);
 }
 
 /**
@@ -213,4 +228,70 @@ function poll_uri($poll) {
   return array(
     'path' => 'poll/' . $poll->id(),
   );
+}
+
+/**
+ * Implements template_preprocess_HOOK() for poll-vote.tpl.php.
+ */
+function template_preprocess_poll_vote(&$variables) {
+  $form = $variables['form'];
+  $variables['title'] = String::checkPlain($form['#entity']->label());
+  $variables['choice'] = drupal_render($form['choice']);
+  $variables['vote'] = drupal_render($form['actions']);
+  $variables['rest'] = drupal_render_children($form);
+  if (isset($form['#block'])) {
+    $variables['block'] = $form['#block'];
+    $variables['theme_hook_suggestions'][] = 'poll_vote__block';
+  }
+}
+
+/**
+ * Prepares variables for meter templates.
+ *
+ * Default template: meter.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - display_value: The textual representation of the meter bar.
+ *   - form: A string specifying one or more forms to which the <meter> element
+ *   - attributes: Associative array of attributes to be placed in the meter
+ *     tag.
+ */
+function template_preprocess_poll_meter(&$variables) {
+  $attributes = $variables['attributes'];
+  foreach (array('form', 'high', 'low', 'max', 'min', 'optimum', 'value') as $key) {
+    if (isset($variables[$key])) {
+      // This function was initially designed for the <meter> tag, but due to
+      // the lack of browser and styling support for it, we're currently using
+      // its attributes as HTML5 data attributes.
+      $attributes['data-' . $key] = $variables[$key];
+    }
+  }
+
+  $variables['attributes'] = new Attribute($attributes);
+}
+
+/**
+ * Implements template_preprocess_HOOK() for poll-results.tpl.php.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - raw_title: A string for the title of the poll.
+ *   - results: The results of the poll.
+ *   - votes: The total results in the poll.
+ *   - raw_links: Array containing links in the poll.
+ *   - block: A boolean to define if the poll is a block.
+ *   - nid: The node ID of the poll.
+ *   - vote: The choice number of the current user's vote.
+ *   The raw_* inputs to this are naturally unsafe; often safe versions are
+ *   made to simply overwrite the raw version, but in this case it seems likely
+ *   that the title and the links may be overridden by the theme layer, so they
+ *   are left in with a different name for that purpose.
+ *
+ * @see poll-results.tpl.php
+ * @see poll-results--block.tpl.php
+ */
+function template_preprocess_poll_results(&$variables) {
+  $variables['links'] = theme('links__poll_results', array('links' => $variables['raw_links']));
+  $variables['title'] = String::checkPlain($variables['raw_title']);
 }

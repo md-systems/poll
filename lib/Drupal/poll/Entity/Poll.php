@@ -10,8 +10,10 @@ namespace Drupal\poll\Entity;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Field\FieldDefinition;
 use Symfony\Component\DependencyInjection\Container;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\poll\PollInterface;
+use Drupal\Component\Utility\String;
 
 /**
  * Defines the poll entity class.
@@ -28,7 +30,7 @@ use Drupal\poll\PollInterface;
  *      "add" = "Drupal\poll\PollFormController",
  *      "edit" = "Drupal\poll\PollFormController",
  *      "delete" = "Drupal\poll\Form\PollDeleteForm",
- *      "view" = "Drupal\poll\Form\PollViewFormController",
+ *      "view" = "Drupal\poll\PollViewFormController",
  *     },
  *   },
  *   base_table = "poll_poll",
@@ -105,6 +107,7 @@ class Poll extends ContentEntityBase implements PollInterface {
 
 
   public $field_choice;
+
 
   /**
    * {@inheritdoc}
@@ -379,5 +382,32 @@ class Poll extends ContentEntityBase implements PollInterface {
 
     return $fields;
   }
+
+  public function hasUserVoted() {
+    $poll_storage_controller = \Drupal::entityManager()
+      ->getStorageController($this->entityType());
+    $vote = $poll_storage_controller->getUserVote($this);
+    if ($vote) {
+      return $vote;
+    }
+    return FALSE;
+  }
+
+  public function getOptions() {
+    $options = array();
+    if (count($this->field_choice)) {
+      foreach ($this->field_choice as $option) {
+        $options[$option->chid] = String::checkPlain($option->choice);
+      }
+    }
+    return $options;
+  }
+
+  public static function postLoad(EntityStorageControllerInterface $storage_controller, array &$entities) {
+    foreach ($entities as $entity) {
+      $entity->votes = $storage_controller->getVotes($entity);
+    }
+  }
+
 
 }
