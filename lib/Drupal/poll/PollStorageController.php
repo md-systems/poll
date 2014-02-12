@@ -26,18 +26,25 @@ class PollStorageController extends FieldableDatabaseStorageController implement
   }
 
   public function deleteVotes(PollInterface $poll) {
-    $this->database->delete('poll_vote')->condition('pid', $poll->id())->execute();
+    $this->database->delete('poll_vote')->condition('pid', $poll->id())
+      ->execute();
   }
 
 
   public function getUserVote(PollInterface $poll) {
     $uid = Drupal::currentUser()->id();
     if ($uid || $poll->anonymous_vote_allow->value) {
-      if($uid) {
-        $query = $this->database->query("SELECT * FROM {poll_vote} WHERE pid = :pid AND uid = :uid", array(':pid' => $poll->id(), ':uid' => $uid));
+      if ($uid) {
+        $query = $this->database->query("SELECT * FROM {poll_vote} WHERE pid = :pid AND uid = :uid", array(
+          ':pid' => $poll->id(),
+          ':uid' => $uid
+        ));
       }
       else {
-        $query = $this->database->query("SELECT * FROM {poll_vote} WHERE pid = :pid AND hostname = :hostname", array(':pid' => $poll->id(), ':hostname' => Drupal::request()->getClientIp()));
+        $query = $this->database->query("SELECT * FROM {poll_vote} WHERE pid = :pid AND hostname = :hostname", array(
+          ':pid' => $poll->id(),
+          ':hostname' => Drupal::request()->getClientIp()
+        ));
       }
       return $query->fetchObject();
     }
@@ -45,7 +52,7 @@ class PollStorageController extends FieldableDatabaseStorageController implement
   }
 
   public function saveVote(array $options) {
-    if(!is_array($options)) {
+    if (!is_array($options)) {
       return FALSE;
     }
     return $this->database->insert('poll_vote')->fields($options)->execute();
@@ -55,7 +62,7 @@ class PollStorageController extends FieldableDatabaseStorageController implement
     $votes = array();
     // set votes for all options to 0
     $options = $poll->getOptions();
-    foreach($options as $id => $label) {
+    foreach ($options as $id => $label) {
       $votes[$id] = 0;
     }
 
@@ -70,13 +77,11 @@ class PollStorageController extends FieldableDatabaseStorageController implement
   }
 
   public function cancelVote(PollInterface $poll, AccountInterface $account) {
-    $uid = (!$account instanceof AccountInterface) ? Drupal::currentUser()->id() : $account->id();
-
-//    $this->database->delete('taxonomy_term_hierarchy')
-//      ->condition('tid', $tids)
-//      ->execute();
-
-
+    $this->database->delete('poll_vote')
+      ->condition('pid', $poll->id())
+      ->condition('uid', (!$account instanceof AccountInterface) ? Drupal::currentUser()
+        ->id() : $account->id())
+      ->execute();
   }
 
 }

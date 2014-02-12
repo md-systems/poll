@@ -31,7 +31,7 @@ class PollViewFormController extends ContentEntityFormController {
   public function form(array $form, array &$form_state) {
     drupal_set_title($this->entity->getLabel());
 
-    if ($this->showResults($this->entity)) {
+    if ($this->showResults($this->entity, $form_state)) {
       $form['results']['#markup'] = $this->poll_view_results($this->entity);
     }
     else {
@@ -49,7 +49,11 @@ class PollViewFormController extends ContentEntityFormController {
       // Set form caching because we could have multiple of these forms on
       // the same page, and we want to ensure the right one gets picked.
       $form_state['cache'] = TRUE;
+      // Set a flag to hide results which will be removed if we want to view
+      // results when the form is rebuilt.
+      $form_state['input']['show_results'] = FALSE;
     }
+
 
     return $form;
   }
@@ -67,7 +71,7 @@ class PollViewFormController extends ContentEntityFormController {
       }
     }
 
-    if ($this->showResults($this->entity)) {
+    if ($this->showResults($this->entity, $form_state)) {
       // Remove all actions.
       $actions = array();
       // Allow user to cancel their vote.
@@ -79,12 +83,21 @@ class PollViewFormController extends ContentEntityFormController {
         $actions['cancel']['#submit'] = array(array($this, 'cancel'));
         $actions['cancel']['#weight'] = '0';
       }
+      if (!$this->entity->hasUserVoted()) {
+        $actions['#type'] = 'actions';
+        $actions['back']['#type'] = 'submit';
+        $actions['back']['#button_type'] = 'primary';
+        $actions['back']['#value'] = $this->t('View poll');
+        $actions['back']['#submit'] = array(array($this, 'back'));
+        $actions['back']['#weight'] = '0';
+      }
     }
     else {
       $actions['#type'] = 'actions';
       $actions['submit']['#type'] = 'submit';
       $actions['submit']['#button_type'] = 'primary';
       $actions['submit']['#value'] = $this->t('Vote');
+      $actions['submit']['#validate'] = array(array($this, 'validate'));
       $actions['submit']['#weight'] = '0';
 
       // view results before voting
@@ -103,16 +116,22 @@ class PollViewFormController extends ContentEntityFormController {
   public function cancel(array $form, array &$form_state) {
     $poll_storage_controller = \Drupal::entityManager()
       ->getStorageController($this->entity->entityType());
-    $status = $poll_storage_controller->cancelVote($this->entity, NULL);
+    $poll_storage_controller->cancelVote($this->entity, NULL);
 
-    // drupal_set_message();
+    drupal_set_message($this->t('Your vote has been cancelled.'));
+
     $uri = $this->entity->normaliseUri();
     $form_state['redirect'] = $uri['path'];
   }
 
   public function result(array $form, array &$form_state) {
-    debug('result():');
-    debug($form_state['values']);
+    $form_state['input']['show_results'] = TRUE;
+    $form_state['rebuild'] = TRUE;
+  }
+
+  public function back(array $form, array &$form_state) {
+    $form_state['input']['show_results'] = FALSE;
+    $form_state['rebuild'] = TRUE;
   }
 
   /**
@@ -127,12 +146,14 @@ class PollViewFormController extends ContentEntityFormController {
     $options['timestamp'] = REQUEST_TIME;
 
     // save vote
-    // display message
     $poll_storage_controller = \Drupal::entityManager()
       ->getStorageController($this->entity->entityType());
     $status = $poll_storage_controller->saveVote($options);
 
-    $form_state['redirect'] = 'admin/structure/poll';
+    drupal_set_message($this->t('You vote has been recorded.'));
+
+    $uri = $this->entity->normaliseUri();
+    $form_state['redirect'] = $uri['path'];
   }
 
   /**
@@ -140,14 +161,17 @@ class PollViewFormController extends ContentEntityFormController {
    */
   public function validate(array $form, array &$form_state) {
     if (!isset($form_state['values']['choice']) || $form_state['values']['choice'] == NULL) {
-      drupal_set_title($form['#node']->question->value);
-      form_set_error('choice', t('Your vote could not be recorded because you did not select any of the choices.'));
+      drupal_set_title($this->entity->question->value);
+      Drupal::formBuilder()
+        ->setErrorByName('choice', $form_state, $this->t('Your vote could not be recorded because you did not select any of the choices.'));
     }
   }
 
 
-  public function showResults(PollInterface $poll) {
-    switch(TRUE) {
+  public function showResults(PollInterface $poll, $form_state) {
+    switch (TRUE) {
+      case (isset($form_state['input']) && isset($form_state['input']['show_results']) && $form_state['input']['show_results']):
+        return TRUE;
       case ($poll->isClosed()):
         return TRUE;
       case (user_is_anonymous() && !$poll->anonymous_vote_allow->value):
@@ -157,6 +181,13 @@ class PollViewFormController extends ContentEntityFormController {
       default:
         return FALSE;
     }
+  }
+
+  public function showViewResults(array $form_state) {
+    return (isset($form_state['input']) &&
+      isset($form_state['input']['show_results']) &&
+      !$form_state['input']['show_results'] &&
+      $this->entity->result_vote_allow->value);
   }
 
   function poll_view_results($poll, $block = FALSE) {
