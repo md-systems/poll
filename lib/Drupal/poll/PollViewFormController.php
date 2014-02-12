@@ -32,18 +32,9 @@ class PollViewFormController extends ContentEntityFormController {
     drupal_set_title($this->entity->getLabel());
 
     if ($this->showResults($this->entity)) {
-      // TODO: Show results
-      // User + User voted
-      // Poll expired
-      // Anonymous user + anonymous_vote_allow = 0 >
       $form['results']['#markup'] = $this->poll_view_results($this->entity);
     }
     else {
-      // TODO: Show poll
-      // Poll not expired
-      // User + User not voted
-      // Anonymous user + anonymous_vote_allow = 1
-
       $options = $this->entity->getOptions();
       if ($options) {
         $form['choice'] = array(
@@ -59,6 +50,7 @@ class PollViewFormController extends ContentEntityFormController {
       // the same page, and we want to ensure the right one gets picked.
       $form_state['cache'] = TRUE;
     }
+
     return $form;
   }
 
@@ -78,12 +70,14 @@ class PollViewFormController extends ContentEntityFormController {
     if ($this->showResults($this->entity)) {
       // Remove all actions.
       $actions = array();
+      // Allow user to cancel their vote.
       if ($this->entity->hasUserVoted() && $this->entity->cancel_vote_allow->value) {
         $actions['#type'] = 'actions';
-        $actions['submit']['#type'] = 'submit';
-        $actions['submit']['#button_type'] = 'primary';
-        $actions['submit']['#value'] = $this->t('Cancel vote');
-        $actions['submit']['#weight'] = '0';
+        $actions['cancel']['#type'] = 'submit';
+        $actions['cancel']['#button_type'] = 'primary';
+        $actions['cancel']['#value'] = $this->t('Cancel vote');
+        $actions['cancel']['#submit'] = array(array($this, 'cancel'));
+        $actions['cancel']['#weight'] = '0';
       }
     }
     else {
@@ -98,10 +92,27 @@ class PollViewFormController extends ContentEntityFormController {
         $actions['result']['#type'] = 'submit';
         $actions['result']['#button_type'] = 'primary';
         $actions['result']['#value'] = $this->t('View results');
+        $actions['result']['#submit'] = array(array($this, 'result'));
         $actions['result']['#weight'] = '1';
       }
     }
+
     return $actions;
+  }
+
+  public function cancel(array $form, array &$form_state) {
+    $poll_storage_controller = \Drupal::entityManager()
+      ->getStorageController($this->entity->entityType());
+    $status = $poll_storage_controller->cancelVote($this->entity, NULL);
+
+    // drupal_set_message();
+    $uri = $this->entity->normaliseUri();
+    $form_state['redirect'] = $uri['path'];
+  }
+
+  public function result(array $form, array &$form_state) {
+    debug('result():');
+    debug($form_state['values']);
   }
 
   /**
@@ -136,23 +147,15 @@ class PollViewFormController extends ContentEntityFormController {
 
 
   public function showResults(PollInterface $poll) {
-    $message = '';
-    if ($poll->isClosed()) {
-      $message .= $this->t('This poll is closed.');
-    }
-    elseif (user_is_anonymous() && !$poll->anonymous_vote_allow->value) {
-      $message .= $this->t('Anonymous users are not allowed to vote.');
-    }
-    elseif ($poll->hasUserVoted()) {
-      $message .= $this->t('You have already voted.');
-    }
-
-    if (drupal_strlen($message)) {
-      drupal_set_message($message);
-      return TRUE;
-    }
-    else {
-      return FALSE;
+    switch(TRUE) {
+      case ($poll->isClosed()):
+        return TRUE;
+      case (user_is_anonymous() && !$poll->anonymous_vote_allow->value):
+        return TRUE;
+      case ($poll->hasUserVoted()):
+        return TRUE;
+      default:
+        return FALSE;
     }
   }
 

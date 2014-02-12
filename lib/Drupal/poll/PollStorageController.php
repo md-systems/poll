@@ -9,6 +9,7 @@ namespace Drupal\poll;
 
 use Drupal;
 use Drupal\poll\PollInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Entity\FieldableDatabaseStorageController;
 
 /**
@@ -66,6 +67,16 @@ class PollStorageController extends FieldableDatabaseStorageController implement
     }
 
     return $votes;
+  }
+
+  public function cancelVote(PollInterface $poll, AccountInterface $account) {
+    $uid = (!$account instanceof AccountInterface) ? Drupal::currentUser()->id() : $account->id();
+
+//    $this->database->delete('taxonomy_term_hierarchy')
+//      ->condition('tid', $tids)
+//      ->execute();
+
+
   }
 
 }

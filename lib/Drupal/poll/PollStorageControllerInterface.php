@@ -21,5 +21,6 @@ interface PollStorageControllerInterface extends EntityStorageControllerInterfac
   public function deleteVotes(PollInterface $poll);
   public function getUserVote(PollInterface $poll);
   public function saveVote(array $fields);
+  public function cancelVote(PollInterface $poll, AccountInterface $account);
 
 }

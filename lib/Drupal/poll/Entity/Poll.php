@@ -409,5 +409,10 @@ class Poll extends ContentEntityBase implements PollInterface {
     }
   }
 
+  public function normaliseUri() {
+    $uri = $this->uri();
+    return str_replace('entity/', '', $uri);
+  }
+
 
 }

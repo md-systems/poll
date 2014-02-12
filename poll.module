@@ -12,8 +12,12 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\field\Field;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Template\Attribute;
-
 //use Drupal;
+
+
+/**
+ * TODO: Expire polls > unpublish polls
+ */
 
 /**
  * Denotes that the poll is not published.
@@ -76,7 +80,6 @@ function poll_menu() {
   $items['poll/%poll'] = array(
     'title' => 'View a poll',
     'route_name' => 'poll.poll_view',
-    //'type' => MENU_LOCAL_ACTION,
   );
 
   return $items;
@@ -248,7 +251,7 @@ function template_preprocess_poll_vote(&$variables) {
 /**
  * Prepares variables for meter templates.
  *
- * Default template: meter.html.twig.
+ * Default template: poll-meter.html.twig.
  *
  * @param array $variables
  *   An associative array containing:
