@@ -65,7 +65,7 @@ class PollListController extends EntityListController {
     $operations = parent::getOperations($entity);
 
     if (isset($operations['edit'])) {
-      $operations['edit']['href'] = $uri['path'] . '/edit/me';
+      $operations['edit']['href'] = $uri['path'] . '/edit';
     }
     if (isset($operations['delete'])) {
       $operations['delete']['href'] = $uri['path'] . '/delete';

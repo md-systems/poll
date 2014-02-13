@@ -16,7 +16,8 @@ use Drupal\Core\Template\Attribute;
  * @todo: Count total votes with field_choice_vote values from poll__field_choice table.
  * @todo: poll block
  * @todo: Unit tests
- * @todo: mulitchoice polls?
+ * @todo: Migrate/Upgrade from D7 core poll module
+ * @todo: multichoice polls?
  */
 
 /**

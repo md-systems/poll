@@ -93,6 +93,7 @@ function poll_schema() {
     'primary key' => array('id'),
     'unique keys' => array(
       'uuid' => array('uuid'),
+      'question' => array('question'),
     ),
   );
 

@@ -329,6 +329,8 @@ class Poll extends ContentEntityBase implements PollInterface {
   }
 
   /**
+   * @todo: Where is this being used?
+   *
    * {@inheritdoc}
    */
   public static function sort($a, $b) {
