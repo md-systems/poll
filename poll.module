@@ -14,10 +14,10 @@ use Drupal\Core\Template\Attribute;
  * @todo: Expire (unpublish) polls automatically after duration has passed
  * @todo: Anonymous user voting in polls - track by IP (or/and cookie?)
  * @todo: Count total votes with field_choice_vote values from poll__field_choice table.
- * @todo: poll block
+ * @todo: Poll block
  * @todo: Unit tests
  * @todo: Migrate/Upgrade from D7 core poll module
- * @todo: multichoice polls?
+ * @todo: Multichoice polls
  */
 
 /**

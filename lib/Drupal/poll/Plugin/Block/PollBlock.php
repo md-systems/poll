@@ -15,7 +15,7 @@ use Drupal\block\BlockBase;
  *
  * @Block(
  *   id = "poll_block",
- *   admin_label = @Translation("Poll"),
+ *   admin_label = @Translation("Most recent poll"),
  *   category = @Translation("Forms")
  * )
  */
@@ -25,14 +25,17 @@ class PollBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function access(AccountInterface $account) {
-  
+    return $account->hasPermission('access polls');
   }
 
   /**
    * {@inheritdoc}
    */
   public function build() {
+    // @todo: load most recent poll
+    $poll = entity_load('poll', 1);
 
+    // @todo: display the form
     return array();
   }
 
