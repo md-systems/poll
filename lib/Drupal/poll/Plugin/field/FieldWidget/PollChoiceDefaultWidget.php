@@ -2,14 +2,13 @@
 
 /**
  * @file
- * Definition of Drupal\poll\Plugin\field\widget\ChoiceVoteDefaultWidget.
+ * Definition of Drupal\poll\Plugin\field\FieldWidget\ChoiceVoteDefaultWidget.
  */
 
 namespace Drupal\poll\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
-use Drupal;
 
 
 /**

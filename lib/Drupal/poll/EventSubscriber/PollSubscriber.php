@@ -7,14 +7,24 @@
 
 namespace Drupal\poll\EventSubscriber;
 
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-
+/**
+ * Class PollSubscriber
+ *
+ * Creates a poll choice field for the module.
+ *
+ * @package Drupal\poll\EventSubscriber
+ */
 class PollSubscriber implements EventSubscriberInterface {
 
+  /**
+   * Create a poll choice field if it doesn't exist.
+   *
+   * @param GetResponseEvent $event
+   */
   public function onKernelRequestPollChoiceFieldCheck(GetResponseEvent $event) {
     $request = $event->getRequest();
     $poll_choice_field_exists = $request->attributes->get('_poll_choice_field_exists');

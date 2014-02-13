@@ -8,7 +8,6 @@
 namespace Drupal\poll;
 
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
 
 /**
  * Provides an interface defining a poll entity.

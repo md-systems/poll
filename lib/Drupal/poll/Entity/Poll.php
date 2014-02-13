@@ -9,8 +9,6 @@ namespace Drupal\poll\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Field\FieldDefinition;
-use Symfony\Component\DependencyInjection\Container;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\poll\PollInterface;
 use Drupal\Component\Utility\String;
@@ -383,14 +381,15 @@ class Poll extends ContentEntityBase implements PollInterface {
     return $fields;
   }
 
+  /**
+   * @todo: Refactor - doesn't belong here.
+   *
+   * @return mixed
+   */
   public function hasUserVoted() {
     $poll_storage_controller = \Drupal::entityManager()
       ->getStorageController($this->entityType());
-    $vote = $poll_storage_controller->getUserVote($this);
-    if ($vote) {
-      return $vote;
-    }
-    return FALSE;
+    return $poll_storage_controller->getUserVote($this);
   }
 
   public function getOptions() {

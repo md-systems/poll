@@ -7,14 +7,7 @@
 
 namespace Drupal\poll;
 
-use Drupal\Component\Uuid\Uuid;
-use Drupal\Core\Cache\Cache;
-use Drupal\Core\Config\ConfigFactory;
-use Drupal\Core\Language\Language;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\ContentEntityFormController;
-use Drupal\Core\Entity\EntityManagerInterface;
-use Drupal\Core\Language\LanguageManager;
 use Drupal\Component\Utility\String;
 use Drupal;
 
@@ -24,7 +17,6 @@ use Drupal;
  */
 class PollViewFormController extends ContentEntityFormController {
 
-
   /**
    * {@inheritdoc}
    */
@@ -32,7 +24,7 @@ class PollViewFormController extends ContentEntityFormController {
     drupal_set_title($this->entity->getLabel());
 
     if ($this->showResults($this->entity, $form_state)) {
-      $form['results']['#markup'] = $this->poll_view_results($this->entity);
+      $form['results']['#markup'] = $this->showPollResults($this->entity);
     }
     else {
       $options = $this->entity->getOptions();
@@ -53,13 +45,11 @@ class PollViewFormController extends ContentEntityFormController {
       // results when the form is rebuilt.
       $form_state['input']['show_results'] = FALSE;
     }
-
-
     return $form;
   }
 
   /**
-   * Returns the action form element for the current entity form.
+   * Returns the action form elements for the current entity form.
    */
   protected function actions(array $form, array &$form_state) {
     $actions = parent::actions($form, $form_state);
@@ -113,6 +103,12 @@ class PollViewFormController extends ContentEntityFormController {
     return $actions;
   }
 
+  /**
+   * Cancel vote submit function.
+   *
+   * @param array $form
+   * @param array $form_state
+   */
   public function cancel(array $form, array &$form_state) {
     $poll_storage_controller = \Drupal::entityManager()
       ->getStorageController($this->entity->entityType());
@@ -124,18 +120,33 @@ class PollViewFormController extends ContentEntityFormController {
     $form_state['redirect'] = $uri['path'];
   }
 
+  /**
+   * View vote results submit function.
+   *
+   * @param array $form
+   * @param array $form_state
+   */
   public function result(array $form, array &$form_state) {
     $form_state['input']['show_results'] = TRUE;
     $form_state['rebuild'] = TRUE;
   }
 
+  /**
+   * Back to poll view submit function.
+   *
+   * @param array $form
+   * @param array $form_state
+   */
   public function back(array $form, array &$form_state) {
     $form_state['input']['show_results'] = FALSE;
     $form_state['rebuild'] = TRUE;
   }
 
   /**
-   * {@inheritdoc}
+   * Save a user's vote submit function.
+   *
+   * @param array $form
+   * @param array $form_state
    */
   public function save(array $form, array &$form_state) {
     $options = array();
@@ -167,15 +178,26 @@ class PollViewFormController extends ContentEntityFormController {
     }
   }
 
-
+  /**
+   * Determine whether we should display the poll results.
+   *
+   * @param PollInterface $poll
+   * @param $form_state
+   *
+   * @return bool
+   */
   public function showResults(PollInterface $poll, $form_state) {
     switch (TRUE) {
+      // The "View results" button, when available, has been clicked.
       case (isset($form_state['input']) && isset($form_state['input']['show_results']) && $form_state['input']['show_results']):
         return TRUE;
+      // The poll is closed.
       case ($poll->isClosed()):
         return TRUE;
+      // Anonymous user is trying to view a poll they aren't allowed to vote in.
       case (user_is_anonymous() && !$poll->anonymous_vote_allow->value):
         return TRUE;
+      // The user has already voted.
       case ($poll->hasUserVoted()):
         return TRUE;
       default:
@@ -183,14 +205,15 @@ class PollViewFormController extends ContentEntityFormController {
     }
   }
 
-  public function showViewResults(array $form_state) {
-    return (isset($form_state['input']) &&
-      isset($form_state['input']['show_results']) &&
-      !$form_state['input']['show_results'] &&
-      $this->entity->result_vote_allow->value);
-  }
-
-  function poll_view_results($poll, $block = FALSE) {
+  /**
+   * Display a themed poll results.
+   *
+   * @param $poll
+   * @param bool $block
+   *
+   * @return false|string
+   */
+  function showPollResults($poll, $block = FALSE) {
     $total_votes = 0;
     foreach ($poll->votes as $vote) {
       $total_votes += $vote;
@@ -225,6 +248,21 @@ class PollViewFormController extends ContentEntityFormController {
       'nid' => $poll->pid,
       'vote' => isset($poll->vote) ? $poll->vote : NULL
     ));
+  }
+
+  /**
+   * @deprecated - ???
+   * @todo: Is this still required?
+   *
+   * @param array $form_state
+   *
+   * @return bool
+   */
+  public function showViewResults(array $form_state) {
+    return (isset($form_state['input']) &&
+      isset($form_state['input']['show_results']) &&
+      !$form_state['input']['show_results'] &&
+      $this->entity->result_vote_allow->value);
   }
 
 

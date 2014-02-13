@@ -12,7 +12,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 
 /**
- * Defines an access controller for the poll term entity.
+ * Defines an access controller for the poll entity.
  *
  * @see \Drupal\poll\Entity\Poll
  */
@@ -32,7 +32,6 @@ class PollAccessController extends EntityAccessController {
         break;
 
       case 'delete':
-        //return $account->hasPermission("delete terms in {$entity->bundle()}") || $account->hasPermission('administer poll');
         return $account->hasPermission('administer polls');
         break;
     }

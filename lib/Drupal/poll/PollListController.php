@@ -19,13 +19,12 @@ use Drupal\Core\Entity\EntityStorageControllerInterface;
 class PollListController extends EntityListController {
 
   /**
-   * Constructs a new EntityListController object.
+   *  Constructs a new EntityListController object.
    *
-   *   The type of entity to be listed.
-   * @param array $entity_info
-   *   An array of entity info for the entity type.
-   * @param \Drupal\Core\Entity\EntityStorageControllerInterface $storage
-   *   The entity storage controller class.
+   * @param EntityTypeInterface $entity_info
+   *    An array of entity info for the entity type.
+   * @param EntityStorageControllerInterface $storage
+   *    The entity storage controller class.
    */
   public function __construct(EntityTypeInterface $entity_info, EntityStorageControllerInterface $storage) {
     parent::__construct($entity_info, $storage);
@@ -47,11 +46,13 @@ class PollListController extends EntityListController {
    * Overrides Drupal\Core\Entity\EntityListController::buildRow().
    */
   public function buildRow(EntityInterface $entity) {
-    $poll_storage_controller = \Drupal::entityManager()->getStorageController($entity->entityType());
+    $poll_storage_controller = \Drupal::entityManager()
+      ->getStorageController($entity->entityType());
 
     $row['question'] = l($entity->label(), 'poll/' . $entity->id());
     $row['status'] = ($entity->isActive()) ? t('Y') : t('N');
-    $row['created'] = ($entity->getCreated()) ? Drupal::service('date')->format($entity->getCreated(), 'long') : t('n/a');
+    $row['created'] = ($entity->getCreated()) ? Drupal::service('date')
+      ->format($entity->getCreated(), 'long') : t('n/a');
     $row['votes'] = $poll_storage_controller->getTotalVotes($entity);
     return $row + parent::buildRow($entity);
   }
@@ -60,14 +61,14 @@ class PollListController extends EntityListController {
    * {@inheritdoc}
    */
   public function getOperations(EntityInterface $entity) {
+    $uri = $entity->normaliseUri();
     $operations = parent::getOperations($entity);
-    $uri = $entity->uri();
 
     if (isset($operations['edit'])) {
-      $operations['edit']['href'] = str_replace('entity/', '', $uri['path']) . '/edit';
+      $operations['edit']['href'] = $uri['path'] . '/edit/me';
     }
     if (isset($operations['delete'])) {
-      $operations['delete']['href'] = str_replace('entity/', '', $uri['path']) . '/delete';
+      $operations['delete']['href'] = $uri['path'] . '/delete';
     }
 
     return $operations;

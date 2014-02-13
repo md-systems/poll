@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\poll\Plugin\field\field_type\VoteChoiceItem.
+ * Contains \Drupal\poll\Plugin\field\FieldType\VoteChoiceItem.
  */
 
 namespace Drupal\poll\Plugin\Field\FieldType;
@@ -74,9 +74,6 @@ class PollChoiceItem extends ConfigFieldItemBase {
         'chid' => array('chid'),
       ),
       'primary key' => array('chid'),
-//      'unique keys' => array(
-//        'chid' => array('chid'),
-//      ),
     );
   }
 

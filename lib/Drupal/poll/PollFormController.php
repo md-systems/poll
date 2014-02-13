@@ -7,11 +7,8 @@
 
 namespace Drupal\poll;
 
-use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\ContentEntityFormController;
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Language\Language;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form controller for the poll poll edit forms.
@@ -108,6 +105,8 @@ class PollFormController extends ContentEntityFormController {
   }
 
   /**
+   * @todo: refactor?
+   *
    * {@inheritdoc}
    */
   public function validate(array $form, array &$form_state) {

@@ -2,13 +2,12 @@
 
 /**
  * @file
- * Contains of \Drupal\taxonomy\TermBreadcrumbBuilder.
+ * Contains \Drupal\poll\PollBreadcrumbBuilder.
  */
 
 namespace Drupal\poll;
 
 use Drupal\Core\Breadcrumb\BreadcrumbBuilderBase;
-use Symfony\Cmf\Component\Routing\RouteObjectInterface;
 
 /**
  * Provides a custom poll breadcrumb builder.

@@ -2,14 +2,13 @@
 
 /**
  * @file
- * Definition of Drupal\poll\Plugin\field\formatter\VoteChoiceDefaultFormatter.
+ * Definition of Drupal\poll\Plugin\field\FieldFormatter\PollChoiceDefaultFormatter.
  */
 
 namespace Drupal\poll\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
-use Drupal;
 
 /**
  * Plugin implementation of the 'poll_choice' formatter.
