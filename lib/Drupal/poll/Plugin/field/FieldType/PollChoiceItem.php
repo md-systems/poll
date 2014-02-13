@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\poll\Plugin\field\FieldType\VoteChoiceItem.
+ * Contains \Drupal\poll\Plugin\field\FieldType\PollChoiceItem.
  */
 
 namespace Drupal\poll\Plugin\Field\FieldType;

@@ -21,11 +21,7 @@ use Drupal\Core\Entity\FieldableDatabaseStorageController;
 class PollStorageController extends FieldableDatabaseStorageController implements PollStorageControllerInterface {
 
   /**
-   * Calcualte total votes for a poll.
-   *
-   * @param PollInterface $poll
-   *
-   * @return mixed
+   * {@inheritdoc}
    */
   public function getTotalVotes(PollInterface $poll) {
     $query = $this->database->query("SELECT COUNT(chid) FROM {poll_vote} WHERE pid = :pid", array(':pid' => $poll->id()));
@@ -33,21 +29,15 @@ class PollStorageController extends FieldableDatabaseStorageController implement
   }
 
   /**
-   * Delete all votes for a poll.
-   *
-   * @param PollInterface $poll
+   * {@inheritdoc}
    */
   public function deleteVotes(PollInterface $poll) {
-    $this->database->delete('poll_vote')->condition('pid', $poll->id())
+    return $this->database->delete('poll_vote')->condition('pid', $poll->id())
       ->execute();
   }
 
   /**
-   * Get a user's vote in a poll.
-   *
-   * @param PollInterface $poll
-   *
-   * @return bool
+   * {@inheritdoc}
    */
   public function getUserVote(PollInterface $poll) {
     $uid = Drupal::currentUser()->id();
@@ -70,11 +60,7 @@ class PollStorageController extends FieldableDatabaseStorageController implement
   }
 
   /**
-   * Save a user's vote for a poll.
-   *
-   * @param array $options
-   *
-   * @return bool|Drupal\Core\Database\StatementInterface|int|null
+   * {@inheritdoc}
    */
   public function saveVote(array $options) {
     if (!is_array($options)) {
@@ -84,18 +70,11 @@ class PollStorageController extends FieldableDatabaseStorageController implement
   }
 
   /**
-   * Get a count of votes for each option in the poll.
-   *
-   * @todo: At the moment we are assuming that value of each vote = 1. However,
-   * this count should take into account the value for each option as set for
-   * each option choice in the field_choice_vote column of poll__field_choice table.
-   *
-   * @param PollInterface $poll
-   * @return array
+   * {@inheritdoc}
    */
   public function getVotes(PollInterface $poll) {
     $votes = array();
-    // set votes for all options to 0
+    // Set votes for all options to 0
     $options = $poll->getOptions();
     foreach ($options as $id => $label) {
       $votes[$id] = 0;
@@ -104,19 +83,17 @@ class PollStorageController extends FieldableDatabaseStorageController implement
     $query = $this->database->query("SELECT chid, COUNT(chid) AS votes FROM {poll_vote} WHERE pid = :pid GROUP BY chid", array(':pid' => $poll->id()));
     $results = $query->fetchAll();
     // Replace the count for options that have recorded votes in the database.
+    // Multiply by the vote value for each option.
+    $optionValues = $poll->getOptionValues();
     foreach ($results as $result) {
-      $votes[$result->chid] = $result->votes;
+      $votes[$result->chid] = $result->votes * $optionValues[$result->chid];
     }
 
     return $votes;
   }
 
   /**
-   * Cancel a user's vote.
-   *
-   * @param PollInterface $poll
-   * @param AccountInterface $account
-   *   Default is the currently logged in user when the call is made.
+   * {@inheritdoc}
    */
   public function cancelVote(PollInterface $poll, AccountInterface $account) {
     $this->database->delete('poll_vote')

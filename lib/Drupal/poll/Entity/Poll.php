@@ -78,11 +78,25 @@ class Poll extends ContentEntityBase implements PollInterface {
    */
   public $langcode;
 
-
+  /**
+   * Are anonymous users allowed to vote.
+   *
+   * @var boolean
+   */
   public $anonymous_vote_allow;
 
+  /**
+   * Are users allowed to cancel their vote.
+   *
+   * @var boolean
+   */
   public $cancel_vote_allow;
 
+  /**
+   * Are users allowed to view results before voting.
+   *
+   * @var boolean
+   */
   public $result_vote_allow;
 
   /**
@@ -92,6 +106,7 @@ class Poll extends ContentEntityBase implements PollInterface {
 
   /**
    * Flag indicating whether the poll is active or not.
+   *
    * @var boolean
    */
   public $status;
@@ -103,7 +118,11 @@ class Poll extends ContentEntityBase implements PollInterface {
    */
   public $created;
 
-
+  /**
+   * The choice field values for this vote.
+   *
+   * @var
+   */
   public $field_choice;
 
 
@@ -392,6 +411,11 @@ class Poll extends ContentEntityBase implements PollInterface {
     return $poll_storage_controller->getUserVote($this);
   }
 
+  /**
+   * Get all options for this poll.
+   *
+   * @return array
+   */
   public function getOptions() {
     $options = array();
     if (count($this->field_choice)) {
@@ -402,16 +426,38 @@ class Poll extends ContentEntityBase implements PollInterface {
     return $options;
   }
 
+  /**
+   * Get the values of each vote option for this poll.
+   *
+   * @return array
+   */
+  public function getOptionValues() {
+    $options = array();
+    if (count($this->field_choice)) {
+      foreach ($this->field_choice as $option) {
+        $options[$option->chid] = $option->vote;
+      }
+    }
+    return $options;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function postLoad(EntityStorageControllerInterface $storage_controller, array &$entities) {
     foreach ($entities as $entity) {
       $entity->votes = $storage_controller->getVotes($entity);
     }
   }
 
+  /**
+   * Remove 'entity/' from the generted uri for this entity.
+   *
+   * @return mixed
+   */
   public function normaliseUri() {
     $uri = $this->uri();
     return str_replace('entity/', '', $uri);
   }
-
 
 }

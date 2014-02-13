@@ -15,7 +15,8 @@ use Drupal\Core\Template\Attribute;
  * @todo: Anonymous user voting in polls - track by IP (or/and cookie?)
  * @todo: Count total votes with field_choice_vote values from poll__field_choice table.
  * @todo: poll block
- *
+ * @todo: Unit tests
+ * @todo: mulitchoice polls?
  */
 
 /**
