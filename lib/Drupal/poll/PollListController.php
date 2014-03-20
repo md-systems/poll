@@ -34,6 +34,11 @@ class PollListController extends EntityListController {
    * Overrides Drupal\Core\Entity\EntityListController::buildHeader().
    */
   public function buildHeader() {
+
+
+
+
+
     $header['question'] = t('Question');
     $header['status'] = t('Status');
     $header['created'] = t('Created');

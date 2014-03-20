@@ -7,7 +7,7 @@
 
 namespace Drupal\poll\Plugin\Field\FieldType;
 
-use Drupal\Core\Field\ConfigFieldItemBase;
+use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal;
@@ -23,29 +23,22 @@ use Drupal;
  *   default_formatter = "poll_choice_default"
  * )
  */
-class PollChoiceItem extends ConfigFieldItemBase {
+class PollChoiceItem extends FieldItemBase {
 
   const POLL_CHOICE_MAX_LENGTH = 512;
-  /**
-   * Definitions of the contained properties.
-   *
-   * @var array
-   */
-  static $propertyDefinitions;
 
   /**
    * {@inheritdoc}
    */
-  public function getPropertyDefinitions() {
-    if (!isset(static::$propertyDefinitions)) {
-      static::$propertyDefinitions['chid'] = DataDefinition::create('integer')
-        ->setLabel(t('Choice ID'));
-      static::$propertyDefinitions['choice'] = DataDefinition::create('string')
-        ->setLabel(t('Choice'));
-      static::$propertyDefinitions['vote'] = DataDefinition::create('integer')
-        ->setLabel(t('Vote'));
-    }
-    return static::$propertyDefinitions;
+  public static function propertyDefinitions(FieldDefinitionInterface $field_definition) {
+    $properties['chid'] = DataDefinition::create('integer')
+      ->setLabel(t('Choice ID'));
+    $properties['choice'] = DataDefinition::create('string')
+      ->setLabel(t('Choice'));
+    $properties['vote'] = DataDefinition::create('integer')
+      ->setLabel(t('Vote'));
+
+    return $properties;
   }
 
   /**

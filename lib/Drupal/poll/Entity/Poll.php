@@ -12,6 +12,8 @@ use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\poll\PollInterface;
 use Drupal\Component\Utility\String;
+use Drupal\Core\Entity\EntityTypeInterface;
+
 
 /**
  * Defines the poll entity class.
@@ -340,7 +342,7 @@ class Poll extends ContentEntityBase implements PollInterface {
   /**
    * {@inheritdoc}
    */
-  public static function baseFieldDefinitions($entity_type) {
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields['id'] = FieldDefinition::create('integer')
       ->setLabel(t('Poll ID'))
       ->setDescription(t('The poll ID.'))
@@ -401,6 +403,59 @@ class Poll extends ContentEntityBase implements PollInterface {
 
     return $fields;
   }
+
+
+//  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+//    $fields['tid'] = FieldDefinition::create('integer')
+//      ->setLabel(t('Term ID'))
+//      ->setDescription(t('The term ID.'))
+//      ->setReadOnly(TRUE);
+//
+//    $fields['uuid'] = FieldDefinition::create('uuid')
+//      ->setLabel(t('UUID'))
+//      ->setDescription(t('The term UUID.'))
+//      ->setReadOnly(TRUE);
+//
+//    $fields['vid'] = FieldDefinition::create('entity_reference')
+//      ->setLabel(t('Vocabulary'))
+//      ->setDescription(t('The vocabulary to which the term is assigned.'))
+//      ->setSetting('target_type', 'taxonomy_vocabulary');
+//
+//    $fields['langcode'] = FieldDefinition::create('language')
+//      ->setLabel(t('Language code'))
+//      ->setDescription(t('The term language code.'));
+//
+//    $fields['name'] = FieldDefinition::create('string')
+//      ->setLabel(t('Name'))
+//      ->setDescription(t('The term name.'))
+//      ->setRequired(TRUE)
+//      ->setSetting('max_length', 255);
+//
+//    $fields['description'] = FieldDefinition::create('text_long')
+//      ->setLabel(t('Description'))
+//      ->setDescription(t('A description of the term.'))
+//      ->setSetting('text_processing', 1);
+//
+//    $fields['weight'] = FieldDefinition::create('integer')
+//      ->setLabel(t('Weight'))
+//      ->setDescription(t('The weight of this term in relation to other terms.'))
+//      ->setSetting('default_value', 0);
+//
+//    // @todo Convert this to an entity_reference field, see
+//    // https://drupal.org/node/1915056
+//    $fields['parent'] = FieldDefinition::create('integer')
+//      ->setLabel(t('Term Parents'))
+//      ->setDescription(t('The parents of this term.'))
+//      // Save new terms with no parents by default.
+//      ->setSetting('default_value', 0)
+//      ->setConstraints(array('TermParent' => array()));
+//
+//    $fields['changed'] = FieldDefinition::create('changed')
+//      ->setLabel(t('Changed'))
+//      ->setDescription(t('The time that the term was last edited.'));
+//
+//    return $fields;
+//  }
 
   /**
    * @todo: Refactor - doesn't belong here.

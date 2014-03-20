@@ -18,6 +18,9 @@ use Drupal\Core\Template\Attribute;
  * @todo: Unit tests
  * @todo: Migrate/Upgrade from D7 core poll module
  * @todo: Multichoice polls
+ * @todo: Views integration
+ * @todo: Embedding in other entities - view modes
+ *
  */
 
 /**
@@ -57,12 +60,6 @@ function poll_help($path, $arg) {
  * Implements hook_menu().
  */
 function poll_menu() {
-  $items['admin/structure/poll'] = array(
-    'title' => 'Polls',
-    'description' => 'Manage polls for your site.',
-    'route_name' => 'poll.poll_list',
-  );
-
   $items['poll/add'] = array(
     'title' => 'Add new poll',
     'route_name' => 'poll.poll_add',
@@ -85,6 +82,20 @@ function poll_menu() {
 
   return $items;
 }
+
+/**
+ * Implements hook_menu_link_defaults().
+ */
+function poll_menu_link_defaults() {
+  $items['poll.admin.overview'] = array(
+    'link_title' => 'Polls',
+    'parent' => 'system.admin.structure',
+    'description' => 'Manage polls for your site.',
+    'route_name' => 'poll.poll_list',
+  );
+  return $items;
+}
+
 
 /**
  * Implements hook_theme().
@@ -130,7 +141,6 @@ function poll_theme() {
   return $theme_hooks;
 }
 
-
 /**
  * Implements hook_permission().
  */
@@ -168,7 +178,7 @@ function poll_install_choice_field() {
       'cardinality' => '-1',
       'locked' => FALSE,
     );
-    entity_create('field_entity', $field)->save();
+    entity_create('field_config', $field)->save();
 
     $instance = array(
       'field_name' => 'field_choice',
@@ -181,7 +191,7 @@ function poll_install_choice_field() {
         'max_length' => 255,
       ),
     );
-    entity_create('field_instance', $instance)->save();
+    entity_create('field_instance_config', $instance)->save();
 
     // Assign form display settings for the 'default' view mode.
     entity_get_form_display('poll', 'poll', 'default')
