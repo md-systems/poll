@@ -2,8 +2,9 @@
 
 /**
  * @file
- * Install, update, and uninstall functions for the Poll module.
+ * Install, update and uninstall functions for the aggregator module.
  */
+use Drupal\Core\Language\Language;
 
 
 /**
@@ -15,7 +16,6 @@ function poll_schema() {
     'fields' => array(
       'id' => array(
         'type' => 'serial',
-        'unsigned' => TRUE,
         'not null' => TRUE,
         'description' => 'Primary Key: Unique poll ID.',
       ),
@@ -55,7 +55,7 @@ function poll_schema() {
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'default' => 1,
+        'default' => 0,
         'size' => 'tiny',
         'description' => 'Anonymous users can vote. (0 = No, 1 = Yes)',
       ),
@@ -63,7 +63,7 @@ function poll_schema() {
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'default' => 1,
+        'default' => 0,
         'size' => 'tiny',
         'description' => 'A user may cancel their vote. (0 = No, 1 = Yes)',
       ),
@@ -84,15 +84,15 @@ function poll_schema() {
         'description' => 'The status of a poll. (0 = Not Active, 1 = Active)',
       ),
       'created' => array(
-        'description' => 'The Unix timestamp when the poll was created.',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
+        'description' => 'When the poll was created, as a Unix timestamp.',
       ),
     ),
     'primary key' => array('id'),
+    'indexes' => array(),
     'unique keys' => array(
-      'uuid' => array('uuid'),
       'question' => array('question'),
     ),
   );

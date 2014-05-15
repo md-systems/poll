@@ -18,10 +18,11 @@
  * @ingroup themeable
  */
 #}
-
 <div class="poll">
     {% if block %}
-    <h3 class="poll-title">{{ title }}</h3>
+        <h3 class="poll-title">{{ title }}</h3>
+    {% else %}
+        <h3 class="poll-results-title">{{ results_title }}</h3>
     {% endif %}
     <dl>
         {{ results }}
@@ -30,6 +31,7 @@
         {{ 'Total votes: '|t }} {{ votes }}
     </div>
 </div>
+
 {% if block %}
-<div class="links"> {{ links }} </div>
+<div class="links">zzzzzz {{ links }} </div>
 {% endif %}

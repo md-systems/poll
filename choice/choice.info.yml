@@ -1,0 +1,8 @@
+name: Choice
+type: module
+description: 'Defines a field type for choices and their values.'
+package: Field types
+version: VERSION
+core: 8.x
+dependencies:
+  - field

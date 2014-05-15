@@ -7,16 +7,21 @@
 
 namespace Drupal\poll\Plugin\Block;
 
-use Drupal\Core\Session\AccountInterface;
+use Drupal\poll\PollStorageInterface;
 use Drupal\block\BlockBase;
+use Drupal\Core\Entity\Query\QueryInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Session\AccountInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Cache\Cache;
 
 /**
- * Provides a 'Poll' block.
+ * Provides a 'Poll' block with the latest poll.
  *
  * @Block(
  *   id = "poll_block",
  *   admin_label = @Translation("Most recent poll"),
- *   category = @Translation("Forms")
+ *   category = @Translation("Lists (Views)")
  * )
  */
 class PollBlock extends BlockBase {
@@ -32,11 +37,14 @@ class PollBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function build() {
-    // @todo: load most recent poll
-    $poll = entity_load('poll', 1);
+    $polls = \Drupal::entityManager()->getStorage('poll')->getMostRecentPoll();
+    if ($polls) {
+      $entity = reset($polls);
+      $view = entity_view($entity, 'default');
 
-    // @todo: display the form
-    return array();
+      return $view;
+    }
+
   }
 
 }

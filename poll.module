@@ -5,20 +5,12 @@
  * Used to aggregate syndicated content (RSS, RDF, and Atom).
  */
 
+use Drupal\poll\PollInterface;
+use Drupal\Component\Utility\Xss;
 use Drupal\poll\Entity\Poll;
 use Drupal\field\Field;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Template\Attribute;
-
-/**
- * @todo: Expire (unpublish) polls automatically after duration has passed
- * @todo: Anonymous user voting in polls - track by IP (or/and cookie?)
- * @todo: Count total votes with field_choice_vote values from poll__field_choice table.
- * @todo: Poll block
- * @todo: Unit tests
- * @todo: Migrate/Upgrade from D7 core poll module
- * @todo: Multichoice polls
- */
 
 /**
  * Denotes that the poll is not published.
@@ -30,61 +22,6 @@ const POLL_NOT_PUBLISHED = 0;
  */
 const POLL_PUBLISHED = 1;
 
-/**
- * Implements hook_help().
- */
-function poll_help($path, $arg) {
-  switch ($path) {
-    case 'admin/help#poll':
-      $output = '';
-      $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Poll module can be used to create simple surveys or questionnaires that display cumulative results. A poll is a good way to receive feedback from site users and community members. For more information, see the online handbook entry for the <a href="@poll">Poll module</a>.', array('@poll' => 'http://drupal.org/documentation/modules/poll/')) . '</p>';
-      $output .= '<h3>' . t('Uses') . '</h3>';
-      $output .= '<dl>';
-      $output .= '<dt>' . t('Creating a poll') . '</dt>';
-      $output .= '<dd>' . t('Users can create a poll by clicking on Poll on the <a href="@add-content">Add new content</a> page, and entering the question being posed, the answer choices, and beginning vote counts for each choice. The status (closed or active) and duration (length of time the poll remains active for new votes) can also be specified.', array('@add-content' => url('node/add'))) . '</dd>';
-      $output .= '<dt>' . t('Viewing polls') . '</dt>';
-      $output .= '<dd>' . t('You can visit the <a href="@poll">Polls</a> page to view all current polls, or alternately enable the <em>Most recent poll</em> Block on the <a href="@blocks">Blocks administration page</a>. To vote in or view the results of a specific poll, you can click on the poll itself.', array(
-          '@poll' => url('poll'),
-          '@blocks' => url('admin/structure/Block')
-        )) . '</dd>';
-      $output .= '</dl>';
-      return $output;
-  }
-}
-
-/**
- * Implements hook_menu().
- */
-function poll_menu() {
-  $items['admin/structure/poll'] = array(
-    'title' => 'Polls',
-    'description' => 'Manage polls for your site.',
-    'route_name' => 'poll.poll_list',
-  );
-
-  $items['poll/add'] = array(
-    'title' => 'Add new poll',
-    'route_name' => 'poll.poll_add',
-  );
-
-  $items['poll/%poll/edit'] = array(
-    'title' => 'Edit a poll',
-    'route_name' => 'poll.poll_edit',
-  );
-
-  $items['poll/%poll/delete'] = array(
-    'title' => 'Delete a poll',
-    'route_name' => 'poll.poll_delete',
-  );
-
-  $items['poll/%poll'] = array(
-    'title' => 'View a poll',
-    'route_name' => 'poll.poll_view',
-  );
-
-  return $items;
-}
 
 /**
  * Implements hook_theme().
@@ -130,7 +67,6 @@ function poll_theme() {
   return $theme_hooks;
 }
 
-
 /**
  * Implements hook_permission().
  */
@@ -149,9 +85,20 @@ function poll_permission() {
  * Implements hook_page_build().
  */
 function poll_page_build(&$page) {
-  $path = drupal_get_path('module', 'poll') . '/css';
-  $page['#attached']['css'][$path . '/poll.base.css'] = array('every_page' => TRUE);
-  $page['#attached']['css'][$path . '/poll.theme.css'] = array('every_page' => TRUE);
+  $page['#attached']['library'][] = 'poll/drupal.poll-links';
+}
+
+/**
+ * Loads a poll.
+ *
+ * @param int $id
+ *   The poll id.
+ *
+ * @return \Drupal\poll\PollInterface
+ *   An object describing the poll.
+ */
+function poll_load($id) {
+  return entity_load('poll', $id);
 }
 
 /**
@@ -164,11 +111,11 @@ function poll_install_choice_field() {
       'name' => 'field_choice',
       'entity_type' => 'poll',
       'module' => 'poll',
-      'type' => 'poll_choice',
+      'type' => 'choice',
       'cardinality' => '-1',
       'locked' => FALSE,
     );
-    entity_create('field_entity', $field)->save();
+    entity_create('field_config', $field)->save();
 
     $instance = array(
       'field_name' => 'field_choice',
@@ -181,49 +128,19 @@ function poll_install_choice_field() {
         'max_length' => 255,
       ),
     );
-    entity_create('field_instance', $instance)->save();
+    entity_create('field_instance_config', $instance)->save();
 
     // Assign form display settings for the 'default' view mode.
     entity_get_form_display('poll', 'poll', 'default')
       ->setComponent('field_choice', array(
-        'type' => 'poll_choice_default',
+        'type' => 'choice_default',
         'settings' => array(
           'size' => '60',
           'placeholder' => '',
         ),
-        'weight' => 0,
+        'weight' => -10,
       ))
       ->save();
-
-    entity_get_display('poll', 'poll', 'default')
-      ->setComponent('field_choice', array(
-        'label' => 'Choice',
-        'type' => 'poll_choice_default',
-        'settings' => array(),
-      ))
-      ->save();
-  }
-}
-
-/**
- * Implements hook_admin_paths().
- *
- * @todo: Not sure we need all these paths.
- */
-function poll_admin_paths() {
-  if (Drupal::config('node.settings')->get('use_admin_theme')) {
-    $paths = array(
-      'poll/*/edit' => TRUE,
-      'poll/*/delete' => TRUE,
-      'poll/*/revisions' => TRUE,
-      'poll/*/revisions/*/revert' => TRUE,
-      'poll/*/revisions/*/delete' => TRUE,
-      'poll/*/translations' => TRUE,
-      'poll/*/translations/*' => TRUE,
-      'poll/add' => TRUE,
-      'poll/add/*' => TRUE,
-    );
-    return $paths;
   }
 }
 
@@ -252,6 +169,7 @@ function template_preprocess_poll_vote(&$variables) {
   $variables['choice'] = drupal_render($form['choice']);
   $variables['vote'] = drupal_render($form['actions']);
   $variables['rest'] = drupal_render_children($form);
+  // @todo:
   if (isset($form['#block'])) {
     $variables['block'] = $form['#block'];
     $variables['theme_hook_suggestions'][] = 'poll_vote__block';
@@ -271,8 +189,17 @@ function template_preprocess_poll_vote(&$variables) {
  *     tag.
  */
 function template_preprocess_poll_meter(&$variables) {
+
   $attributes = $variables['attributes'];
-  foreach (array('form', 'high', 'low', 'max', 'min', 'optimum', 'value') as $key) {
+  foreach (array(
+             'form',
+             'high',
+             'low',
+             'max',
+             'min',
+             'optimum',
+             'value'
+           ) as $key) {
     if (isset($variables[$key])) {
       // This function was initially designed for the <meter> tag, but due to
       // the lack of browser and styling support for it, we're currently using
@@ -305,7 +232,11 @@ function template_preprocess_poll_meter(&$variables) {
  * @see poll-results--block.tpl.php
  */
 function template_preprocess_poll_results(&$variables) {
-  // @todo: Not sure what links we want to display.
-  $variables['links'] = theme('links__poll_results', array('links' => $variables['raw_links']));
+  $links = array(
+    '#theme' => 'links__poll_results',
+    '#links' => $variables['raw_links']
+  );
+  $variables['links'] = drupal_render($links);
   $variables['title'] = String::checkPlain($variables['raw_title']);
+  $variables['results_title'] = t('Results');
 }

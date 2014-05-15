@@ -2,23 +2,23 @@
 
 /**
  * @file
- * Definition of Drupal\poll\PollStorageController.
+ * Contains \Drupal\poll\PollStorage.
  */
 
 namespace Drupal\poll;
 
-use Drupal;
+use Drupal\Core\Entity\ContentEntityDatabaseStorage;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\Entity\FieldableDatabaseStorageController;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\Query\QueryInterface;
 
 /**
  * Controller class for polls.
  *
- * This extends the Drupal\Core\Entity\DatabaseStorageController class, adding
- * required special handling for poll entities. All database queries are run
- * through this class.
+ * This extends the Drupal\Core\Entity\ContentEntityDatabaseStorage class,
+ * adding required special handling for poll entities.
  */
-class PollStorageController extends FieldableDatabaseStorageController implements PollStorageControllerInterface {
+class PollStorage extends ContentEntityDatabaseStorage implements PollStorageInterface {
 
   /**
    * {@inheritdoc}
@@ -40,8 +40,8 @@ class PollStorageController extends FieldableDatabaseStorageController implement
    * {@inheritdoc}
    */
   public function getUserVote(PollInterface $poll) {
-    $uid = Drupal::currentUser()->id();
-    if ($uid || $poll->anonymous_vote_allow->value) {
+    $uid = \Drupal::currentUser()->id();
+    if ($uid || $poll->getAnonymousVoteAllow()) {
       if ($uid) {
         $query = $this->database->query("SELECT * FROM {poll_vote} WHERE pid = :pid AND uid = :uid", array(
           ':pid' => $poll->id(),
@@ -95,12 +95,32 @@ class PollStorageController extends FieldableDatabaseStorageController implement
   /**
    * {@inheritdoc}
    */
-  public function cancelVote(PollInterface $poll, AccountInterface $account) {
+  public function cancelVote(PollInterface $poll, AccountInterface $account = NULL) {
     $this->database->delete('poll_vote')
       ->condition('pid', $poll->id())
-      ->condition('uid', (!$account instanceof AccountInterface) ? Drupal::currentUser()
+      ->condition('uid', (!$account instanceof AccountInterface) ? \Drupal::currentUser()
         ->id() : $account->id())
       ->execute();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getPollDuplicates(PollInterface $poll) {
+    $query = \Drupal::entityQuery('poll');
+    $query->condition('question', $poll->label());
+
+    if ($poll->id()) {
+      $query->condition('id', $poll->id(), '<>');
+    }
+    return $this->loadMultiple($query->execute());
+  }
+
+  public function getMostRecentPoll() {
+    $query = \Drupal::entityQuery('poll')
+      ->condition('status', POLL_PUBLISHED)
+      ->sort('created', 'DESC')
+      ->pager(1);
+    return $this->loadMultiple($query->execute());
+  }
 }

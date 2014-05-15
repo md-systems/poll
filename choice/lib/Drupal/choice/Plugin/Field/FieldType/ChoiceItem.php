@@ -5,7 +5,7 @@
  * Contains \Drupal\poll\Plugin\field\FieldType\PollChoiceItem.
  */
 
-namespace Drupal\poll\Plugin\Field\FieldType;
+namespace Drupal\choice\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -16,16 +16,16 @@ use Drupal\Core\TypedData\DataDefinition;
  * Plugin implementation of the 'poll_choice' field type.
  *
  * @FieldType(
- *   id = "poll_choice",
- *   label = @Translation("Poll choice"),
- *   description = @Translation("Stores the poll choice and initial value of votes for the choice."),
- *   default_widget = "poll_choice_default",
- *   default_formatter = "poll_choice_default"
+ *   id = "choice",
+ *   label = @Translation("Choice"),
+ *   description = @Translation("Stores the choice and initial value for the choice."),
+ *   default_widget = "choice_default",
+ *   default_formatter = "choice_default"
  * )
  */
-class PollChoiceItem extends FieldItemBase {
+class ChoiceItem extends FieldItemBase {
 
-  const POLL_CHOICE_MAX_LENGTH = 512;
+  const CHOICE_MAX_LENGTH = 512;
 
   /**
    * {@inheritdoc}
@@ -88,10 +88,10 @@ class PollChoiceItem extends FieldItemBase {
     $constraints[] = $constraint_manager->create('ComplexData', array(
       'choice' => array(
         'Length' => array(
-          'max' => static::POLL_CHOICE_MAX_LENGTH,
+          'max' => static::CHOICE_MAX_LENGTH,
           'maxMessage' => t('%name: the choice field may not be longer than @max characters.', array(
             '%name' => $this->getFieldDefinition()->getLabel(),
-            '@max' => static::POLL_CHOICE_MAX_LENGTH
+            '@max' => static::CHOICE_MAX_LENGTH
           )),
         )
       ),

@@ -9,68 +9,51 @@ namespace Drupal\poll\Controller;
 
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\poll\PollInterface;
-use Drupal\Core\Database\Connection;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Returns responses for poll module routes.
+ * Returns responses for aggregator module routes.
  */
-class PollController extends ControllerBase implements ContainerInjectionInterface {
+class PollController extends ControllerBase {
 
   /**
-   * The database connection.
-   *
-   * @var \Drupal\Core\Database\Connection;
-   */
-  protected $database;
-
-  /**
-   * Constructs a \Drupal\poll\Controller\PollController object.
-   *
-   * @param \Drupal\Core\Database\Connection $database
-   *   The database connection.
-   */
-  public function __construct(Connection $database) {
-    $this->database = $database;
-  }
-
-  /**
-   * {inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('database')
-    );
-  }
-
-  /**
-   * Presents the poll poll creation form.
+   * Presents the poll creation form.
    *
    * @return array
    *   A form array as expected by drupal_render().
    */
   public function pollAdd() {
-    $entity_manager = $this->entityManager();
-    $poll = $entity_manager->getStorageController('poll')
+    $account = $this->currentUser();
+    $poll = $this->entityManager()->getStorage('poll')
       ->create(array(
-        'refresh' => 3600,
+        'uid' => $account->id(),
+        'runtime' => 0,
+        'anonymous_vote_allow' => 0,
+        'cancel_vote_allow' => 0,
+        'result_vote_allow' => 0,
+        'status' => 1,
       ));
-    return $entity_manager->getForm($poll);
+    return $this->entityFormBuilder()->getForm($poll);
   }
 
   /**
    * Route title callback.
    *
-   * @param \Drupal\poll\PollInterface $poll_poll
-   *   The poll poll.
+   * @param \Drupal\poll\PollInterface $poll
+   *   The poll entity.
    *
    * @return string
    *   The poll label.
    */
-  public function pollTitle(PollInterface $poll_poll) {
-    return Xss::filter($poll_poll->label());
+  public function pollTitle(PollInterface $poll) {
+    return Xss::filter($poll->label());
+  }
+
+  public function viewPoll(PollInterface $poll) {
+    $output = entity_view($poll, 'default');
+    return $output;
   }
 
 }

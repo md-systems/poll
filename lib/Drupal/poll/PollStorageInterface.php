@@ -2,19 +2,33 @@
 
 /**
  * @file
- * Contains \Drupal\poll\PollStorageControllerInterface.
+ * Contains \Drupal\poll\PollStorageInterface.
  */
 
 namespace Drupal\poll;
 
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\poll\PollInterface;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
 
 /**
  * Defines a common interface for poll entity controller classes.
  */
-interface PollStorageControllerInterface extends EntityStorageControllerInterface {
+interface PollStorageInterface extends EntityStorageInterface {
+
+  /**
+   * Provides a list of duplicate polls.
+   *
+   * @param \Drupal\poll\Entity\PollInterface $poll
+   *   The poll entity.
+   *
+   * @return
+   *   An array with the list of duplicated polls.
+   */
+  public function getPollDuplicates(PollInterface $poll);
+
+  public function saveVote(array $options);
+
+  public function cancelVote(PollInterface $poll, AccountInterface $account = NULL);
 
   /**
    * Get total votes for a poll.
@@ -52,23 +66,6 @@ interface PollStorageControllerInterface extends EntityStorageControllerInterfac
    */
   public function getUserVote(PollInterface $poll);
 
-  /**
-   * Save votes cast by a user.
-   *
-   * @param array $fields
-   *
-   * @return mixed
-   */
-  public function saveVote(array $fields);
-
-  /**
-   * Cancel a user's vote(s) for a poll.
-   *
-   * @param PollInterface $poll
-   * @param AccountInterface $account
-   *
-   * @return mixed
-   */
-  public function cancelVote(PollInterface $poll, AccountInterface $account);
+  public function getMostRecentPoll();
 
 }

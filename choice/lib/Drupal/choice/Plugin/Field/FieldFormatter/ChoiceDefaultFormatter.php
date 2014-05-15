@@ -5,7 +5,7 @@
  * Definition of Drupal\poll\Plugin\field\FieldFormatter\PollChoiceDefaultFormatter.
  */
 
-namespace Drupal\poll\Plugin\Field\FieldFormatter;
+namespace Drupal\choice\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
@@ -14,15 +14,15 @@ use Drupal\Core\Field\FieldItemListInterface;
  * Plugin implementation of the 'poll_choice' formatter.
  *
  * @FieldFormatter(
- *   id = "poll_choice_default",
- *   module = "poll",
- *   label = @Translation("Poll choice"),
+ *   id = "choice_default",
+ *   module = "choice",
+ *   label = @Translation("Choice"),
  *   field_types = {
- *     "poll_choice"
+ *     "choice"
  *   }
  * )
  */
-class PollChoiceDefaultFormatter extends FormatterBase {
+class ChoiceDefaultFormatter extends FormatterBase {
 
   /**
    * {@inheritdoc}

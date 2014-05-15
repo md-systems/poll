@@ -3,7 +3,6 @@ services:
     class: Drupal\poll\EventSubscriber\PollSubscriber
     tags:
       - { name: event_subscriber }
-
   poll.breadcrumb:
     class: Drupal\poll\PollBreadcrumbBuilder
     tags:

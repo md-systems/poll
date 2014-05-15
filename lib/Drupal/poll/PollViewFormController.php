@@ -11,7 +11,6 @@ use Drupal\Core\Entity\ContentEntityFormController;
 use Drupal\Component\Utility\String;
 use Drupal;
 
-
 /**
  * Base for controller for poll term edit forms.
  */
@@ -21,8 +20,6 @@ class PollViewFormController extends ContentEntityFormController {
    * {@inheritdoc}
    */
   public function form(array $form, array &$form_state) {
-    drupal_set_title($this->entity->getLabel());
-
     if ($this->showResults($this->entity, $form_state)) {
       $form['results']['#markup'] = $this->showPollResults($this->entity);
     }
@@ -65,7 +62,7 @@ class PollViewFormController extends ContentEntityFormController {
       // Remove all actions.
       $actions = array();
       // Allow user to cancel their vote.
-      if ($this->entity->hasUserVoted() && $this->entity->cancel_vote_allow->value) {
+      if ($this->entity->hasUserVoted() && $this->entity->getCancelVoteAllow()) {
         $actions['#type'] = 'actions';
         $actions['cancel']['#type'] = 'submit';
         $actions['cancel']['#button_type'] = 'primary';
@@ -110,14 +107,13 @@ class PollViewFormController extends ContentEntityFormController {
    * @param array $form_state
    */
   public function cancel(array $form, array &$form_state) {
-    $poll_storage_controller = \Drupal::entityManager()
-      ->getStorageController($this->entity->entityType());
-    $poll_storage_controller->cancelVote($this->entity, NULL);
-
-    drupal_set_message($this->t('Your vote has been cancelled.'));
-
-    $uri = $this->entity->normaliseUri();
-    $form_state['redirect'] = $uri['path'];
+    $form_state['redirect_route'] = array(
+      'route_name' => 'poll.poll_vote_delete',
+      'route_parameters' => array(
+        'poll' => $this->entity->id(),
+        'user' => \Drupal::currentUser()->id(),
+      ),
+    );
   }
 
   /**
@@ -151,20 +147,20 @@ class PollViewFormController extends ContentEntityFormController {
   public function save(array $form, array &$form_state) {
     $options = array();
     $options['chid'] = $form_state['values']['choice'];
-    $options['uid'] = Drupal::currentUser()->id();
+    $options['uid'] = \Drupal::currentUser()->id();
     $options['pid'] = $this->entity->id();
-    $options['hostname'] = Drupal::request()->getClientIp();
+    $options['hostname'] = \Drupal::request()->getClientIp();
     $options['timestamp'] = REQUEST_TIME;
-
     // save vote
-    $poll_storage_controller = \Drupal::entityManager()
-      ->getStorageController($this->entity->entityType());
-    $status = $poll_storage_controller->saveVote($options);
-
-    drupal_set_message($this->t('You vote has been recorded.'));
-
-    $uri = $this->entity->normaliseUri();
-    $form_state['redirect'] = $uri['path'];
+    $pollStorage = \Drupal::entityManager()->getStorage($this->entity->getId());
+    $status = $pollStorage->saveVote($options);
+    if($status) {
+      drupal_set_message($this->t('Your vote has been recorded.'));
+    }
+    else {
+      drupal_set_message($this->t('Sorry, your vote could not be recorded.'), 'error');
+    }
+    $form_state['redirect'] = $this->entity->url();
   }
 
   /**
@@ -172,7 +168,7 @@ class PollViewFormController extends ContentEntityFormController {
    */
   public function validate(array $form, array &$form_state) {
     if (!isset($form_state['values']['choice']) || $form_state['values']['choice'] == NULL) {
-      drupal_set_title($this->entity->question->value);
+      //drupal_set_title($this->entity->question->value);
       Drupal::formBuilder()
         ->setErrorByName('choice', $form_state, $this->t('Your vote could not be recorded because you did not select any of the choices.'));
     }
@@ -187,6 +183,7 @@ class PollViewFormController extends ContentEntityFormController {
    * @return bool
    */
   public function showResults(PollInterface $poll, $form_state) {
+    $account = $this->currentUser();
     switch (TRUE) {
       // The "View results" button, when available, has been clicked.
       case (isset($form_state['input']) && isset($form_state['input']['show_results']) && $form_state['input']['show_results']):
@@ -195,7 +192,7 @@ class PollViewFormController extends ContentEntityFormController {
       case ($poll->isClosed()):
         return TRUE;
       // Anonymous user is trying to view a poll they aren't allowed to vote in.
-      case (user_is_anonymous() && !$poll->anonymous_vote_allow->value):
+      case ($account->isAnonymous() && !$poll->getAnonymousVoteAllow()):
         return TRUE;
       // The user has already voted.
       case ($poll->hasUserVoted()):
@@ -223,7 +220,7 @@ class PollViewFormController extends ContentEntityFormController {
     $poll_results = array();
     foreach ($poll->votes as $pid => $vote) {
       $percentage = round($vote * 100 / max($total_votes, 1));
-      $display_votes = (!$block) ? ' (' . Drupal::translation()
+      $display_votes = (!$block) ? ' (' . \Drupal::translation()
           ->formatPlural($vote, '1 vote', '@count votes') . ')' : '';
 
       $poll_results[] = array(
@@ -239,31 +236,18 @@ class PollViewFormController extends ContentEntityFormController {
       );
     }
 
-    return theme('poll_results', array(
-      'raw_title' => $poll->label(),
-      'results' => drupal_render($poll_results),
-      'votes' => $total_votes,
-      'raw_links' => isset($poll->links) ? $poll->links : array(),
-      'block' => $block,
-      'nid' => $poll->pid,
-      'vote' => isset($poll->vote) ? $poll->vote : NULL
-    ));
-  }
+    $output = array(
+      '#theme' => 'poll_results',
+      '#raw_title' => $poll->label(),
+      '#results' => $poll_results,
+      '#votes' => $total_votes,
+      '#raw_links' => isset($poll->links) ? $poll->links : array(),
+      '#block' => $block,
+      '#nid' => $poll->pid,
+      '#vote' => isset($poll->vote) ? $poll->vote : NULL
+    );
 
-  /**
-   * @deprecated - ???
-   * @todo: Is this still required?
-   *
-   * @param array $form_state
-   *
-   * @return bool
-   */
-  public function showViewResults(array $form_state) {
-    return (isset($form_state['input']) &&
-      isset($form_state['input']['show_results']) &&
-      !$form_state['input']['show_results'] &&
-      $this->entity->result_vote_allow->value);
+    return drupal_render($output);
   }
-
 
 }

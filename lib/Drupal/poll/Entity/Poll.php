@@ -2,176 +2,62 @@
 
 /**
  * @file
- * Definition of Drupal\poll\Entity\Poll.
+ * Contains \Drupal\poll\Entity\Poll.
  */
 
 namespace Drupal\poll\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Symfony\Component\DependencyInjection\Container;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\poll\PollInterface;
 use Drupal\Component\Utility\String;
 
 /**
  * Defines the poll entity class.
  *
- * @EntityType(
+ * @ContentEntityType(
  *   id = "poll",
  *   label = @Translation("Poll"),
  *   controllers = {
- *    "access" = "Drupal\poll\PollAccessController",
- *     "list" = "Drupal\poll\PollListController",
- *     "storage" = "Drupal\poll\PollStorageController",
+ *     "storage" = "Drupal\poll\PollStorage",
+ *     "list_builder" = "Drupal\poll\PollListBuilder",
+ *     "view_builder" = "Drupal\poll\PollViewBuilder",
  *     "form" = {
- *      "default" = "Drupal\poll\PollFormController",
- *      "add" = "Drupal\poll\PollFormController",
- *      "edit" = "Drupal\poll\PollFormController",
- *      "delete" = "Drupal\poll\Form\PollDeleteForm",
- *      "view" = "Drupal\poll\PollViewFormController",
- *     },
+ *       "default" = "Drupal\poll\PollFormController",
+ *       "edit" = "Drupal\poll\PollFormController",
+ *       "view" = "Drupal\poll\PollViewFormController",
+ *       "delete" = "Drupal\poll\Form\PollDeleteForm",
+ *       "delete_vote" = "Drupal\poll\Form\PollVoteDeleteForm",
+ *       "delete_items" = "Drupal\poll\Form\PollItemsDeleteForm",
+ *     }
+ *   },
+ *   links = {
+ *     "canonical" = "poll.poll_view",
+ *     "edit-form" = "poll.poll_edit",
+ *     "delete-form" = "poll.poll_delete",
  *   },
  *   base_table = "poll_poll",
  *   fieldable = TRUE,
- *   translatable = TRUE,
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "question",
- *     "uuid" = "uuid"
+ *     "uuid" = "uuid",
  *   }
  * )
  */
 class Poll extends ContentEntityBase implements PollInterface {
 
-  /**
-   * The poll ID.
-   *
-   * @var string
-   */
-  public $id;
-
-  /**
-   * The User ID of poll author.
-   *
-   * @var string
-   */
-  public $uid;
-
-  /**
-   * The poll UUID.
-   *
-   * @var string
-   */
-  public $uuid;
-
-  /**
-   * Question for the poll.
-   *
-   * @var string
-   */
-  public $question;
-
-  /**
-   * The lnaguage code.
-   *
-   * @var string
-   */
-  public $langcode;
-
-  /**
-   * Are anonymous users allowed to vote.
-   *
-   * @var boolean
-   */
-  public $anonymous_vote_allow;
-
-  /**
-   * Are users allowed to cancel their vote.
-   *
-   * @var boolean
-   */
-  public $cancel_vote_allow;
-
-  /**
-   * Are users allowed to view results before voting.
-   *
-   * @var boolean
-   */
-  public $result_vote_allow;
-
-  /**
-   * @var integer
-   */
-  public $runtime;
-
-  /**
-   * Flag indicating whether the poll is active or not.
-   *
-   * @var boolean
-   */
-  public $status;
-
-  /**
-   * The time that the poll was created.
-   *
-   * @var \Drupal\Core\Field\FieldItemInterface
-   */
-  public $created;
-
-  /**
-   * The choice field values for this vote.
-   *
-   * @var
-   */
-  public $field_choice;
-
-
-  /**
-   * {@inheritdoc}
-   */
-  public function init() {
-    parent::init();
-
-    // We unset all defined properties, so magic getters apply.
-    unset($this->id);
-    unset($this->uid);
-    unset($this->uuid);
-    unset($this->question);
-    unset($this->langcode);
-    unset($this->anonymous_vote_allow);
-    unset($this->cancel_vote_allow);
-    unset($this->result_vote_allow);
-    unset($this->runtime);
-    unset($this->status);
-    unset($this->created);
-    unset($this->field_choice);
-  }
-
-  /**
-   * Implements Drupal\Core\Entity\EntityInterface::id().
-   */
-  public function id() {
-    return $this->get('id')->value;
+  public function getId() {
+    return $this->getEntityType()->id();
   }
 
   /**
    * Implements Drupal\Core\Entity\EntityInterface::label().
    */
   public function label() {
-    return $this->get('question')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getLabel() {
-    return $this->getQuestion();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getQuestion() {
     return $this->get('question')->value;
   }
 
@@ -186,46 +72,16 @@ class Poll extends ContentEntityBase implements PollInterface {
   /**
    * {@inheritdoc}
    */
-  public function setAnonymousVoteAllow($anonymousVoteAllow) {
-    $this->set('anonymous_vote_allow', $anonymousVoteAllow);
+  public function setCreated($created) {
+    $this->set('created', $created);
     return $this;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setCancelVoteAllow($cancelVoteAllow) {
-    $this->set('cancel_vote_allow', $cancelVoteAllow);
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setResultVoteAllow($resultVoteAllow) {
-    $this->set('result_vote_allow', $resultVoteAllow);
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function isAnonymousVoteAllow() {
-    return $this->get('anonymous_vote_allow')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function isCancelVoteAllow() {
-    return $this->get('cancel_vote_allow')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function isResultVoteAllow() {
-    return $this->get('result_vote_allow')->value;
+  public function getCreated() {
+    return $this->get('created')->value;
   }
 
   /**
@@ -246,8 +102,53 @@ class Poll extends ContentEntityBase implements PollInterface {
   /**
    * {@inheritdoc}
    */
+  public function getAnonymousVoteAllow() {
+    return $this->get('anonymous_vote_allow')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setAnonymousVoteAllow($anonymous_vote_allow) {
+    $this->set('anonymous_vote_allow', $anonymous_vote_allow);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCancelVoteAllow() {
+    return $this->get('cancel_vote_allow')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setCancelVoteAllow($cancel_vote_allow) {
+    $this->set('cancel_vote_allow', $cancel_vote_allow);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getResultVoteAllow() {
+    return $this->get('result_vote_allow')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setResultVoteAllow($result_vote_allow) {
+    $this->set('result_vote_allow', $result_vote_allow);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function isActive() {
-    return $this->get('status')->value;
+    return (bool) $this->get('status')->value;
   }
 
   /**
@@ -261,22 +162,30 @@ class Poll extends ContentEntityBase implements PollInterface {
   /**
    * {@inheritdoc}
    */
-  public function getAuthor() {
+  public function getOwner() {
     return $this->get('uid')->entity;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getAuthorId() {
+  public function getOwnerId() {
     return $this->get('uid')->target_id;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setAuthorId($uid) {
+  public function setOwnerId($uid) {
     $this->set('uid', $uid);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOwner(UserInterface $account) {
+    $this->set('uid', $account->id());
     return $this;
   }
 
@@ -290,117 +199,128 @@ class Poll extends ContentEntityBase implements PollInterface {
   /**
    * {@inheritdoc}
    */
-  public function activate() {
-    $this->get('status')->value = 1;
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function close() {
-    $this->get('status')->value = 0;
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCreated() {
-    return $this->get('created')->value;
-  }
-
-  public function setCreated($created = NULL) {
-    $this->set('created', isset($created) ? $created : REQUEST_TIME);
-    return $this;
-  }
-
-  public function setFieldChoice($fieldChoice) {
-    $this->set('field_choice', $fieldChoice);
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setLangcode($langcode) {
-    $this->set('langcode', $langcode);
-    return $this;
-  }
-
-  /**
-   * @todo: Where is this being used?
-   *
-   * {@inheritdoc}
-   */
-  public static function sort($a, $b) {
-    return strcmp($a->getQuestion(), $b->getQuestion());
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function baseFieldDefinitions($entity_type) {
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields['id'] = FieldDefinition::create('integer')
       ->setLabel(t('Poll ID'))
-      ->setDescription(t('The poll ID.'))
-      ->setReadOnly(TRUE);
+      ->setDescription(t('The ID of the poll.'))
+      ->setReadOnly(TRUE)
+      ->setSetting('unsigned', TRUE);
+
+    $fields['uid'] = FieldDefinition::create('entity_reference')
+      ->setLabel(t('User ID'))
+      ->setDescription(t('The user ID of the poll author.'))
+      ->setSetting('target_type', 'user')
+      ->setSetting('default_value', 0);
 
     $fields['uuid'] = FieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
       ->setDescription(t('The poll UUID.'))
       ->setReadOnly(TRUE);
 
-    $fields['uid'] = FieldDefinition::create('entity_reference')
-      ->setLabel(t('User ID'))
-      ->setDescription(t('The user ID of the poll author.'))
-      ->setSettings(array(
-        'target_type' => 'user',
-        'default_value' => 0,
-      ));
-
-    $fields['question'] = FieldDefinition::create('text')
+    $fields['question'] = FieldDefinition::create('string')
       ->setLabel(t('Question'))
       ->setDescription(t('The poll question.'))
       ->setRequired(TRUE)
-      ->setTranslatable(TRUE)
-      ->setSettings(array(
-        'default_value' => '',
-        'max_length' => 255,
-        'text_processing' => 0,
+      ->setSetting('max_length', 255)
+      ->setDisplayOptions('form', array(
+        'type' => 'string',
+        'weight' => -100,
       ));
 
     $fields['langcode'] = FieldDefinition::create('language')
       ->setLabel(t('Language code'))
       ->setDescription(t('The poll language code.'));
 
-    $fields['anonymous_vote_allow'] = FieldDefinition::create('boolean')
-      ->setLabel(t('Allow anonymous votes'))
-      ->setDescription(t('A boolean indicating whether anonymous users are allowed to vote.'));
+    // Poll attributes
+    $duration = array(
+      // 1-6 days.
+      86400,
+      2 * 86400,
+      3 * 86400,
+      4 * 86400,
+      5 * 86400,
+      6 * 86400,
+      // 1-3 weeks (7 days).
+      604800,
+      2 * 604800,
+      3 * 604800,
+      // 1-3,6,9 months (30 days).
+      2592000,
+      2 * 2592000,
+      3 * 2592000,
+      6 * 2592000,
+      9 * 2592000,
+      // 1 year (365 days).
+      31536000,
+    );
 
-    $fields['cancel_vote_allow'] = FieldDefinition::create('boolean')
-      ->setLabel(t('Allow cancel votes'))
-      ->setDescription(t('A boolean indicating whether users may cancel their vote.'));
+    $period = array(0 => t('Unlimited')) + array_map('format_interval', array_combine($duration, $duration));
 
-    $fields['result_vote_allow'] = FieldDefinition::create('boolean')
-      ->setLabel(t('Allow view results'))
-      ->setDescription(t('A boolean indicating whether users may see the results before voting.'));
-
-    $fields['runtime'] = FieldDefinition::create('boolean')
+    $fields['runtime'] = FieldDefinition::create('list_integer')
       ->setLabel(t('Runtime'))
-      ->setDescription(t('The number of seconds after creation during which the poll is active.'));
+      ->setDescription(t('The number of seconds after creation during which the poll is active.'))
+      ->setSetting('unsigned', TRUE)
+      ->setRequired(TRUE)
+      ->setSetting('allowed_values', $period)
+      ->setDisplayOptions('form', array(
+        'type' => 'options_select',
+        'weight' => 0,
+      ));
 
-    $fields['status'] = FieldDefinition::create('boolean')
-      ->setLabel(t('Status'))
-      ->setDescription(t('A boolean indicating whether the poll is active.'));
+    $fields['anonymous_vote_allow'] = FieldDefinition::create('list_integer')
+      ->setLabel(t('Allow anonymous votes'))
+      ->setDescription(t('A flag indicating whether anonymous users are allowed to vote.'))
+      ->setSetting('unsigned', TRUE)
+      ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
+      ->setDisplayOptions('form', array(
+        'type' => 'options_select',
+        'weight' => 1,
+      ));
 
-    // @todo Convert to a "created" field in https://drupal.org/node/2145103.
-    $fields['created'] = FieldDefinition::create('integer')
+    $fields['cancel_vote_allow'] = FieldDefinition::create('list_integer')
+      ->setLabel(t('Allow cancel votes'))
+      ->setDescription(t('A flag indicating whether users may cancel their vote.'))
+      ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
+      ->setDisplayOptions('form', array(
+        'type' => 'options_select',
+        'weight' => 2,
+      ));
+
+    $fields['result_vote_allow'] = FieldDefinition::create('list_integer')
+      ->setLabel(t('Allow view results'))
+      ->setDescription(t('A flag indicating whether users may see the results before voting.'))
+      ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
+      ->setDisplayOptions('form', array(
+        'type' => 'options_select',
+        'weight' => 3,
+      ));
+
+    $fields['status'] = FieldDefinition::create('list_integer')
+      ->setLabel(t('Active?'))
+      ->setDescription(t('A flag indicating whether the poll is active.'))
+      ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
+      ->setDisplayOptions('form', array(
+        'type' => 'options_select',
+        'weight' => 4,
+      ));
+
+    // This is updated by the fetcher and not when the feed is saved, therefore
+    // it's a timestamp and not a changed field.
+    $fields['created'] = FieldDefinition::create('timestamp')
       ->setLabel(t('Created'))
-      ->setDescription(t('The time that the poll was created.'));
+      ->setDescription(t('When the poll was created, as a Unix timestamp.'));
 
     return $fields;
   }
+
+  /**
+   *
+   * {@inheritdoc}
+   */
+  public static function sort($a, $b) {
+    return strcmp($a->label(), $b->label());
+  }
+
 
   /**
    * @todo: Refactor - doesn't belong here.
@@ -408,8 +328,7 @@ class Poll extends ContentEntityBase implements PollInterface {
    * @return mixed
    */
   public function hasUserVoted() {
-    $poll_storage_controller = \Drupal::entityManager()
-      ->getStorageController($this->entityType());
+    $poll_storage_controller = \Drupal::entityManager()->getStorage('poll');
     return $poll_storage_controller->getUserVote($this);
   }
 
@@ -446,9 +365,20 @@ class Poll extends ContentEntityBase implements PollInterface {
   /**
    * {@inheritdoc}
    */
-  public static function postLoad(EntityStorageControllerInterface $storage_controller, array &$entities) {
+  public static function postLoad(EntityStorageInterface $storage, array &$entities) {
     foreach ($entities as $entity) {
-      $entity->votes = $storage_controller->getVotes($entity);
+      $entity->votes = $storage->getVotes($entity);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function postDelete(EntityStorageInterface $storage, array $entities) {
+    parent::postDelete($storage, $entities);
+
+    foreach ($entities as $entity) {
+      $storage->deleteVotes($entity);
     }
   }
 
