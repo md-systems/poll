@@ -22,7 +22,6 @@ const POLL_NOT_PUBLISHED = 0;
  */
 const POLL_PUBLISHED = 1;
 
-
 /**
  * Implements hook_theme().
  */
@@ -99,49 +98,6 @@ function poll_page_build(&$page) {
  */
 function poll_load($id) {
   return entity_load('poll', $id);
-}
-
-/**
- * Create choice field for the poll entity.
- */
-function poll_install_choice_field() {
-  $poll_choice_field = Field::fieldInfo()->getField('poll', 'field_choice');
-  if (empty($poll_choice_field)) {
-    $field = array(
-      'name' => 'field_choice',
-      'entity_type' => 'poll',
-      'module' => 'poll',
-      'type' => 'choice',
-      'cardinality' => '-1',
-      'locked' => FALSE,
-    );
-    entity_create('field_config', $field)->save();
-
-    $instance = array(
-      'field_name' => 'field_choice',
-      'entity_type' => 'poll',
-      'label' => 'Choice',
-      'bundle' => 'poll',
-      'description' => t('Enter a poll choice and default vote.'),
-      'required' => FALSE,
-      'settings' => array(
-        'max_length' => 255,
-      ),
-    );
-    entity_create('field_instance_config', $instance)->save();
-
-    // Assign form display settings for the 'default' view mode.
-    entity_get_form_display('poll', 'poll', 'default')
-      ->setComponent('field_choice', array(
-        'type' => 'choice_default',
-        'settings' => array(
-          'size' => '60',
-          'placeholder' => '',
-        ),
-        'weight' => -10,
-      ))
-      ->save();
-  }
 }
 
 /**

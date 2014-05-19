@@ -73,7 +73,7 @@ class PollFormController extends ContentEntityFormController {
     if ($insert) {
       drupal_set_message($this->t('The poll %poll has been updated.', array('%poll' => $poll->label())));
       if (arg(0) == 'admin') {
-        $form_state['redirect_route']['route_name'] = 'aggregator.admin_overview';
+        $form_state['redirect_route']['route_name'] = 'poll.poll_list';
       }
       else {
         $form_state['redirect_route'] = $poll->urlInfo('canonical');

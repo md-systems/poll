@@ -168,7 +168,6 @@ class PollViewFormController extends ContentEntityFormController {
    */
   public function validate(array $form, array &$form_state) {
     if (!isset($form_state['values']['choice']) || $form_state['values']['choice'] == NULL) {
-      //drupal_set_title($this->entity->question->value);
       Drupal::formBuilder()
         ->setErrorByName('choice', $form_state, $this->t('Your vote could not be recorded because you did not select any of the choices.'));
     }
