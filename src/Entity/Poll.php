@@ -39,6 +39,7 @@ use Drupal\user\UserInterface;
  *     "canonical" = "poll.poll_view",
  *     "edit-form" = "poll.poll_edit",
  *     "delete-form" = "poll.poll_delete",
+ *     "admin-form" = "poll.poll_list"
  *   },
  *   base_table = "poll_poll",
  *   fieldable = TRUE,
