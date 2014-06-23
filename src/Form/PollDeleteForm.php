@@ -8,6 +8,7 @@
 namespace Drupal\poll\Form;
 
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;
+use Drupal\Core\Url;
 
 /**
  * Provides a form for deleting a poll.
@@ -32,9 +33,7 @@ class PollDeleteForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelRoute() {
-    return array(
-      'route_name' => 'poll.poll_list',
-    );
+    return new Url('poll.poll_list');
   }
 
   /**

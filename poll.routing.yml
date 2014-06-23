@@ -10,10 +10,14 @@ poll.poll_add:
   defaults:
     _content: '\Drupal\poll\Controller\PollController::pollAdd'
     _title: 'Add poll'
+  options:
+    _admin_route: TRUE
   requirements:
     _permission: 'administer polls'
 poll.poll_edit:
   path: '/poll/{poll}/edit'
+  options:
+    _admin_route: TRUE
   defaults:
     _entity_form: 'poll.edit'
   requirements:

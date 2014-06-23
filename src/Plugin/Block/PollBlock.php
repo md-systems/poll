@@ -7,6 +7,7 @@
 
 namespace Drupal\poll\Plugin\Block;
 
+use Drupal\poll\PollInterface;
 use Drupal\poll\PollStorageInterface;
 use Drupal\block\BlockBase;
 use Drupal\Core\Entity\Query\QueryInterface;
@@ -14,6 +15,8 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Cache\Cache;
+use Symfony\Component\HttpFoundation\Request;
+use Drupal\poll\Entity\Poll;
 
 /**
  * Provides a 'Poll' block with the latest poll.
@@ -39,10 +42,14 @@ class PollBlock extends BlockBase {
   public function build() {
     $polls = \Drupal::entityManager()->getStorage('poll')->getMostRecentPoll();
     if ($polls) {
-      $entity = reset($polls);
-      $view = entity_view($entity, 'default');
-
-      return $view;
+      $poll = reset($polls);
+      // If we're viewing this poll, don't show this block.
+      $page = \Drupal::request()->attributes->get('poll');
+      if($page instanceof PollInterface && $page->id() == $poll->id()) {
+        return;
+      }
+      // @todo: new view mode using ajax
+      return entity_view($poll, 'block');
     }
 
   }

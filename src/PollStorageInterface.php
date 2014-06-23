@@ -16,18 +16,22 @@ use Drupal\Core\Session\AccountInterface;
 interface PollStorageInterface extends EntityStorageInterface {
 
   /**
-   * Provides a list of duplicate polls.
+   * Save a user's vote.
    *
-   * @param \Drupal\poll\Entity\PollInterface $poll
-   *   The poll entity.
+   * @param array $options
    *
-   * @return
-   *   An array with the list of duplicated polls.
+   * @return mixed
    */
-  public function getPollDuplicates(PollInterface $poll);
-
   public function saveVote(array $options);
 
+  /**
+   * Cancel a user's vote.
+   *
+   * @param PollInterface $poll
+   * @param AccountInterface $account
+   *
+   * @return mixed
+   */
   public function cancelVote(PollInterface $poll, AccountInterface $account = NULL);
 
   /**
@@ -66,6 +70,20 @@ interface PollStorageInterface extends EntityStorageInterface {
    */
   public function getUserVote(PollInterface $poll);
 
+  /**
+   * Get the most recent poll posted on the site.
+   *
+   * @return mixed
+   */
   public function getMostRecentPoll();
+
+  /**
+   * Find all duplicates of a poll by matching the question.
+   *
+   * @param PollInterface $poll
+   *
+   * @return mixed
+   */
+  public function getPollDuplicates(PollInterface $poll);
 
 }

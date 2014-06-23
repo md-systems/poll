@@ -8,7 +8,7 @@
 namespace Drupal\poll;
 
 use Drupal\Component\Utility\String;
-use Drupal\Core\Entity\ContentEntityFormController;
+use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Language\Language;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Form controller for the poll edit forms.
  */
-class PollFormController extends ContentEntityFormController {
+class PollFormController extends ContentEntityForm {
 
   /**
    * {@inheritdoc}
@@ -72,17 +72,13 @@ class PollFormController extends ContentEntityFormController {
     $poll->save();
     if ($insert) {
       drupal_set_message($this->t('The poll %poll has been updated.', array('%poll' => $poll->label())));
-      if (arg(0) == 'admin') {
-        $form_state['redirect_route']['route_name'] = 'poll.poll_list';
-      }
-      else {
-        $form_state['redirect_route'] = $poll->urlInfo('canonical');
-      }
     }
     else {
       watchdog('poll', 'Poll %poll added.', array('%poll' => $poll->label()), WATCHDOG_NOTICE, l($this->t('View'), 'admin/config/services/aggregator'));
       drupal_set_message($this->t('The poll %poll has been added.', array('%poll' => $poll->label())));
     }
+
+    $form_state['redirect_route']['route_name'] = 'poll.poll_list';
   }
 
 }

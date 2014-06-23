@@ -7,14 +7,14 @@
 
 namespace Drupal\poll;
 
-use Drupal\Core\Entity\ContentEntityFormController;
+use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Component\Utility\String;
 use Drupal;
 
 /**
  * Base for controller for poll term edit forms.
  */
-class PollViewFormController extends ContentEntityFormController {
+class PollViewFormController extends ContentEntityForm {
 
   /**
    * {@inheritdoc}

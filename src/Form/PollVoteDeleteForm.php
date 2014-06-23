@@ -25,12 +25,7 @@ class PollVoteDeleteForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelRoute() {
-    return array(
-      'route_name' => 'poll.poll_view',
-      'route_parameters' => array(
-        'poll' => $this->entity->id(),
-      ),
-    );
+    return $this->entity->urlInfo();
   }
 
   /**
@@ -58,9 +53,9 @@ class PollVoteDeleteForm extends ContentEntityConfirmFormBase {
     $pollStorage = \Drupal::entityManager()->getStorage($this->entity->getId());
     $pollStorage->cancelVote($this->entity, $account);
     watchdog('poll', '%user\'s vote in Poll #%poll deleted.', array(
-        '%user' => $account->id(),
-        '%poll' => $this->entity->getId()
-      ));
+      '%user' => $account->id(),
+      '%poll' => $this->entity->getId()
+    ));
     drupal_set_message($this->t('The vote has been deleted.'));
     // Display the original poll.
     $form_state['redirect_route'] = array(

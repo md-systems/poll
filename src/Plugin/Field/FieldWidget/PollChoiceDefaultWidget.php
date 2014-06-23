@@ -26,6 +26,11 @@ use Drupal\Core\Field\WidgetBase;
 class PollChoiceDefaultWidget extends WidgetBase {
 
   /**
+   * The default value of a vote.
+   */
+  const VOTE_DEFAULT_VALUE = 1;
+
+  /**
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, array &$form_state) {
@@ -44,7 +49,7 @@ class PollChoiceDefaultWidget extends WidgetBase {
       '#type' => 'number',
       '#placeholder' => t('Vote'),
       '#empty_value' => '',
-      '#default_value' => isset($items[$delta]->vote) ? $items[$delta]->vote : '',
+      '#default_value' => isset($items[$delta]->vote) ? $items[$delta]->vote : static::VOTE_DEFAULT_VALUE,
       '#min' => 0,
       '#suffix' => '</div>',
     );

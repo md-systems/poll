@@ -47,12 +47,12 @@ class PollListBuilder extends DraggableListBuilder {
     $pollStorage = \Drupal::entityManager()->getStorage('poll');
 
     $row['question'] = l($entity->label(), 'poll/' . $entity->id());
-    $row['votes'] = $pollStorage->getTotalVotes($entity);
-    $row['status'] = ($entity->isActive()) ? t('Y') : t('N');
     $row['author']['data'] = array(
       '#theme' => 'username',
       '#account' => $entity->getOwner(),
     );
+    $row['votes'] = $pollStorage->getTotalVotes($entity);
+    $row['status'] = ($entity->isActive()) ? t('Y') : t('N');
     $row['created'] = ($entity->getCreated()) ? Drupal::service('date')
       ->format($entity->getCreated(), 'long') : t('n/a');
     return $row + parent::buildRow($entity);

@@ -14,6 +14,7 @@ use Symfony\Component\DependencyInjection\Container;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\poll\PollInterface;
 use Drupal\Component\Utility\String;
+use Drupal\user\UserInterface;
 
 /**
  * Defines the poll entity class.

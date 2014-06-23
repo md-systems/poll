@@ -9,8 +9,6 @@ namespace Drupal\poll;
 
 use Drupal\Core\Entity\ContentEntityDatabaseStorage;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\Query\QueryInterface;
 
 /**
  * Controller class for polls.
@@ -116,6 +114,9 @@ class PollStorage extends ContentEntityDatabaseStorage implements PollStorageInt
     return $this->loadMultiple($query->execute());
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getMostRecentPoll() {
     $query = \Drupal::entityQuery('poll')
       ->condition('status', POLL_PUBLISHED)
