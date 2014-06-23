@@ -19,21 +19,8 @@ class PollViewBuilder extends EntityViewBuilder {
   /**
    * {@inheritdoc}
    */
-  public function view(EntityInterface $entity, $view_mode = 'default', $langcode = NULL) {
-    $build = parent::view($entity, $view_mode, $langcode);
-//    if ($view_mode == 'block') {
-//      var_dump($build);
-//    }
-    return $build;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getBuildDefaults(EntityInterface $entity, $view_mode, $langcode) {
-    // @todo: default & ajax view modes.
-    $form = \Drupal::formBuilder()
-      ->getForm('Drupal\poll\Form\PollViewForm', $entity);
+  public function view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
+    $form = \Drupal::formBuilder()->getForm('Drupal\poll\Form\PollViewForm', $entity);
     return $form;
   }
 
