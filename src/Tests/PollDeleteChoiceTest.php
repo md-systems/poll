@@ -31,13 +31,13 @@ class PollDeleteChoiceTest extends PollTestBase {
     // @TODO need to fix the poll nid and not hard code poll/1
 
     // Edit the poll, and try to delete first poll choice.
-    $this->drupalGet("poll/1");
-    $edit['choice[chid:1][chtext]'] = '';
-    $this->drupalPostForm('poll/1', $edit, t('Save'));
+    $this->drupalGet("poll/$poll_nid/edit");
+    $edit['field_choice[0][choice]'] = '';
+    $this->drupalPostForm(NULL, $edit, t('Save'));
 
     // Click on the poll title to go to node page.
-    //$this->drupalGet('poll');
-    //$this->clickLink($title);
+    $this->drupalGet('admin/structure/poll');
+    $this->clickLink($title);
 
     // Check the first poll choice is deleted, while the others remain.
     $this->drupalGet('poll/1');

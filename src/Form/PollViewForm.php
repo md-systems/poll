@@ -147,6 +147,14 @@ class PollViewForm extends FormBase {
     foreach ($poll->votes as $vote) {
       $total_votes += $vote;
     }
+    $poll->links = array(
+      'poll-report' => array(
+        'title' => t('Older Polls'),
+        'href' => "polls",
+        'html' => TRUE,
+        //'query' => array('token' => \Drupal::getContainer()->get('csrf_token')->get("node/{$entity->id()}/report")),
+      ),
+    );
 
     $options = $poll->getOptions();
     $poll_results = array();
@@ -167,7 +175,6 @@ class PollViewForm extends FormBase {
         '#attributes' => array('class' => array('bar')),
       );
     }
-
     $output = array(
       '#theme' => 'poll_results',
       '#raw_title' => $poll->label(),

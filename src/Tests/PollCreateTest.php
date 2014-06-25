@@ -32,6 +32,17 @@ class PollCreateTest extends PollTestBase {
     $this->drupalGet('poll/' . $poll->id() . '/edit');
     $this->assertText($poll->label(), 'Correct poll loaded from database.');
 
+    // Verify poll appears on 'poll' page.
+    $this->drupalGet('admin/structure/poll');
+    $this->assertText($poll->label(), 'Poll appears in poll list.');
+    $this->assertText('Y', 'Poll is active.');
+
+    // Click on the poll question to go to poll page.
+    $this->clickLink($poll->label());
+
+    //We do this later!!
+    //$this->assertText('Total votes: 0', 'Link to poll correct.');
+
     // Alter the question and ensure it gets saved correctly.
     $new_question = $this->randomName();
     $poll->setQuestion($new_question);
@@ -53,7 +64,6 @@ class PollCreateTest extends PollTestBase {
     $this->drupalGet('poll/' . $poll->id() . '/edit');
     $this->assertFieldByXPath("//input[@name='field_choice[0][choice]']", $vote_choice, 'Choice successfully changed.');
     $this->assertFieldByXPath("//input[@name='field_choice[0][vote]']", $vote_count, 'Vote successfully changed.');
-
   }
 
   /**
@@ -94,6 +104,5 @@ class PollCreateTest extends PollTestBase {
     $this->drupalGet('poll/' . $poll->id());
     $elements = $this->xpath('//input[@value="Cancel your vote"]');
     $this->assertTrue(empty($elements), "'Cancel your vote' button no longer appears.");
-
   }
 }
