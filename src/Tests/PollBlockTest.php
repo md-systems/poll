@@ -12,12 +12,12 @@ namespace Drupal\poll\Tests;
  */
 class PollBlockTest extends PollTestBase {
 
-  /**
-   * An administrative user for testing.
-   *
-   * @var Drupal\user\Plugin\Core\Entity\User
-   */
-  protected $adminUser;
+    /**
+     * An administrative user for testing.
+     *
+     * @var \Drupal\user\Entity\User
+     */
+    protected $adminUser;
 
   /**
    * Modules to enable.
@@ -47,7 +47,7 @@ class PollBlockTest extends PollTestBase {
    */
   function testRecentBlock() {
     // Enable the recent poll block.
-    $this->drupalPlaceBlock('poll_recent_block');
+    $this->drupalPlaceBlock('poll_block');
 
     // Create a poll which should appear in recent polls block.
     $title = $this->randomName();
@@ -63,7 +63,7 @@ class PollBlockTest extends PollTestBase {
 
     // Logout and login back in as a user who can vote.
     $this->drupalLogout();
-    $vote_user = $this->drupalCreateUser(array('cancel own vote', 'inspect all votes', 'vote on polls', 'access content'));
+    $vote_user = $this->drupalCreateUser(array('access polls', 'access content'));
     $this->drupalLogin($vote_user);
 
     // Verify we can vote via the block.
@@ -78,7 +78,7 @@ class PollBlockTest extends PollTestBase {
     $this->assertText('1 vote - open', 'Link to poll listing correct.');
 
     // Close the poll and verify block doesn't appear.
-    $content_user = $this->drupalCreateUser(array('create poll content', 'edit any poll content', 'access content'));
+    $content_user = $this->drupalCreateUser(array('access polls', 'access content'));
     $this->drupalLogout();
     $this->drupalLogin($content_user);
     $close_edit = array('active' => 0);
