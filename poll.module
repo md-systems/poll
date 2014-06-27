@@ -5,12 +5,10 @@
  * Used to aggregate syndicated content (RSS, RDF, and Atom).
  */
 
-use Drupal\poll\PollInterface;
-use Drupal\Component\Utility\Xss;
 use Drupal\poll\Entity\Poll;
-use Drupal\field\Field;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Template\Attribute;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Denotes that the poll is not published.
@@ -21,6 +19,25 @@ const POLL_NOT_PUBLISHED = 0;
  * Denotes that the poll is published.
  */
 const POLL_PUBLISHED = 1;
+
+/**
+ * Implements hook_help().
+ */
+function poll_help($route_name, Request $request) {
+  switch ($route_name) {
+    case 'help.page.poll':
+      $output = '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Poll module can be used to create simple surveys or questionnaires that display cumulative results. A poll is a good way to receive feedback from site users and community members. For more information, see the online handbook entry for the <a href="!poll">Poll module</a>.', array('!poll' => 'https://drupal.org/documentation/modules/poll')) . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Creating a poll') . '</dt>';
+      $output .= '<dd>' . t('Users can create a poll by clicking on <a href="!add-poll">Add a poll</a> on the <a href="!polls">Polls</a> page, and entering the question being posed, the answer choices, and beginning vote counts for each choice. The status (closed or active) and duration (length of time the poll remains active for new votes) can also be specified.', array('!add-poll' => \Drupal::url('poll.poll_add'), '!polls' => \Drupal::url('poll.poll_list'))) . '</dd>';
+      $output .= '<dt>' . t('Viewing polls') . '</dt>';
+      $output .= '<dd>' . t('You can visit the <a href="!polls">Polls</a> page to view all current polls, or alternately enable the <em>Most recent poll</em> block on the <a href="!blocks">Blocks administration page</a>. To vote in or view the results of a specific poll, you can click on the poll itself.', array('!polls' => \Drupal::url('poll.poll_list'), '!blocks' => \Drupal::url('block.admin_display'))) . '</dd>';
+      $output .= '</dl>';
+      return $output;
+  }
+}
 
 /**
  * Implements hook_theme().
@@ -110,10 +127,20 @@ function poll_uri($poll) {
 }
 
 /**
- * @todo: Unpublish expired polls if their $duration isn't "Unlimited"
+ * Implements hook_cron().
  */
 function poll_cron() {
-
+  $nids = db_query('SELECT p.nid FROM {poll} p INNER JOIN {node} n ON p.nid = n.nid WHERE (n.created + p.runtime) < :request_time AND p.active = :active AND p.runtime <> :runtime', array(
+      ':request_time' => REQUEST_TIME,
+      ':active' => 1,
+      ':runtime' => 0
+    ))->fetchCol();
+  if (!empty($nids)) {
+    db_update('poll')
+      ->fields(array('active' => 0))
+      ->condition('nid', $nids)
+      ->execute();
+  }
 }
 
 /**
