@@ -1,0 +1,45 @@
+poll.poll_list:
+  path: '/admin/structure/poll'
+  defaults:
+    _entity_list: 'poll'
+    _title: 'Polls'
+  requirements:
+    _permission: 'administer polls'
+poll.poll_add:
+  path: '/poll/add'
+  defaults:
+    _content: '\Drupal\poll\Controller\PollController::pollAdd'
+    _title: 'Add poll'
+  options:
+    _admin_route: TRUE
+  requirements:
+    _permission: 'administer polls'
+poll.poll_edit:
+  path: '/poll/{poll}/edit'
+  options:
+    _admin_route: TRUE
+  defaults:
+    _entity_form: 'poll.edit'
+  requirements:
+    _permission: 'administer polls'
+poll.poll_delete:
+  path: '/poll/{poll}/delete'
+  defaults:
+    _entity_form: 'poll.delete'
+    _title: 'Delete form'
+  requirements:
+    _permission: 'administer polls'
+poll.poll_view:
+  path: '/poll/{poll}'
+  defaults:
+    _content: '\Drupal\poll\Controller\PollController::viewPoll'
+    _title_callback: '\Drupal\poll\Controller\PollController::pollTitle'
+  requirements:
+    _permission: 'access polls'
+poll.poll_vote_delete:
+  path: '/poll/{poll}/delete/vote/{user}'
+  defaults:
+    _entity_form: 'poll.delete_vote'
+    _title: 'Delete vote'
+  requirements:
+    _permission: 'access polls'

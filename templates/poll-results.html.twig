@@ -18,21 +18,20 @@
  * @ingroup themeable
  */
 #}
-
 <div class="poll">
-    {% if block %}
+  {% if block %}
     <h3 class="poll-title">{{ title }}</h3>
-    {% endif %}
-    <dl>
-        {{ results }}
-    </dl>
-    <div class="total">
-        {{ 'Total votes: '|t }} {{ votes }}
-    </div>
-    {% if cancel_form is not empty %}
-        {{ cancel_form }}
-    {% endif %}
+  {% else %}
+    <h3 class="poll-results-title">{{ results_title }}</h3>
+  {% endif %}
+  <dl>
+    {{ results }}
+  </dl>
+  <div class="total">
+    {{ 'Total votes: '|t }} {{ votes }}
+  </div>
 </div>
+
 {% if block %}
-<div class="links"> {{ links }} </div>
+  <div class="links"> {{ links }} </div>
 {% endif %}
