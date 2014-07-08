@@ -64,7 +64,7 @@ class PollBlockTest extends PollTestBase {
     // Logout and login back in as a user who can vote.
     $this->drupalLogout();
     $vote_user = $this->drupalCreateUser(array('access polls', 'access content'));
-    $this->drupalLogin($vote_user);
+      $this->drupalLogin($vote_user);
 
     // Verify we can vote via the block.
     $edit = array(
@@ -77,6 +77,7 @@ class PollBlockTest extends PollTestBase {
     $this->clickLink('Older polls');
     $this->assertText('1 vote - open', 'Link to poll listing correct.');
 
+    // Close the poll and verify block doesn't appear.
     // Close the poll and verify block doesn't appear.
     $content_user = $this->drupalCreateUser(array('access polls', 'access content'));
     $this->drupalLogout();

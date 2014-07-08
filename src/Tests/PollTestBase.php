@@ -38,20 +38,20 @@ abstract class PollTestBase extends WebTestBase {
   function pollCreate($title, $choices, $preview = TRUE) {
     $this->assertTrue(TRUE, 'Create a poll');
 
-    $admin_user = $this->drupalCreateUser(array('create poll content', 'administer nodes'));
-    $web_user = $this->drupalCreateUser(array('create poll content', 'access content', 'edit own poll content'));
+    $admin_user = $this->drupalCreateUser(array('access polls', 'administer nodes'));
+    $web_user = $this->drupalCreateUser(array('access polls', 'access content'));
     $this->drupalLogin($admin_user);
 
     // Get the form first to initialize the state of the internal browser.
-    $this->drupalGet('node/add/poll');
+    $this->drupalGet('poll/add');
 
     // Prepare a form with two choices.
     list($edit, $index) = $this->_pollGenerateEdit($title, $choices);
 
     // Verify that the vote count element only allows non-negative integers.
-    $edit['choice[new:1][chvotes]'] = -1;
-    $edit['choice[new:0][chvotes]'] = $this->randomString(7);
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $edit['field_choice[new:1][choice]'] = -1;
+    $edit['field_choice[new:0][choice]'] = $this->randomString(7);
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertText(t('Vote count for new choice must be higher or equal to 0.'));
     $this->assertText(t('Vote count for new choice must be a number.'));
 
@@ -63,21 +63,21 @@ abstract class PollTestBase extends WebTestBase {
     // Re-submit the form until all choices are filled in.
     if (count($choices) > 2) {
       while ($index < count($choices)) {
-        $this->drupalPost(NULL, $edit, t('Add another choice'));
+        $this->drupalPostForm(NULL, $edit, t('Add another choice'));
         $this->assertPollChoiceOrder($choices, $index);
         list($edit, $index) = $this->_pollGenerateEdit($title, $choices, $index);
       }
     }
 
     if ($preview) {
-      $this->drupalPost(NULL, $edit, t('Preview'));
+      $this->drupalPostForm(NULL, $edit, t('Preview'));
       $this->assertPollChoiceOrder($choices, $index, TRUE);
       list($edit, $index) = $this->_pollGenerateEdit($title, $choices, $index);
     }
 
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     $node = $this->drupalGetNodeByTitle($title);
-    $this->assertText(t('@type @title has been created.', array('@type' => node_type_get_label('poll'), '@title' => $title)), 'Poll has been created.');
+    $this->assertText(t('@type @title has been created.', array('@type' => node_type_get_names('poll'), '@title' => $title)), 'Poll has been created.');
     $this->assertTrue($node->nid, 'Poll has been found in the database.');
 
     return isset($node->nid) ? $node->nid : FALSE;
@@ -98,7 +98,7 @@ abstract class PollTestBase extends WebTestBase {
    * @return
    *   An indexed array containing:
    *   - The generated POST values, suitable for
-   *     Drupal\simpletest\WebTestBase::drupalPost().
+   *     Drupal\simpletest\WebTestBase::drupalPostFrom().
    *   - The number of poll choices contained in 'edit', for potential re-usage
    *     in subsequent invocations of this function.
    */
@@ -108,13 +108,13 @@ abstract class PollTestBase extends WebTestBase {
     $new_choices = array_values(array_slice($choices, $index, $max_new_choices));
 
     $edit = array(
-      'title' => $title,
+      'question[0][value]' => $title,
     );
     foreach ($already_submitted_choices as $k => $text) {
-      $edit['choice[chid:' . $k . '][chtext]'] = $text;
+      $edit['field_choice[$k][choice]'] = $text;
     }
     foreach ($new_choices as $k => $text) {
-      $edit['choice[new:' . $k . '][chtext]'] = $text;
+      $edit['field_choice[$k][choice]'] = $text;
     }
     return array($edit, count($already_submitted_choices) + count($new_choices));
   }
@@ -190,13 +190,12 @@ abstract class PollTestBase extends WebTestBase {
       }
     }
   }
-
   /**
    * Tests updating a poll.
    */
   function pollUpdate($nid, $title, $edit) {
     // Edit the poll node.
-    $this->drupalPost('node/' . $nid . '/edit', $edit, t('Save'));
-    $this->assertText(t('@type @title has been updated.', array('@type' => node_type_get_label('poll'), '@title' => $title)), 'Poll has been updated.');
+    $this->drupalPostFrom('node/' . $nid . '/edit', $edit, t('Save'));
+    $this->assertText(t('@type @title has been updated.', array('@type' => node_type_get_names('poll'), '@title' => $title)), 'Poll has been updated.');
   }
 }
