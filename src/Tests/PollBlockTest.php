@@ -67,13 +67,13 @@ class PollBlockTest extends PollTestBase {
     // Logout and login back in as a user who can vote.
     $this->drupalLogout();
     $vote_user = $this->drupalCreateUser(array('access polls', 'access content'));
-      $this->drupalLogin($vote_user);
+    $this->drupalLogin($vote_user);
 
     // Verify we can vote via the block.
     $edit = array(
       'choice' => '1',
     );
-    $this->drupalPostForm('user/' . $vote_user->uid, $edit, t('Vote'));
+    $this->drupalPostForm('user/' . $vote_user->id(), $edit, t('Vote'));
     $this->assertText('Your vote has been recorded.', 'Your vote has been recorded.');
     $this->assertText('Total votes:  1', 'Vote count updated correctly.');
     /*Oder Polls link is not there, fix it in the module
@@ -88,7 +88,7 @@ class PollBlockTest extends PollTestBase {
     $this->drupalLogin($content_user);
     $close_edit = array('status' => 0);
     $this->pollUpdate($poll_nid, $title, $close_edit);
-    $this->drupalGet('user/' . $content_user->uid);
+    $this->drupalGet('user/' . $content_user->id());
     $this->assertNoText($title, 'Poll no longer appears in block.');
   }
 }
