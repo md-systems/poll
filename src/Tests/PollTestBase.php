@@ -73,9 +73,7 @@ abstract class PollTestBase extends WebTestBase {
         list($edit, $index) = $this->_pollGenerateEdit($title, $choices, $index);
       }
     }
-    echo '/// ';
-    print_r($edit);
-    echo ' ///';
+    debug($edit);
 
     /* No previewbutton to check with sascha.
     if ($preview) {
@@ -230,7 +228,7 @@ abstract class PollTestBase extends WebTestBase {
    */
   function pollUpdate($nid, $title, $edit) {
     // Edit the poll node.
-    $this->drupalPostFrom('node/' . $nid . '/edit', $edit, t('Save'));
+    $this->drupalPostForm('node/' . $nid . '/edit', $edit, t('Save'));
     $this->assertText(t('@type @title has been updated.', array('@type' => node_type_get_names('poll'), '@title' => $title)), 'Poll has been updated.');
   }
 }

@@ -7,6 +7,8 @@
 
 namespace Drupal\poll\Tests;
 
+use Drupal\Component\Utility\String;
+
 /**
  * Tests the recent poll block.
  */
@@ -53,9 +55,7 @@ class PollBlockTest extends PollTestBase {
     $title = $this->randomName();
 
     $choices = $this->_generateChoices(7);
-    echo '/// ';
-    print_r($choices);
-    echo ' ///';
+    debug($choices);
     $poll_nid = $this->pollCreate($title, $choices, TRUE);
 
     // Verify poll appears in a block.
@@ -63,7 +63,7 @@ class PollBlockTest extends PollTestBase {
     $this->drupalGet('user');
     // If a 'block' view not generated, this title would not appear even though
     // the choices might.
-    $this->assertText($title, 'Poll appears in block.');
+    $this->assertText($title, String::format('@title Poll appears in block.', array('@title' => $title)));
 
     // Logout and login back in as a user who can vote.
     $this->drupalLogout();
