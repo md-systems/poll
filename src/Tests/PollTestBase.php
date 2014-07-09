@@ -67,12 +67,15 @@ abstract class PollTestBase extends WebTestBase {
 
     // Re-submit the form until all choices are filled in.
     if (count($choices) > 2) {
-      while ($index < count($choices)) {
+      while ($index <= count($choices)) {
         $this->drupalPostForm(NULL, $edit, t('Add another item'));
         $this->assertPollChoiceOrder($choices, $index);
         list($edit, $index) = $this->_pollGenerateEdit($title, $choices, $index);
       }
     }
+    echo '/// ';
+    print_r($edit);
+    echo ' ///';
 
     /* No previewbutton to check with sascha.
     if ($preview) {
@@ -84,10 +87,13 @@ abstract class PollTestBase extends WebTestBase {
 
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $poll = $this->drupalGetPollByQuestion($title);
-    $this->assertText(t('@type @title has been created.', array('@type' => node_type_get_names('poll'), '@title' => $title)), 'Poll has been created.');
-    $this->assertTrue($poll->nid, 'Poll has been found in the database.');
 
-    return isset($poll->nid) ? $poll->nid : FALSE;
+    $this->assertText(t('The poll @title has been added.', array('@title' => $title)), 'The poll ' . $title . ' has been added.');
+    $this->assertTrue($poll->id(), 'Poll has been found in the database.');
+
+    $poll_id = $poll->id();
+
+    return isset($poll_id) ? $poll_id : FALSE;
   }
 
   /**
@@ -101,11 +107,11 @@ abstract class PollTestBase extends WebTestBase {
    * @return \Drupal\node\NodeInterface
    *   A node entity matching $title.
    */
-  function drupalGetPollByQuestion($title, $reset = FALSE) {
+  function drupalGetPollByQuestion($question, $reset = FALSE) {
     if ($reset) {
       \Drupal::entityManager()->getStorage('poll')->resetCache();
     }
-    $polls = entity_load_multiple_by_properties('poll', array('title' => $title));
+    $polls = entity_load_multiple_by_properties('poll', array('question' => $question));
     // Load the first poll returned from the database.
     $returned_poll = reset($polls);
     return $returned_poll;

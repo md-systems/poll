@@ -51,7 +51,11 @@ class PollBlockTest extends PollTestBase {
 
     // Create a poll which should appear in recent polls block.
     $title = $this->randomName();
+
     $choices = $this->_generateChoices(7);
+    echo '/// ';
+    print_r($choices);
+    echo ' ///';
     $poll_nid = $this->pollCreate($title, $choices, TRUE);
 
     // Verify poll appears in a block.
