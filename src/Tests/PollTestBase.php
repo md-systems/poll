@@ -67,7 +67,7 @@ abstract class PollTestBase extends WebTestBase {
 
     // Re-submit the form until all choices are filled in.
     if (count($choices) > 2) {
-      while ($index <= count($choices)) {
+      while ($index < count($choices)) {
         $this->drupalPostForm(NULL, $edit, t('Add another item'));
         $this->assertPollChoiceOrder($choices, $index);
         list($edit, $index) = $this->_pollGenerateEdit($title, $choices, $index);
