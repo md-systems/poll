@@ -44,10 +44,10 @@ abstract class PollTestBase extends WebTestBase {
     $this->drupalLogin($admin_user);
 
     // Get the form first to initialize the state of the internal browser.
-    $this->drupalGet('poll/add');
+    //$this->drupalGet('poll/add');
 
     // Prepare a form with two choices.
-    list($edit, $index) = $this->_pollGenerateEdit($title, $choices);
+    //list($edit, $index) = $this->_pollGenerateEdit($title, $choices);
 
     // Verify that the vote count element only allows non-negative integers.
     /*
@@ -137,7 +137,6 @@ abstract class PollTestBase extends WebTestBase {
     $max_new_choices = ($index == 0 ? 2 : 1);
     $already_submitted_choices = array_slice($choices, 0, $index);
     $new_choices = array_values(array_slice($choices, $index, $max_new_choices));
-
     $edit = array(
       'question[0][value]' => $question,
     );
@@ -145,8 +144,8 @@ abstract class PollTestBase extends WebTestBase {
     foreach ($already_submitted_choices as $k => $text) {
       $edit['field_choice[' . $k  . '][choice]'] = $text;
     }
-    foreach ($new_choices as $k => $text) {
-      $edit['field_choice[' . $k . '][choice]'] = $text;
+    foreach ($new_choices as $k=> $text) {
+      $edit['field_choice[' . ($k + $index) . '][choice]'] = $text;
     }
     return array($edit, count($already_submitted_choices) + count($new_choices));
   }
