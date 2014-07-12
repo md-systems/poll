@@ -9,6 +9,7 @@ use Drupal\poll\Entity\Poll;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Template\Attribute;
 use Symfony\Component\HttpFoundation\Request;
+use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Denotes that the poll is not published.
@@ -23,7 +24,7 @@ const POLL_PUBLISHED = 1;
 /**
  * Implements hook_help().
  */
-function poll_help($route_name, Request $request) {
+function poll_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.poll':
       $output = '<h3>' . t('About') . '</h3>';
