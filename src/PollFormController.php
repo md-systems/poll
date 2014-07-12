@@ -7,11 +7,8 @@
 
 namespace Drupal\poll;
 
-use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\ContentEntityForm;
-use Drupal\Core\Entity\EntityManagerInterface;
-use Drupal\Core\Language\Language;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Language\LanguageInterface;
 
 /**
  * Form controller for the poll edit forms.
@@ -29,8 +26,8 @@ class PollFormController extends ContentEntityForm {
     $form['langcode'] = array(
       '#title' => $this->t('Language'),
       '#type' => 'language_select',
-      '#default_value' => $poll->language()->id,
-      '#languages' => Language::STATE_ALL,
+      '#default_value' => $poll->language()->getId(),
+      '#languages' => LanguageInterface::STATE_ALL,
       '#weight' => -4,
     );
 

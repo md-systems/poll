@@ -24,6 +24,7 @@ use Drupal\user\UserInterface;
  *   label = @Translation("Poll"),
  *   controllers = {
  *     "storage" = "Drupal\poll\PollStorage",
+ *     "translation" = "Drupal\content_translation\ContentTranslationHandler",
  *     "list_builder" = "Drupal\poll\PollListBuilder",
  *     "view_builder" = "Drupal\poll\PollViewBuilder",
  *     "form" = {
@@ -43,6 +44,7 @@ use Drupal\user\UserInterface;
  *   },
  *   base_table = "poll_poll",
  *   fieldable = TRUE,
+ *   translatable = TRUE,
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "question",
@@ -195,7 +197,21 @@ class Poll extends ContentEntityBase implements PollInterface {
    * {@inheritdoc}
    */
   public function isClosed() {
-    return $this->get('status')->value == 0;
+    return (bool) $this->get('status')->value == 0;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function close() {
+    return $this->set('status', 0);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function open() {
+    return $this->set('status', 1);
   }
 
   /**
@@ -273,6 +289,7 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setLabel(t('Allow anonymous votes'))
       ->setDescription(t('A flag indicating whether anonymous users are allowed to vote.'))
       ->setSetting('unsigned', TRUE)
+      ->setRequired(TRUE)
       ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
       ->setDisplayOptions('form', array(
         'type' => 'options_select',
@@ -283,6 +300,7 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setLabel(t('Allow cancel votes'))
       ->setDescription(t('A flag indicating whether users may cancel their vote.'))
       ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
+      ->setRequired(TRUE)
       ->setDisplayOptions('form', array(
         'type' => 'options_select',
         'weight' => 2,
@@ -292,6 +310,7 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setLabel(t('Allow view results'))
       ->setDescription(t('A flag indicating whether users may see the results before voting.'))
       ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
+      ->setRequired(TRUE)
       ->setDisplayOptions('form', array(
         'type' => 'options_select',
         'weight' => 3,
@@ -301,6 +320,7 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setLabel(t('Active?'))
       ->setDescription(t('A flag indicating whether the poll is active.'))
       ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
+      ->setRequired(TRUE)
       ->setDisplayOptions('form', array(
         'type' => 'options_select',
         'weight' => 4,

@@ -29,7 +29,7 @@ class PollController extends ControllerBase {
         'uid' => $account->id(),
         'runtime' => 0,
         'anonymous_vote_allow' => 0,
-        'cancel_vote_allow' => 0,
+        'cancel_vote_allow' => 1,
         'result_vote_allow' => 0,
         'status' => 1,
       ));

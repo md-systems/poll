@@ -1,0 +1,18 @@
+poll.poll_view:
+  route_name: poll.poll_view
+  base_route: poll.poll_view
+  title: View
+poll.poll_edit:
+  route_name: poll.poll_edit
+  base_route: poll.poll_view
+  title: Edit
+poll.poll_delete:
+  route_name: poll.poll_delete
+  base_route: poll.poll_view
+  title: Delete
+  weight: 8
+poll.poll_votes:
+  route_name: poll.poll_delete
+  base_route: poll.poll_view
+  title: Votes
+  weight: 10

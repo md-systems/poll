@@ -8,8 +8,7 @@
 use Drupal\poll\Entity\Poll;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Template\Attribute;
-use Symfony\Component\HttpFoundation\Request;
-
+use Drupal\Core\Routing\RouteMatchInterface;
 /**
  * Denotes that the poll is not published.
  */
@@ -23,7 +22,7 @@ const POLL_PUBLISHED = 1;
 /**
  * Implements hook_help().
  */
-function poll_help($route_name, Request $request) {
+function poll_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.poll':
       $output = '<h3>' . t('About') . '</h3>';
@@ -114,8 +113,12 @@ function poll_page_build(&$page) {
  * @return \Drupal\poll\PollInterface
  *   An object describing the poll.
  */
-function poll_load($id) {
-  return entity_load('poll', $id);
+function poll_load($pid = NULL, $reset = FALSE) {
+  return entity_load('poll', $pid, $reset);
+}
+
+function poll_load_multiple($pids = array(), $reset = FALSE) {
+  return entity_load_multiple('poll', $pids, $reset);
 }
 
 /**
@@ -131,16 +134,18 @@ function poll_uri($poll) {
  * Implements hook_cron().
  */
 function poll_cron() {
-  $nids = db_query('SELECT p.nid FROM {poll} p INNER JOIN {node} n ON p.nid = n.nid WHERE (n.created + p.runtime) < :request_time AND p.active = :active AND p.runtime <> :runtime', array(
+  $pids = db_query('SELECT p.id FROM {poll_poll} p WHERE (p.created + p.runtime) < :request_time AND p.status = :status AND p.runtime <> :runtime', array(
       ':request_time' => REQUEST_TIME,
-      ':active' => 1,
+      ':status' => 1,
       ':runtime' => 0
     ))->fetchCol();
-  if (!empty($nids)) {
-    db_update('poll')
-      ->fields(array('active' => 0))
-      ->condition('nid', $nids)
-      ->execute();
+
+  if (!empty($pids)) {
+    $polls = poll_load_multiple($pids);
+    foreach ($polls as $poll) {
+      $poll->close();
+      $poll->save();
+    }
   }
 }
 

@@ -56,7 +56,7 @@ class PollVoteDeleteForm extends ContentEntityConfirmFormBase {
       '%user' => $account->id(),
       '%poll' => $this->entity->getId()
     ));
-    drupal_set_message($this->t('The vote has been deleted.'));
+    drupal_set_message($this->t('Your vote was cancelled.'));
     // Display the original poll.
     $form_state['redirect_route'] = array(
       'route_name' => 'poll.poll_view',

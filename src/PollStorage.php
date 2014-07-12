@@ -47,12 +47,12 @@ class PollStorage extends ContentEntityDatabaseStorage implements PollStorageInt
         ));
       }
       else {
-        $query = $this->database->query("SELECT * FROM {poll_vote} WHERE pid = :pid AND hostname = :hostname", array(
+        $query = $this->database->query("SELECT * FROM {poll_vote} WHERE pid = :pid AND hostname = :hostname AND uid = 0", array(
           ':pid' => $poll->id(),
-          ':hostname' => Drupal::request()->getClientIp()
+          ':hostname' => \Drupal::request()->getClientIp()
         ));
       }
-      return $query->fetchObject();
+      return $query->fetchAssoc();
     }
     return FALSE;
   }

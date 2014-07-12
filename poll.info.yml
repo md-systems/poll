@@ -7,3 +7,4 @@ version: VERSION
 dependencies:
   - field
   - node
+  - options

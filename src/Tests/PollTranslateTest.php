@@ -7,6 +7,8 @@
 
 namespace Drupal\poll\Tests;
 
+use Drupal\Core\Language\Language;
+
 /**
  * Tests poll translation logic.
  */
@@ -17,7 +19,7 @@ class PollTranslateTest extends PollTestBase {
    *
    * @var array
    */
-  public static $modules = array('translation');
+  public static $modules = array('language', 'content_translation');
 
   public static function getInfo() {
     return array(
@@ -27,6 +29,13 @@ class PollTranslateTest extends PollTestBase {
     );
   }
 
+  public function setUp() {
+    $language = new Language(array(
+      'id' => 'zh-hans',
+    ));
+    language_save($language);
+  }
+
   /**
    * Tests poll creation and translation.
    *
@@ -34,7 +43,7 @@ class PollTranslateTest extends PollTestBase {
    * the vote count values are set to 0.
    */
   function testPollTranslate() {
-    $admin_user = $this->drupalCreateUser(array('administer content types', 'administer languages', 'edit any poll content', 'create poll content', 'administer nodes', 'translate all content'));
+    $admin_user = $this->drupalCreateUser(array('administer content types', 'administer languages', 'administer polls', 'translate all content'));
 
     // Set up a poll with two choices.
     $title = $this->randomName();
@@ -44,13 +53,6 @@ class PollTranslateTest extends PollTestBase {
 
     $this->drupalLogout();
     $this->drupalLogin($admin_user);
-
-    // Enable a second language.
-    $this->drupalGet('admin/config/regional/language');
-    $edit = array();
-    $edit['predefined_langcode'] = 'nl';
-    $this->drupalPost('admin/config/regional/language/add', $edit, t('Add language'));
-    $this->assertRaw(t('The language %language has been created and can now be used.', array('%language' => 'Dutch')), 'Language Dutch has been created.');
 
     // Set "Poll" content type to use multilingual support with translation.
     $this->drupalGet('admin/structure/types/manage/poll');
