@@ -31,7 +31,7 @@ class PollExpirationTest extends PollTestBase {
 
     // Visit the poll edit page and verify that by default, expiration
     // is set to unlimited.
-    $this->drupalGet("node/$poll_nid/edit");
+    $this->drupalGet("poll/$poll_nid/edit");
     $this->assertField('runtime', 'Poll expiration setting found.');
     $elements = $this->xpath('//select[@id="edit-runtime"]/option[@selected="selected"]');
     $this->assertTrue(isset($elements[0]['value']) && $elements[0]['value'] == 0, 'Poll expiration set to unlimited.');
@@ -40,34 +40,39 @@ class PollExpirationTest extends PollTestBase {
     $edit = array();
     $poll_expiration = 604800; // One week.
     $edit['runtime'] = $poll_expiration;
-    $this->drupalPost(NULL, $edit, t('Save'));
-    $this->assertRaw(t('Poll %title has been updated.', array('%title' => $title)), 'Poll expiration settings saved.');
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->assertRaw(t('The poll %title has been updated.', array('%title' => $title)), 'Poll expiration settings saved.');
 
     // Make sure that the changed expiration settings is kept.
-    $this->drupalGet("node/$poll_nid/edit");
+    $this->drupalGet("poll/$poll_nid/edit");
     $elements = $this->xpath('//select[@id="edit-runtime"]/option[@selected="selected"]');
-    $this->assertTrue(isset($elements[0]['value']) && $elements[0]['value'] == $poll_expiration, 'Poll expiration set to unlimited.');
+    $this->assertTrue(isset($elements[0]['value']) && $elements[0]['value'] == $poll_expiration, 'Poll expiration set to one Week.');
 
     // Force a cron run. Since the expiration date has not yet been reached,
     // the poll should remain active.
-    drupal_cron_run();
-    $this->drupalGet("node/$poll_nid/edit");
-    $elements = $this->xpath('//input[@id="edit-active-1"]');
-    $this->assertTrue(isset($elements[0]) && !empty($elements[0]['checked']), 'Poll is still active.');
+    \Drupal::Service('cron')->run();
+    $this->drupalGet("poll/$poll_nid/edit");
+    $elements = $this->xpath('//select[@id="edit-status"]/option[@selected="selected"]');
+    $this->assertTrue(isset($elements[0]['value']) && $elements[0]['value'] == 1, 'Poll is still active.');
 
     // Test expiration. Since REQUEST_TIME is a constant and we don't
     // want to keep SimpleTest waiting until the moment of expiration arrives,
     // we forcibly change the expiration date in the database.
-    $created = db_query('SELECT created FROM {node} WHERE nid = :nid', array(':nid' => $poll_nid))->fetchField();
-    db_update('node')
-      ->fields(array('created' => $created - ($poll_expiration * 1.01)))
-      ->condition('nid', $poll_nid)
+    $created = db_query('SELECT created FROM {poll_poll} WHERE id = :id', array(':id' => $poll_nid))->fetchField();
+    debug($created);
+    debug($created - ($poll_expiration * 1.21));
+    db_update('poll_poll')
+      ->fields(array('created' => $created - ($poll_expiration * 1.21)))
+      ->condition('id', $poll_nid)
       ->execute();
 
+    $created = db_query('SELECT created FROM {poll_poll} WHERE id = :id', array(':id' => $poll_nid))->fetchField();
+    debug($created);
+
     // Run cron and verify that the poll is now marked as "closed".
-    drupal_cron_run();
-    $this->drupalGet("node/$poll_nid/edit");
-    $elements = $this->xpath('//input[@id="edit-active-0"]');
-    $this->assertTrue(isset($elements[0]) && !empty($elements[0]['checked']), 'Poll has expired.');
+    \Drupal::Service('cron')->run();
+    $this->drupalGet("poll/$poll_nid/edit");
+    $elements = $this->xpath('//select[@id="edit-status"]/option[@selected="selected"]');
+    $this->assertTrue(isset($elements[0]['value']) && $elements[0]['value'] == 0, 'Poll has expired.');
   }
 }
