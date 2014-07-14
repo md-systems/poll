@@ -7,6 +7,8 @@
 
 namespace Drupal\poll\Tests;
 
+use Drupal\poll\Entity\Poll;
+
 /**
  * Tests the expiration of polls.
  */
@@ -59,7 +61,7 @@ class PollExpirationTest extends PollTestBase {
 
     // Run cron and verify that the poll is now marked as "closed".
     $this->cronRun();
-    $loaded_poll = poll_load($poll->id());
+    $loaded_poll = Poll::load($poll->id());
     $this->assertTrue($loaded_poll->isClosed(), 'Poll has expired.');
   }
 }

@@ -9,6 +9,7 @@ use Drupal\poll\Entity\Poll;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Routing\RouteMatchInterface;
+
 /**
  * Denotes that the poll is not published.
  */
@@ -105,23 +106,6 @@ function poll_page_build(&$page) {
 }
 
 /**
- * Loads a poll.
- *
- * @param int $id
- *   The poll id.
- *
- * @return \Drupal\poll\PollInterface
- *   An object describing the poll.
- */
-function poll_load($pid = NULL, $reset = FALSE) {
-  return entity_load('poll', $pid, $reset);
-}
-
-function poll_load_multiple($pids = array(), $reset = FALSE) {
-  return entity_load_multiple('poll', $pids, $reset);
-}
-
-/**
  * Entity URI callback.
  */
 function poll_uri($poll) {
@@ -141,7 +125,7 @@ function poll_cron() {
     ))->fetchCol();
 
   if (!empty($pids)) {
-    $polls = poll_load_multiple($pids);
+    $polls = Poll::loadMultiple($pids);
     foreach ($polls as $poll) {
       $poll->close();
       $poll->save();
@@ -229,3 +213,4 @@ function template_preprocess_poll_results(&$variables) {
   $variables['title'] = String::checkPlain($variables['raw_title']);
   $variables['results_title'] = t('Results');
 }
+
