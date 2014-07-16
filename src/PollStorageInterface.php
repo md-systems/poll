@@ -87,9 +87,9 @@ interface PollStorageInterface extends EntityStorageInterface {
   public function getPollDuplicates(PollInterface $poll);
 
   /**
-   * Find all expired polls.
+   * Returns all expired polls.
    *
-   * @return mixed
+   * @return \Drupal\poll\PollInterface[]
    *
    */
   public function getExpiredPolls();

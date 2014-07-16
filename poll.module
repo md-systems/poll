@@ -111,12 +111,10 @@ function poll_uri($poll) {
   );
 }
 
-/**
- * Unpublish expired polls if their $duration isn't "Unlimited"
- */
 function poll_cron() {
+  //Unpublish expired polls if their $duration isn't "Unlimited"
   $polls = \Drupal::entityManager()->getStorage('poll')->getExpiredPolls();
-  foreach($polls as $poll) {
+  foreach ($polls as $poll) {
     $poll->status->value = 0;
     $poll->save();
   }

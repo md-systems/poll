@@ -65,8 +65,6 @@ class PollExpirationTest extends PollTestBase {
       ->condition('id', $poll_nid)
       ->execute();
 
-    //$created = db_query('SELECT created FROM {poll_poll} WHERE id = :id', array(':id' => $poll_nid))->fetchField();
-
     // Run cron and verify that the poll is now marked as "closed".
     \Drupal::Service('cron')->run();
     $this->drupalGet("poll/$poll_nid/edit");
