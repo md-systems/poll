@@ -14,12 +14,12 @@ use Drupal\Component\Utility\String;
  */
 class PollBlockTest extends PollTestBase {
 
-    /**
-     * An administrative user for testing.
-     *
-     * @var \Drupal\user\Entity\User
-     */
-    protected $adminUser;
+  /**
+   * An administrative user for testing.
+   *
+   * @var \Drupal\user\Entity\User
+   */
+  protected $adminUser;
 
   /**
    * Modules to enable.
@@ -66,7 +66,7 @@ class PollBlockTest extends PollTestBase {
 
     // Logout and login back in as a user who can vote.
     $this->drupalLogout();
-    $vote_user = $this->drupalCreateUser(array('access polls', 'access content'));
+    $vote_user = $this->drupalCreateUser(array('access polls', 'administer polls'));
     $this->drupalLogin($vote_user);
 
     // Verify we can vote via the block.
@@ -76,14 +76,14 @@ class PollBlockTest extends PollTestBase {
     $this->drupalPostForm('user/' . $vote_user->id(), $edit, t('Vote'));
     $this->assertText('Your vote has been recorded.', 'Your vote has been recorded.');
     $this->assertText('Total votes:  1', 'Vote count updated correctly.');
-    /*Oder Polls link is not there, fix it in the module
+
     $this->assertText('Older polls', 'Link to older polls appears.');
     $this->clickLink('Older polls');
     $this->assertText('1 vote - open', 'Link to poll listing correct.');
-    */
+
 
     // Close the poll and verify block doesn't appear.
-    $content_user = $this->drupalCreateUser(array('access polls', 'access content', 'administer polls'));
+    $content_user = $this->drupalCreateUser(array('access polls', 'administer polls'));
     $this->drupalLogout();
     $this->drupalLogin($content_user);
     $close_edit = array('status' => 0);

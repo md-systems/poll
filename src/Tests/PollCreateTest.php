@@ -67,8 +67,8 @@ class PollCreateTest extends PollTestBase {
    * Tests creating, editing, and closing a poll.
    */
   function testPollClose() {
-    $content_user = $this->drupalCreateUser(array('administer polls', 'access content'));
-    $vote_user = $this->drupalCreateUser(array('access polls', 'access content'));
+    $content_user = $this->drupalCreateUser(array('administer polls'));
+    $vote_user = $this->drupalCreateUser(array('access polls'));
 
     // Create poll.
     $title = $this->randomName();

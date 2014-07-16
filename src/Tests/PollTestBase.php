@@ -74,14 +74,6 @@ abstract class PollTestBase extends WebTestBase {
       }
     }
 
-    /* No previewbutton to check with sascha.
-    if ($preview) {
-      $this->drupalPostForm(NULL, $edit, t('Preview'));
-      $this->assertPollChoiceOrder($choices, $index, TRUE);
-      list($edit, $index) = $this->_pollGenerateEdit($title, $choices, $index);
-    }
-    */
-
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $poll = $this->drupalGetPollByQuestion($title);
 
@@ -227,6 +219,6 @@ abstract class PollTestBase extends WebTestBase {
   function pollUpdate($nid, $title, $edit) {
     // Edit the poll node.
     $this->drupalPostForm('poll/' . $nid . '/edit', $edit, t('Save'));
-    $this->assertText(t('@type @title has been updated.', array('@type' => 'poll', '@title' => $title)), 'Poll has been updated.');
+    $this->assertText(t('poll @title has been updated.', array('@title' => $title)), 'Poll has been updated.');
   }
 }
