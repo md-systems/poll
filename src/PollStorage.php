@@ -124,4 +124,10 @@ class PollStorage extends ContentEntityDatabaseStorage implements PollStorageInt
       ->pager(1);
     return $this->loadMultiple($query->execute());
   }
+
+  public function getExpiredPolls() {
+    $query = $this->database->query("SELECT id, created, runtime FROM {poll_poll} WHERE (UNIX_TIMESTAMP() > (created + runtime)) AND Status = 1 AND runtime <> 0");
+    //return $query->fetchAll();
+    return $this->loadMultiple($query->fetchCol());
+  }
 }

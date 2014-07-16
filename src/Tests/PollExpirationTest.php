@@ -58,16 +58,14 @@ class PollExpirationTest extends PollTestBase {
     // Test expiration. Since REQUEST_TIME is a constant and we don't
     // want to keep SimpleTest waiting until the moment of expiration arrives,
     // we forcibly change the expiration date in the database.
+
     $created = db_query('SELECT created FROM {poll_poll} WHERE id = :id', array(':id' => $poll_nid))->fetchField();
-    debug($created);
-    debug($created - ($poll_expiration * 1.21));
     db_update('poll_poll')
       ->fields(array('created' => $created - ($poll_expiration * 1.21)))
       ->condition('id', $poll_nid)
       ->execute();
 
-    $created = db_query('SELECT created FROM {poll_poll} WHERE id = :id', array(':id' => $poll_nid))->fetchField();
-    debug($created);
+    //$created = db_query('SELECT created FROM {poll_poll} WHERE id = :id', array(':id' => $poll_nid))->fetchField();
 
     // Run cron and verify that the poll is now marked as "closed".
     \Drupal::Service('cron')->run();
