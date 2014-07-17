@@ -30,12 +30,12 @@ class PollDeleteChoiceTest extends PollTestBase {
     $this->assertTrue($poll_nid, 'Poll for choice deletion logic test created.');
 
     // Edit the poll, and try to delete first poll choice.
-    $this->drupalGet("node/$poll_nid/edit");
-    $edit['choice[chid:1][chtext]'] = '';
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->drupalGet("poll/$poll_nid/edit");
+    $edit['field_choice[0][choice]'] = '';
+    $this->drupalPostForm(NULL, $edit, t('Save'));
 
     // Click on the poll title to go to node page.
-    $this->drupalGet('poll');
+    $this->drupalGet('admin/structure/poll');
     $this->clickLink($title);
 
     // Check the first poll choice is deleted, while the others remain.

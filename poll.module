@@ -11,6 +11,8 @@ use Drupal\poll\Entity\Poll;
 use Drupal\field\Field;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Template\Attribute;
+use Drupal\poll\PollStorageInterface;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Denotes that the poll is not published.
@@ -109,11 +111,13 @@ function poll_uri($poll) {
   );
 }
 
-/**
- * @todo: Unpublish expired polls if their $duration isn't "Unlimited"
- */
 function poll_cron() {
-
+  //Unpublish expired polls if their $duration isn't "Unlimited"
+  $polls = \Drupal::entityManager()->getStorage('poll')->getExpiredPolls();
+  foreach ($polls as $poll) {
+    $poll->status->value = 0;
+    $poll->save();
+  }
 }
 
 /**
