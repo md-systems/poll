@@ -15,16 +15,6 @@ use Drupal\Component\Utility\String;
 class PollBlockTest extends PollTestBase {
 
   /**
-<<<<<<< HEAD
-=======
-   * An administrative user for testing.
-   *
-   * @var \Drupal\user\Entity\User
-   */
-  protected $adminUser;
-
-  /**
->>>>>>> d65948c... /Problems with create poll content role
    * Modules to enable.
    *
    * @var array
