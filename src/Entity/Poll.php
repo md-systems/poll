@@ -9,7 +9,7 @@ namespace Drupal\poll\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\FieldDefinition;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Symfony\Component\DependencyInjection\Container;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\poll\PollInterface;
@@ -218,24 +218,24 @@ class Poll extends ContentEntityBase implements PollInterface {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields['id'] = FieldDefinition::create('integer')
+    $fields['id'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Poll ID'))
       ->setDescription(t('The ID of the poll.'))
       ->setReadOnly(TRUE)
       ->setSetting('unsigned', TRUE);
 
-    $fields['uid'] = FieldDefinition::create('entity_reference')
+    $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('User ID'))
       ->setDescription(t('The user ID of the poll author.'))
       ->setSetting('target_type', 'user')
       ->setSetting('default_value', 0);
 
-    $fields['uuid'] = FieldDefinition::create('uuid')
+    $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
       ->setDescription(t('The poll UUID.'))
       ->setReadOnly(TRUE);
 
-    $fields['question'] = FieldDefinition::create('string')
+    $fields['question'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Question'))
       ->setDescription(t('The poll question.'))
       ->setRequired(TRUE)
@@ -245,7 +245,7 @@ class Poll extends ContentEntityBase implements PollInterface {
         'weight' => -100,
       ));
 
-    $fields['langcode'] = FieldDefinition::create('language')
+    $fields['langcode'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language code'))
       ->setDescription(t('The poll language code.'));
 
@@ -272,9 +272,9 @@ class Poll extends ContentEntityBase implements PollInterface {
       31536000,
     );
 
-    $period = array(0 => t('Unlimited')) + array_map('format_interval', array_combine($duration, $duration));
+    $period = array(0 => t('Unlimited')) + array_map(array(\Drupal::service('date.formatter'), 'formatInterval'), array_combine($duration, $duration));
 
-    $fields['runtime'] = FieldDefinition::create('list_integer')
+    $fields['runtime'] = BaseFieldDefinition::create('list_integer')
       ->setLabel(t('Runtime'))
       ->setDescription(t('The number of seconds after creation during which the poll is active.'))
       ->setSetting('unsigned', TRUE)
@@ -285,7 +285,7 @@ class Poll extends ContentEntityBase implements PollInterface {
         'weight' => 0,
       ));
 
-    $fields['anonymous_vote_allow'] = FieldDefinition::create('list_integer')
+    $fields['anonymous_vote_allow'] = BaseFieldDefinition::create('list_integer')
       ->setLabel(t('Allow anonymous votes'))
       ->setDescription(t('A flag indicating whether anonymous users are allowed to vote.'))
       ->setSetting('unsigned', TRUE)
@@ -296,7 +296,7 @@ class Poll extends ContentEntityBase implements PollInterface {
         'weight' => 1,
       ));
 
-    $fields['cancel_vote_allow'] = FieldDefinition::create('list_integer')
+    $fields['cancel_vote_allow'] = BaseFieldDefinition::create('list_integer')
       ->setLabel(t('Allow cancel votes'))
       ->setDescription(t('A flag indicating whether users may cancel their vote.'))
       ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
@@ -306,7 +306,7 @@ class Poll extends ContentEntityBase implements PollInterface {
         'weight' => 2,
       ));
 
-    $fields['result_vote_allow'] = FieldDefinition::create('list_integer')
+    $fields['result_vote_allow'] = BaseFieldDefinition::create('list_integer')
       ->setLabel(t('Allow view results'))
       ->setDescription(t('A flag indicating whether users may see the results before voting.'))
       ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
@@ -316,7 +316,7 @@ class Poll extends ContentEntityBase implements PollInterface {
         'weight' => 3,
       ));
 
-    $fields['status'] = FieldDefinition::create('list_integer')
+    $fields['status'] = BaseFieldDefinition::create('list_integer')
       ->setLabel(t('Active?'))
       ->setDescription(t('A flag indicating whether the poll is active.'))
       ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
@@ -328,7 +328,7 @@ class Poll extends ContentEntityBase implements PollInterface {
 
     // This is updated by the fetcher and not when the feed is saved, therefore
     // it's a timestamp and not a changed field.
-    $fields['created'] = FieldDefinition::create('timestamp')
+    $fields['created'] = BaseFieldDefinition::create('timestamp')
       ->setLabel(t('Created'))
       ->setDescription(t('When the poll was created, as a Unix timestamp.'));
 

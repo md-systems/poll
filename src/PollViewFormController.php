@@ -10,6 +10,7 @@ namespace Drupal\poll;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Component\Utility\String;
 use Drupal;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Base for controller for poll term edit forms.
@@ -19,7 +20,7 @@ class PollViewFormController extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
-  public function form(array $form, array &$form_state) {
+  public function form(array $form, FormStateInterface $form_state) {
     if ($this->showResults($this->entity, $form_state)) {
       $form['results']['#markup'] = $this->showPollResults($this->entity);
     }
@@ -48,7 +49,7 @@ class PollViewFormController extends ContentEntityForm {
   /**
    * Returns the action form elements for the current entity form.
    */
-  protected function actions(array $form, array &$form_state) {
+  protected function actions(array $form, FormStateInterface $form_state) {
     $actions = parent::actions($form, $form_state);
     if (count($actions)) {
       foreach ($actions as $name => $action) {
@@ -106,14 +107,11 @@ class PollViewFormController extends ContentEntityForm {
    * @param array $form
    * @param array $form_state
    */
-  public function cancel(array $form, array &$form_state) {
-    $form_state['redirect_route'] = array(
-      'route_name' => 'poll.poll_vote_delete',
-      'route_parameters' => array(
+  public function cancel(array $form, FormStateInterface $form_state) {
+    $form_state->setRedirect('poll.poll_vote_delete', array(
         'poll' => $this->entity->id(),
-        'user' => \Drupal::currentUser()->id(),
-      ),
-    );
+      'user' => \Drupal::currentUser()->id()
+    ));
   }
 
   /**
@@ -122,7 +120,7 @@ class PollViewFormController extends ContentEntityForm {
    * @param array $form
    * @param array $form_state
    */
-  public function result(array $form, array &$form_state) {
+  public function result(array $form, FormStateInterface $form_state) {
     $form_state['input']['show_results'] = TRUE;
     $form_state['rebuild'] = TRUE;
   }
@@ -133,7 +131,7 @@ class PollViewFormController extends ContentEntityForm {
    * @param array $form
    * @param array $form_state
    */
-  public function back(array $form, array &$form_state) {
+  public function back(array $form, FormStateInterface $form_state) {
     $form_state['input']['show_results'] = FALSE;
     $form_state['rebuild'] = TRUE;
   }
@@ -144,9 +142,9 @@ class PollViewFormController extends ContentEntityForm {
    * @param array $form
    * @param array $form_state
    */
-  public function save(array $form, array &$form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     $options = array();
-    $options['chid'] = $form_state['values']['choice'];
+    $options['chid'] = $form_state->getValue('choice');
     $options['uid'] = \Drupal::currentUser()->id();
     $options['pid'] = $this->entity->id();
     $options['hostname'] = \Drupal::request()->getClientIp();
@@ -160,16 +158,15 @@ class PollViewFormController extends ContentEntityForm {
     else {
       drupal_set_message($this->t('Sorry, your vote could not be recorded.'), 'error');
     }
-    $form_state['redirect'] = $this->entity->url();
+    $form_state->setRedirect($this->entity->url());
   }
 
   /**
    * @inheritdoc
    */
-  public function validate(array $form, array &$form_state) {
-    if (!isset($form_state['values']['choice']) || $form_state['values']['choice'] == NULL) {
-      Drupal::formBuilder()
-        ->setErrorByName('choice', $form_state, $this->t('Your vote could not be recorded because you did not select any of the choices.'));
+  public function validate(array $form, FormStateInterface $form_state) {
+    if (!$form_state->hasValue('choice')) {
+      $form_state->setErrorByName('choice', $this->t('Your vote could not be recorded because you did not select any of the choices.'));
     }
   }
 
@@ -181,7 +178,7 @@ class PollViewFormController extends ContentEntityForm {
    *
    * @return bool
    */
-  public function showResults(PollInterface $poll, $form_state) {
+  public function showResults(PollInterface $poll, FormStateInterface $form_state) {
     $account = $this->currentUser();
     switch (TRUE) {
       // The "View results" button, when available, has been clicked.

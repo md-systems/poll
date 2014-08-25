@@ -8,6 +8,7 @@
 namespace Drupal\poll\Form;
 
 use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\poll\PollInterface;
 use Drupal\Component\Utility\String;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -25,7 +26,7 @@ class PollViewForm extends FormBase {
     return 'poll_view_form';
   }
 
-  public function buildForm(array $form, array &$form_state, $poll = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, $poll = NULL) {
     // Add the poll to the form.
     $form['poll']['#type'] = 'value';
     $form['poll']['#value'] = $poll;
@@ -65,12 +66,12 @@ class PollViewForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, array &$form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     // Leaving empty
     $this->save($form, $form_state);
   }
 
-  public function showResults(PollInterface $poll, $form_state) {
+  public function showResults(PollInterface $poll, FormStateInterface $form_state) {
     $account = $this->currentUser();
     switch (TRUE) {
       // The "View results" button, when available, has been clicked.
@@ -90,7 +91,7 @@ class PollViewForm extends FormBase {
     }
   }
 
-  protected function actions(array $form, array &$form_state, $poll) {
+  protected function actions(array $form, FormStateInterface $form_state, $poll) {
     // Remove all actions.
     $actions = array();
     if ($this->showResults($poll, $form_state)) {
@@ -187,14 +188,11 @@ class PollViewForm extends FormBase {
    * @param array $form
    * @param array $form_state
    */
-  public function cancel(array $form, array &$form_state) {
-    $form_state['redirect_route'] = array(
-      'route_name' => 'poll.poll_vote_delete',
-      'route_parameters' => array(
+  public function cancel(array $form, FormStateInterface $form_state) {
+    $form_state->setRedirect('poll.poll_vote_delete', array(
         'poll' => $form_state['values']['poll']->id(),
         'user' => \Drupal::currentUser()->id(),
-      ),
-    );
+    ));
   }
 
   /**
@@ -203,7 +201,7 @@ class PollViewForm extends FormBase {
    * @param array $form
    * @param array $form_state
    */
-  public function result(array $form, array &$form_state) {
+  public function result(array $form, FormStateInterface $form_state) {
     $form_state['input']['show_results'] = TRUE;
     $form_state['rebuild'] = TRUE;
   }
@@ -214,7 +212,7 @@ class PollViewForm extends FormBase {
    * @param array $form
    * @param array $form_state
    */
-  public function back(array $form, array &$form_state) {
+  public function back(array $form, FormStateInterface $form_state) {
     $form_state['input']['show_results'] = FALSE;
     $form_state['rebuild'] = TRUE;
   }
@@ -225,30 +223,31 @@ class PollViewForm extends FormBase {
    * @param array $form
    * @param array $form_state
    */
-  public function save(array $form, array &$form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     $options = array();
-    $options['chid'] = $form_state['values']['choice'];
+    $options['chid'] = $form_state->getValue('choice');
     $options['uid'] = \Drupal::currentUser()->id();
-    $options['pid'] = $form_state['values']['poll']->id();
+    $options['pid'] = $form_state->getValue('poll')->id();
     $options['hostname'] = \Drupal::request()->getClientIp();
     $options['timestamp'] = REQUEST_TIME;
     // save vote
-    $pollStorage = \Drupal::entityManager()->getStorage($form_state['values']['poll']->getId());
+    $pollStorage = \Drupal::entityManager()
+      ->getStorage($form_state->getValue('poll')->id());
     $pollStorage->saveVote($options);
     // @todo: confirm vote has been saved.
     drupal_set_message($this->t('Your vote has been recorded.'));
 
-    $form_state['redirect'] = $form_state['values']['poll']->url();
+    $form_state->setRedirectUrl($form_state->getValue('poll')->urlInfo());
   }
 
   /**
    * {@inheritdoc}
    *
    */
-  public function validateForm(array &$form, array &$form_state) {
-    if($form_state['values']['op'] == 'Vote') {
-      if (!isset($form_state['values']['choice']) || $form_state['values']['choice'] == NULL) {
-        $this->setFormError('choice', $form_state, $this->t('Your vote could not be recorded because you did not select any of the choices.'));
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    if ($form_state->getValue('op') == 'Vote') {
+      if (!$form_state->hasValue('choice')) {
+        $form_state->setErrorByName('choice', $this->t('Your vote could not be recorded because you did not select any of the choices.'));
       }
     }
   }
