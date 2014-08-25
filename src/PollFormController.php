@@ -9,6 +9,7 @@ namespace Drupal\poll;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Form controller for the poll edit forms.
@@ -18,7 +19,7 @@ class PollFormController extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
-  public function form(array $form, array &$form_state) {
+  public function form(array $form, FormStateInterface $form_state) {
     $poll = $this->entity;
     // @todo: convert to a language selection widget defined in the base field.
     //   Blocked on https://drupal.org/node/2226493 which adds a generic
@@ -34,7 +35,7 @@ class PollFormController extends ContentEntityForm {
     return parent::form($form, $form_state, $poll);
   }
 
-  public function buildEntity(array $form, array &$form_state) {
+  public function buildEntity(array $form, FormStateInterface $form_state) {
     /** @var \Drupal\poll\PollInterface $entity */
     $entity = parent::buildEntity($form, $form_state);
 
@@ -47,14 +48,14 @@ class PollFormController extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, array &$form_state) {
+  public function validate(array $form, FormStateInterface $form_state) {
     $poll = $this->buildEntity($form, $form_state);
     // Check for duplicate titles.
     $poll_storage = $this->entityManager->getStorage('poll');
     $result = $poll_storage->getPollDuplicates($poll);
     foreach ($result as $item) {
       if (strcasecmp($item->label(), $poll->label()) == 0) {
-        $this->setFormError('question', $form_state, $this->t('A feed named %feed already exists. Enter a unique question.', array('%feed' => $poll->label())));
+        $form_state->setErrorByName('question', $this->t('A feed named %feed already exists. Enter a unique question.', array('%feed' => $poll->label())));
       }
     }
     parent::validate($form, $form_state);
@@ -63,7 +64,7 @@ class PollFormController extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
-  public function save(array $form, array &$form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     $poll = $this->entity;
     $insert = (bool) $poll->id();
     $poll->save();
@@ -75,7 +76,7 @@ class PollFormController extends ContentEntityForm {
       drupal_set_message($this->t('The poll %poll has been added.', array('%poll' => $poll->label())));
     }
 
-    $form_state['redirect_route']['route_name'] = 'poll.poll_list';
+    $form_state->setRedirect('poll.poll_list');
   }
 
 }
