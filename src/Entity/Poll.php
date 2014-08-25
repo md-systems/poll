@@ -22,7 +22,7 @@ use Drupal\user\UserInterface;
  * @ContentEntityType(
  *   id = "poll",
  *   label = @Translation("Poll"),
- *   controllers = {
+ *   handlers = {
  *     "storage" = "Drupal\poll\PollStorage",
  *     "translation" = "Drupal\content_translation\ContentTranslationHandler",
  *     "list_builder" = "Drupal\poll\PollListBuilder",
@@ -228,7 +228,8 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setLabel(t('User ID'))
       ->setDescription(t('The user ID of the poll author.'))
       ->setSetting('target_type', 'user')
-      ->setSetting('default_value', 0);
+      ->setTranslatable(TRUE)
+      ->setDefaultValue(0);
 
     $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
@@ -239,6 +240,7 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setLabel(t('Question'))
       ->setDescription(t('The poll question.'))
       ->setRequired(TRUE)
+      ->setTranslatable(TRUE)
       ->setSetting('max_length', 255)
       ->setDisplayOptions('form', array(
         'type' => 'string',
