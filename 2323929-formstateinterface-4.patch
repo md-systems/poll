@@ -1,0 +1,557 @@
+diff --git a/src/Entity/Poll.php b/src/Entity/Poll.php
+index 646d4a7..d358627 100644
+--- a/src/Entity/Poll.php
++++ b/src/Entity/Poll.php
+@@ -9,7 +9,7 @@ namespace Drupal\poll\Entity;
+ 
+ use Drupal\Core\Entity\ContentEntityBase;
+ use Drupal\Core\Entity\EntityTypeInterface;
+-use Drupal\Core\Field\FieldDefinition;
++use Drupal\Core\Field\BaseFieldDefinition;
+ use Symfony\Component\DependencyInjection\Container;
+ use Drupal\Core\Entity\EntityStorageInterface;
+ use Drupal\poll\PollInterface;
+@@ -218,24 +218,24 @@ class Poll extends ContentEntityBase implements PollInterface {
+    * {@inheritdoc}
+    */
+   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+-    $fields['id'] = FieldDefinition::create('integer')
++    $fields['id'] = BaseFieldDefinition::create('integer')
+       ->setLabel(t('Poll ID'))
+       ->setDescription(t('The ID of the poll.'))
+       ->setReadOnly(TRUE)
+       ->setSetting('unsigned', TRUE);
+ 
+-    $fields['uid'] = FieldDefinition::create('entity_reference')
++    $fields['uid'] = BaseFieldDefinition::create('entity_reference')
+       ->setLabel(t('User ID'))
+       ->setDescription(t('The user ID of the poll author.'))
+       ->setSetting('target_type', 'user')
+       ->setSetting('default_value', 0);
+ 
+-    $fields['uuid'] = FieldDefinition::create('uuid')
++    $fields['uuid'] = BaseFieldDefinition::create('uuid')
+       ->setLabel(t('UUID'))
+       ->setDescription(t('The poll UUID.'))
+       ->setReadOnly(TRUE);
+ 
+-    $fields['question'] = FieldDefinition::create('string')
++    $fields['question'] = BaseFieldDefinition::create('string')
+       ->setLabel(t('Question'))
+       ->setDescription(t('The poll question.'))
+       ->setRequired(TRUE)
+@@ -245,7 +245,7 @@ class Poll extends ContentEntityBase implements PollInterface {
+         'weight' => -100,
+       ));
+ 
+-    $fields['langcode'] = FieldDefinition::create('language')
++    $fields['langcode'] = BaseFieldDefinition::create('language')
+       ->setLabel(t('Language code'))
+       ->setDescription(t('The poll language code.'));
+ 
+@@ -272,9 +272,9 @@ class Poll extends ContentEntityBase implements PollInterface {
+       31536000,
+     );
+ 
+-    $period = array(0 => t('Unlimited')) + array_map('format_interval', array_combine($duration, $duration));
++    $period = array(0 => t('Unlimited')) + array_map(array(\Drupal::service('date.formatter'), 'formatInterval'), array_combine($duration, $duration));
+ 
+-    $fields['runtime'] = FieldDefinition::create('list_integer')
++    $fields['runtime'] = BaseFieldDefinition::create('list_integer')
+       ->setLabel(t('Runtime'))
+       ->setDescription(t('The number of seconds after creation during which the poll is active.'))
+       ->setSetting('unsigned', TRUE)
+@@ -285,7 +285,7 @@ class Poll extends ContentEntityBase implements PollInterface {
+         'weight' => 0,
+       ));
+ 
+-    $fields['anonymous_vote_allow'] = FieldDefinition::create('list_integer')
++    $fields['anonymous_vote_allow'] = BaseFieldDefinition::create('list_integer')
+       ->setLabel(t('Allow anonymous votes'))
+       ->setDescription(t('A flag indicating whether anonymous users are allowed to vote.'))
+       ->setSetting('unsigned', TRUE)
+@@ -296,7 +296,7 @@ class Poll extends ContentEntityBase implements PollInterface {
+         'weight' => 1,
+       ));
+ 
+-    $fields['cancel_vote_allow'] = FieldDefinition::create('list_integer')
++    $fields['cancel_vote_allow'] = BaseFieldDefinition::create('list_integer')
+       ->setLabel(t('Allow cancel votes'))
+       ->setDescription(t('A flag indicating whether users may cancel their vote.'))
+       ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
+@@ -306,7 +306,7 @@ class Poll extends ContentEntityBase implements PollInterface {
+         'weight' => 2,
+       ));
+ 
+-    $fields['result_vote_allow'] = FieldDefinition::create('list_integer')
++    $fields['result_vote_allow'] = BaseFieldDefinition::create('list_integer')
+       ->setLabel(t('Allow view results'))
+       ->setDescription(t('A flag indicating whether users may see the results before voting.'))
+       ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
+@@ -316,7 +316,7 @@ class Poll extends ContentEntityBase implements PollInterface {
+         'weight' => 3,
+       ));
+ 
+-    $fields['status'] = FieldDefinition::create('list_integer')
++    $fields['status'] = BaseFieldDefinition::create('list_integer')
+       ->setLabel(t('Active?'))
+       ->setDescription(t('A flag indicating whether the poll is active.'))
+       ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
+@@ -328,7 +328,7 @@ class Poll extends ContentEntityBase implements PollInterface {
+ 
+     // This is updated by the fetcher and not when the feed is saved, therefore
+     // it's a timestamp and not a changed field.
+-    $fields['created'] = FieldDefinition::create('timestamp')
++    $fields['created'] = BaseFieldDefinition::create('timestamp')
+       ->setLabel(t('Created'))
+       ->setDescription(t('When the poll was created, as a Unix timestamp.'));
+ 
+diff --git a/src/Form/PollDeleteForm.php b/src/Form/PollDeleteForm.php
+index 4f1ff60..6c73e59 100644
+--- a/src/Form/PollDeleteForm.php
++++ b/src/Form/PollDeleteForm.php
+@@ -9,6 +9,7 @@ namespace Drupal\poll\Form;
+ 
+ use Drupal\Core\Entity\ContentEntityConfirmFormBase;
+ use Drupal\Core\Url;
++use Drupal\Core\Form\FormStateInterface;
+ 
+ /**
+  * Provides a form for deleting a poll.
+@@ -32,7 +33,7 @@ class PollDeleteForm extends ContentEntityConfirmFormBase {
+   /**
+    * {@inheritdoc}
+    */
+-  public function getCancelRoute() {
++  public function getCancelUrl() {
+     return new Url('poll.poll_list');
+   }
+ 
+@@ -46,11 +47,11 @@ class PollDeleteForm extends ContentEntityConfirmFormBase {
+   /**
+    * {@inheritdoc}
+    */
+-  public function submit(array $form, array &$form_state) {
++  public function submit(array $form, FormStateInterface $form_state) {
+     $this->entity->delete();
+     watchdog('poll', 'Poll %poll deleted.', array('%poll' => $this->entity->label()));
+     drupal_set_message($this->t('The poll %poll has been deleted.', array('%poll' => $this->entity->label())));
+-    $form_state['redirect_route']['route_name'] = 'poll.poll_list';
++    $form_state->setRedirect('poll.poll_list');
+   }
+ 
+ }
+diff --git a/src/Form/PollItemsDeleteForm.php b/src/Form/PollItemsDeleteForm.php
+index aa3b10d..a4d36bd 100644
+--- a/src/Form/PollItemsDeleteForm.php
++++ b/src/Form/PollItemsDeleteForm.php
+@@ -8,6 +8,8 @@
+ namespace Drupal\poll\Form;
+ 
+ use Drupal\Core\Entity\ContentEntityConfirmFormBase;
++use Drupal\Core\Url;
++use Drupal\Core\Form\FormStateInterface;
+ 
+ /**
+  * Provides a deletion confirmation form for items that belong to a feed.
+@@ -24,10 +26,8 @@ class PollItemsDeleteForm extends ContentEntityConfirmFormBase {
+   /**
+    * {@inheritdoc}
+    */
+-  public function getCancelRoute() {
+-    return array(
+-      'route_name' => 'aggregator.admin_overview',
+-    );
++  public function getCancelUrl() {
++    return new Url('poll.poll_list');
+   }
+ 
+   /**
+@@ -40,10 +40,9 @@ class PollItemsDeleteForm extends ContentEntityConfirmFormBase {
+   /**
+    * {@inheritdoc}
+    */
+-  public function submit(array $form, array &$form_state) {
++  public function submit(array $form, FormStateInterface $form_state) {
+     $this->entity->deleteItems();
+-
+-    $form_state['redirect_route']['route_name'] = 'aggregator.admin_overview';
++    $form_state->setRedirect('poll.poll_list');
+   }
+ 
+ }
+diff --git a/src/Form/PollViewForm.php b/src/Form/PollViewForm.php
+index 4d1351d..1ed6f91 100644
+--- a/src/Form/PollViewForm.php
++++ b/src/Form/PollViewForm.php
+@@ -8,6 +8,7 @@
+ namespace Drupal\poll\Form;
+ 
+ use Drupal\Core\Form\FormBase;
++use Drupal\Core\Form\FormStateInterface;
+ use Drupal\poll\PollInterface;
+ use Drupal\Component\Utility\String;
+ use Symfony\Component\DependencyInjection\ContainerInterface;
+@@ -25,7 +26,7 @@ class PollViewForm extends FormBase {
+     return 'poll_view_form';
+   }
+ 
+-  public function buildForm(array $form, array &$form_state, $poll = NULL) {
++  public function buildForm(array $form, FormStateInterface $form_state, $poll = NULL) {
+     // Add the poll to the form.
+     $form['poll']['#type'] = 'value';
+     $form['poll']['#value'] = $poll;
+@@ -65,12 +66,12 @@ class PollViewForm extends FormBase {
+   /**
+    * {@inheritdoc}
+    */
+-  public function submitForm(array &$form, array &$form_state) {
++  public function submitForm(array &$form, FormStateInterface $form_state) {
+     // Leaving empty
+     $this->save($form, $form_state);
+   }
+ 
+-  public function showResults(PollInterface $poll, $form_state) {
++  public function showResults(PollInterface $poll, FormStateInterface $form_state) {
+     $account = $this->currentUser();
+     switch (TRUE) {
+       // The "View results" button, when available, has been clicked.
+@@ -90,7 +91,7 @@ class PollViewForm extends FormBase {
+     }
+   }
+ 
+-  protected function actions(array $form, array &$form_state, $poll) {
++  protected function actions(array $form, FormStateInterface $form_state, $poll) {
+     // Remove all actions.
+     $actions = array();
+     if ($this->showResults($poll, $form_state)) {
+@@ -187,14 +188,11 @@ class PollViewForm extends FormBase {
+    * @param array $form
+    * @param array $form_state
+    */
+-  public function cancel(array $form, array &$form_state) {
+-    $form_state['redirect_route'] = array(
+-      'route_name' => 'poll.poll_vote_delete',
+-      'route_parameters' => array(
++  public function cancel(array $form, FormStateInterface $form_state) {
++    $form_state->setRedirect('poll.poll_vote_delete', array(
+         'poll' => $form_state['values']['poll']->id(),
+         'user' => \Drupal::currentUser()->id(),
+-      ),
+-    );
++    ));
+   }
+ 
+   /**
+@@ -203,7 +201,7 @@ class PollViewForm extends FormBase {
+    * @param array $form
+    * @param array $form_state
+    */
+-  public function result(array $form, array &$form_state) {
++  public function result(array $form, FormStateInterface $form_state) {
+     $form_state['input']['show_results'] = TRUE;
+     $form_state['rebuild'] = TRUE;
+   }
+@@ -214,7 +212,7 @@ class PollViewForm extends FormBase {
+    * @param array $form
+    * @param array $form_state
+    */
+-  public function back(array $form, array &$form_state) {
++  public function back(array $form, FormStateInterface $form_state) {
+     $form_state['input']['show_results'] = FALSE;
+     $form_state['rebuild'] = TRUE;
+   }
+@@ -225,30 +223,31 @@ class PollViewForm extends FormBase {
+    * @param array $form
+    * @param array $form_state
+    */
+-  public function save(array $form, array &$form_state) {
++  public function save(array $form, FormStateInterface $form_state) {
+     $options = array();
+-    $options['chid'] = $form_state['values']['choice'];
++    $options['chid'] = $form_state->getValue('choice');
+     $options['uid'] = \Drupal::currentUser()->id();
+-    $options['pid'] = $form_state['values']['poll']->id();
++    $options['pid'] = $form_state->getValue('poll')->id();
+     $options['hostname'] = \Drupal::request()->getClientIp();
+     $options['timestamp'] = REQUEST_TIME;
+     // save vote
+-    $pollStorage = \Drupal::entityManager()->getStorage($form_state['values']['poll']->getId());
++    $pollStorage = \Drupal::entityManager()
++      ->getStorage($form_state->getValue('poll')->id());
+     $pollStorage->saveVote($options);
+     // @todo: confirm vote has been saved.
+     drupal_set_message($this->t('Your vote has been recorded.'));
+ 
+-    $form_state['redirect'] = $form_state['values']['poll']->url();
++    $form_state->setRedirectUrl($form_state->getValue('poll')->urlInfo());
+   }
+ 
+   /**
+    * {@inheritdoc}
+    *
+    */
+-  public function validateForm(array &$form, array &$form_state) {
+-    if($form_state['values']['op'] == 'Vote') {
+-      if (!isset($form_state['values']['choice']) || $form_state['values']['choice'] == NULL) {
+-        $this->setFormError('choice', $form_state, $this->t('Your vote could not be recorded because you did not select any of the choices.'));
++  public function validateForm(array &$form, FormStateInterface $form_state) {
++    if ($form_state->getValue('op') == 'Vote') {
++      if (!$form_state->hasValue('choice')) {
++        $form_state->setErrorByName('choice', $this->t('Your vote could not be recorded because you did not select any of the choices.'));
+       }
+     }
+   }
+diff --git a/src/Form/PollVoteDeleteForm.php b/src/Form/PollVoteDeleteForm.php
+index 576d4b9..d823be0 100644
+--- a/src/Form/PollVoteDeleteForm.php
++++ b/src/Form/PollVoteDeleteForm.php
+@@ -8,6 +8,7 @@
+ namespace Drupal\poll\Form;
+ 
+ use Drupal\Core\Entity\ContentEntityConfirmFormBase;
++use Drupal\Core\Form\FormStateInterface;
+ 
+ /**
+  * Provides a form for deleting a vote.
+@@ -24,7 +25,7 @@ class PollVoteDeleteForm extends ContentEntityConfirmFormBase {
+   /**
+    * {@inheritdoc}
+    */
+-  public function getCancelRoute() {
++  public function getCancelUrl() {
+     return $this->entity->urlInfo();
+   }
+ 
+@@ -38,8 +39,9 @@ class PollVoteDeleteForm extends ContentEntityConfirmFormBase {
+   /**
+    * {@inheritdoc}
+    */
+-  public function buildForm(array $form, array &$form_state) {
++  public function buildForm(array $form, FormStateInterface $form_state) {
+     // Always provide entity id in the same form key as in the entity edit form.
++    // @todo: arg(4)
+     $form['uid'] = array('#type' => 'value', '#value' => arg(4));
+     $form = parent::buildForm($form, $form_state);
+     return $form;
+@@ -48,21 +50,16 @@ class PollVoteDeleteForm extends ContentEntityConfirmFormBase {
+   /**
+    * {@inheritdoc}
+    */
+-  public function submit(array $form, array &$form_state) {
+-    $account = entity_load('user', $form_state['values']['uid']);
++  public function submit(array $form, FormStateInterface $form_state) {
++    $account = entity_load('user', $form_state->getValue('uid'));
+     $pollStorage = \Drupal::entityManager()->getStorage($this->entity->getId());
+     $pollStorage->cancelVote($this->entity, $account);
+     watchdog('poll', '%user\'s vote in Poll #%poll deleted.', array(
+       '%user' => $account->id(),
+-      '%poll' => $this->entity->getId()
++      '%poll' => $this->entity->id()
+     ));
+     drupal_set_message($this->t('Your vote was cancelled.'));
+     // Display the original poll.
+-    $form_state['redirect_route'] = array(
+-      'route_name' => 'poll.poll_view',
+-      'route_parameters' => array(
+-        'poll' => $this->entity->id(),
+-      ),
+-    );
++    $form_state->setRedirect('poll.poll_view', array('poll' => $this->entity->id()));
+   }
+ }
+diff --git a/src/Plugin/Field/FieldWidget/PollChoiceDefaultWidget.php b/src/Plugin/Field/FieldWidget/PollChoiceDefaultWidget.php
+index fe63cc3..6784ff7 100644
+--- a/src/Plugin/Field/FieldWidget/PollChoiceDefaultWidget.php
++++ b/src/Plugin/Field/FieldWidget/PollChoiceDefaultWidget.php
+@@ -9,6 +9,7 @@ namespace Drupal\poll\Plugin\Field\FieldWidget;
+ 
+ use Drupal\Core\Field\FieldItemListInterface;
+ use Drupal\Core\Field\WidgetBase;
++use Drupal\Core\Form\FormStateInterface;
+ 
+ 
+ /**
+@@ -33,7 +34,7 @@ class PollChoiceDefaultWidget extends WidgetBase {
+   /**
+    * {@inheritdoc}
+    */
+-  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, array &$form_state) {
++  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
+     $element['chid'] = array(
+       '#type' => 'value',
+       '#value' => $items[$delta]->chid,
+diff --git a/src/PollFormController.php b/src/PollFormController.php
+index f6a9703..df5fe18 100644
+--- a/src/PollFormController.php
++++ b/src/PollFormController.php
+@@ -9,6 +9,7 @@ namespace Drupal\poll;
+ 
+ use Drupal\Core\Entity\ContentEntityForm;
+ use Drupal\Core\Language\LanguageInterface;
++use Drupal\Core\Form\FormStateInterface;
+ 
+ /**
+  * Form controller for the poll edit forms.
+@@ -18,7 +19,7 @@ class PollFormController extends ContentEntityForm {
+   /**
+    * {@inheritdoc}
+    */
+-  public function form(array $form, array &$form_state) {
++  public function form(array $form, FormStateInterface $form_state) {
+     $poll = $this->entity;
+     // @todo: convert to a language selection widget defined in the base field.
+     //   Blocked on https://drupal.org/node/2226493 which adds a generic
+@@ -34,7 +35,7 @@ class PollFormController extends ContentEntityForm {
+     return parent::form($form, $form_state, $poll);
+   }
+ 
+-  public function buildEntity(array $form, array &$form_state) {
++  public function buildEntity(array $form, FormStateInterface $form_state) {
+     /** @var \Drupal\poll\PollInterface $entity */
+     $entity = parent::buildEntity($form, $form_state);
+ 
+@@ -47,14 +48,14 @@ class PollFormController extends ContentEntityForm {
+   /**
+    * {@inheritdoc}
+    */
+-  public function validate(array $form, array &$form_state) {
++  public function validate(array $form, FormStateInterface $form_state) {
+     $poll = $this->buildEntity($form, $form_state);
+     // Check for duplicate titles.
+     $poll_storage = $this->entityManager->getStorage('poll');
+     $result = $poll_storage->getPollDuplicates($poll);
+     foreach ($result as $item) {
+       if (strcasecmp($item->label(), $poll->label()) == 0) {
+-        $this->setFormError('question', $form_state, $this->t('A feed named %feed already exists. Enter a unique question.', array('%feed' => $poll->label())));
++        $form_state->setErrorByName('question', $this->t('A feed named %feed already exists. Enter a unique question.', array('%feed' => $poll->label())));
+       }
+     }
+     parent::validate($form, $form_state);
+@@ -63,7 +64,7 @@ class PollFormController extends ContentEntityForm {
+   /**
+    * {@inheritdoc}
+    */
+-  public function save(array $form, array &$form_state) {
++  public function save(array $form, FormStateInterface $form_state) {
+     $poll = $this->entity;
+     $insert = (bool) $poll->id();
+     $poll->save();
+@@ -75,7 +76,7 @@ class PollFormController extends ContentEntityForm {
+       drupal_set_message($this->t('The poll %poll has been added.', array('%poll' => $poll->label())));
+     }
+ 
+-    $form_state['redirect_route']['route_name'] = 'poll.poll_list';
++    $form_state->setRedirect('poll.poll_list');
+   }
+ 
+ }
+diff --git a/src/PollViewFormController.php b/src/PollViewFormController.php
+index f417084..2d89344 100644
+--- a/src/PollViewFormController.php
++++ b/src/PollViewFormController.php
+@@ -10,6 +10,7 @@ namespace Drupal\poll;
+ use Drupal\Core\Entity\ContentEntityForm;
+ use Drupal\Component\Utility\String;
+ use Drupal;
++use Drupal\Core\Form\FormStateInterface;
+ 
+ /**
+  * Base for controller for poll term edit forms.
+@@ -19,7 +20,7 @@ class PollViewFormController extends ContentEntityForm {
+   /**
+    * {@inheritdoc}
+    */
+-  public function form(array $form, array &$form_state) {
++  public function form(array $form, FormStateInterface $form_state) {
+     if ($this->showResults($this->entity, $form_state)) {
+       $form['results']['#markup'] = $this->showPollResults($this->entity);
+     }
+@@ -48,7 +49,7 @@ class PollViewFormController extends ContentEntityForm {
+   /**
+    * Returns the action form elements for the current entity form.
+    */
+-  protected function actions(array $form, array &$form_state) {
++  protected function actions(array $form, FormStateInterface $form_state) {
+     $actions = parent::actions($form, $form_state);
+     if (count($actions)) {
+       foreach ($actions as $name => $action) {
+@@ -106,14 +107,11 @@ class PollViewFormController extends ContentEntityForm {
+    * @param array $form
+    * @param array $form_state
+    */
+-  public function cancel(array $form, array &$form_state) {
+-    $form_state['redirect_route'] = array(
+-      'route_name' => 'poll.poll_vote_delete',
+-      'route_parameters' => array(
++  public function cancel(array $form, FormStateInterface $form_state) {
++    $form_state->setRedirect('poll.poll_vote_delete', array(
+         'poll' => $this->entity->id(),
+-        'user' => \Drupal::currentUser()->id(),
+-      ),
+-    );
++      'user' => \Drupal::currentUser()->id()
++    ));
+   }
+ 
+   /**
+@@ -122,7 +120,7 @@ class PollViewFormController extends ContentEntityForm {
+    * @param array $form
+    * @param array $form_state
+    */
+-  public function result(array $form, array &$form_state) {
++  public function result(array $form, FormStateInterface $form_state) {
+     $form_state['input']['show_results'] = TRUE;
+     $form_state['rebuild'] = TRUE;
+   }
+@@ -133,7 +131,7 @@ class PollViewFormController extends ContentEntityForm {
+    * @param array $form
+    * @param array $form_state
+    */
+-  public function back(array $form, array &$form_state) {
++  public function back(array $form, FormStateInterface $form_state) {
+     $form_state['input']['show_results'] = FALSE;
+     $form_state['rebuild'] = TRUE;
+   }
+@@ -144,9 +142,9 @@ class PollViewFormController extends ContentEntityForm {
+    * @param array $form
+    * @param array $form_state
+    */
+-  public function save(array $form, array &$form_state) {
++  public function save(array $form, FormStateInterface $form_state) {
+     $options = array();
+-    $options['chid'] = $form_state['values']['choice'];
++    $options['chid'] = $form_state->getValue('choice');
+     $options['uid'] = \Drupal::currentUser()->id();
+     $options['pid'] = $this->entity->id();
+     $options['hostname'] = \Drupal::request()->getClientIp();
+@@ -160,16 +158,15 @@ class PollViewFormController extends ContentEntityForm {
+     else {
+       drupal_set_message($this->t('Sorry, your vote could not be recorded.'), 'error');
+     }
+-    $form_state['redirect'] = $this->entity->url();
++    $form_state->setRedirect($this->entity->url());
+   }
+ 
+   /**
+    * @inheritdoc
+    */
+-  public function validate(array $form, array &$form_state) {
+-    if (!isset($form_state['values']['choice']) || $form_state['values']['choice'] == NULL) {
+-      Drupal::formBuilder()
+-        ->setErrorByName('choice', $form_state, $this->t('Your vote could not be recorded because you did not select any of the choices.'));
++  public function validate(array $form, FormStateInterface $form_state) {
++    if (!$form_state->hasValue('choice')) {
++      $form_state->setErrorByName('choice', $this->t('Your vote could not be recorded because you did not select any of the choices.'));
+     }
+   }
+ 
+@@ -181,7 +178,7 @@ class PollViewFormController extends ContentEntityForm {
+    *
+    * @return bool
+    */
+-  public function showResults(PollInterface $poll, $form_state) {
++  public function showResults(PollInterface $poll, FormStateInterface $form_state) {
+     $account = $this->currentUser();
+     switch (TRUE) {
+       // The "View results" button, when available, has been clicked.
