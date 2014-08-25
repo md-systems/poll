@@ -38,10 +38,10 @@ class PollViewFormController extends ContentEntityForm {
       $form['#entity'] = $this->entity;
       // Set form caching because we could have multiple of these forms on
       // the same page, and we want to ensure the right one gets picked.
-      $form_state->setValue('cache', TRUE);
+      $form_state['cache'] = TRUE;
       // Set a flag to hide results which will be removed if we want to view
       // results when the form is rebuilt.
-      $form_state->setValue(array('input', 'show_results'), FALSE);
+      $form_state['input']['show_results'] = FALSE;
     }
     return $form;
   }
@@ -121,8 +121,8 @@ class PollViewFormController extends ContentEntityForm {
    * @param array $form_state
    */
   public function result(array $form, FormStateInterface $form_state) {
-    $form_state->setValue(array('input', 'show_results'), TRUE);
-    $form_state->setValue('rebuild', TRUE);
+    $form_state['input']['show_results'] = TRUE;
+    $form_state['rebuild'] = TRUE;
   }
 
   /**
@@ -132,8 +132,8 @@ class PollViewFormController extends ContentEntityForm {
    * @param array $form_state
    */
   public function back(array $form, FormStateInterface $form_state) {
-    $form_state->setValue(array('input', 'show_results'), FALSE);
-    $form_state->setValue('rebuild', TRUE);
+    $form_state['input']['show_results'] = FALSE;
+    $form_state['rebuild'] = TRUE;
   }
 
   /**
@@ -182,7 +182,7 @@ class PollViewFormController extends ContentEntityForm {
     $account = $this->currentUser();
     switch (TRUE) {
       // The "View results" button, when available, has been clicked.
-      case ($form_state->hasValue(array('input', 'show_results'))):
+      case (isset($form_state['input']) && isset($form_state['input']['show_results']) && $form_state['input']['show_results']):
         return TRUE;
       // The poll is closed.
       case ($poll->isClosed()):

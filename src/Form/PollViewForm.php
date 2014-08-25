@@ -52,10 +52,10 @@ class PollViewForm extends FormBase {
       $form['#entity'] = $poll;
       // Set form caching because we could have multiple of these forms on
       // the same page, and we want to ensure the right one gets picked.
-      $form_state->setValue('cache', TRUE);
+      $form_state['cache'] = TRUE;
       // Set a flag to hide results which will be removed if we want to view
       // results when the form is rebuilt.
-      $form_state->setValue(array('input', 'show_results'), FALSE);
+      $form_state['input']['show_results'] = FALSE;
     }
 
     $form['actions'] = $this->actions($form, $form_state, $poll);
@@ -75,10 +75,7 @@ class PollViewForm extends FormBase {
     $account = $this->currentUser();
     switch (TRUE) {
       // The "View results" button, when available, has been clicked.
-      case ($form_state->hasValue('input') && $form_state->hasValue(array(
-          'input',
-          'show_results'
-        ))):
+      case (isset($form_state['input']) && isset($form_state['input']['show_results']) && $form_state['input']['show_results']):
         return TRUE;
       // The poll is closed.
       case ($poll->isClosed()):
@@ -205,8 +202,8 @@ class PollViewForm extends FormBase {
    * @param array $form_state
    */
   public function result(array $form, FormStateInterface $form_state) {
-    $form_state->setValue(array('input', 'show_results'), TRUE);
-    $form_state->setValue('rebuild', TRUE);
+    $form_state['input']['show_results'] = TRUE;
+    $form_state['rebuild'] = TRUE;
   }
 
   /**
@@ -216,8 +213,8 @@ class PollViewForm extends FormBase {
    * @param array $form_state
    */
   public function back(array $form, FormStateInterface $form_state) {
-    $form_state->setValue(array('input', 'show_results'), FALSE);
-    $form_state->setValue('rebuild', TRUE);
+    $form_state['input']['show_results'] = FALSE;
+    $form_state['rebuild'] = TRUE;
   }
 
   /**
@@ -240,7 +237,7 @@ class PollViewForm extends FormBase {
     // @todo: confirm vote has been saved.
     drupal_set_message($this->t('Your vote has been recorded.'));
 
-    $form_state->setRedirect($form_state->getValue('poll')->url());
+    $form_state->setRedirectUrl($form_state->getValue('poll')->urlInfo());
   }
 
   /**
