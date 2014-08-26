@@ -39,11 +39,12 @@ use Drupal\user\UserInterface;
  *   links = {
  *     "canonical" = "poll.poll_view",
  *     "edit-form" = "poll.poll_edit",
- *     "delete-form" = "poll.poll_delete",
- *     "admin-form" = "poll.poll_list"
+ *     "delete-form" = "poll.poll_delete"
  *   },
- *   base_table = "poll_poll",
+ *   base_table = "poll",
+ *   data_table = "poll_field_data",
  *   fieldable = TRUE,
+ *   field_ui_base_route = "poll.poll_list",
  *   translatable = TRUE,
  *   entity_keys = {
  *     "id" = "id",
