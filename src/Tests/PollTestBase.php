@@ -219,12 +219,5 @@ abstract class PollTestBase extends WebTestBase {
       }
     }
   }
-  /**
-   * Tests updating a poll.
-   */
-  function pollUpdate($nid, $title, $edit) {
-    // Edit the poll node.
-    $this->drupalPostForm('poll/' . $nid . '/edit', $edit, t('Save'));
-    $this->assertText(t('poll @title has been updated.', array('@title' => $title)));
-  }
+
 }
