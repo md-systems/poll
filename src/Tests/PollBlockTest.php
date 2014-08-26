@@ -45,7 +45,6 @@ class PollBlockTest extends PollTestBase {
     $this->drupalPlaceBlock('poll_recent_block');
 
     // Verify poll appears in a block.
-    // View user page so we're not matching the poll node on front page.
     $this->drupalLogin($this->web_user);
     $this->drupalGet('user');
 

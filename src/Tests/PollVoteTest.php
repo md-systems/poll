@@ -79,9 +79,7 @@ class PollVoteTest extends PollTestBase {
     $this->assertText('Your vote has been recorded.', 'Your vote was recorded.');
     $this->assertText('Total votes:  1', 'Vote count updated correctly.');
 
-    /*the button is not there yet anyway.
     $elements = $this->xpath('//input[@value="Cancel your vote"]');
     $this->assertTrue(empty($elements), "'Cancel your vote' button does not appear.");
-    */
   }
 }
