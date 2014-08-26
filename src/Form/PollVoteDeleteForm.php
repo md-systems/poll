@@ -9,11 +9,16 @@ namespace Drupal\poll\Form;
 
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\user\Entity\User;
+use Drupal\user\UserInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 /**
  * Provides a form for deleting a vote.
  */
-class PollVoteDeleteForm extends ContentEntityConfirmFormBase {
+class PollVoteDeleteForm extends ContentEntityConfirmFormBase implements ContainerAwareInterface {
+ use ContainerAwareTrait;
 
   /**
    * {@inheritdoc}
@@ -39,20 +44,10 @@ class PollVoteDeleteForm extends ContentEntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
-    // Always provide entity id in the same form key as in the entity edit form.
-    // @todo: arg(4)
-    $form['uid'] = array('#type' => 'value', '#value' => arg(4));
-    $form = parent::buildForm($form, $form_state);
-    return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function submit(array $form, FormStateInterface $form_state) {
-    $account = entity_load('user', $form_state->getValue('uid'));
-    $pollStorage = \Drupal::entityManager()->getStorage($this->entity->getId());
+    $uid = $this->container->get('request_stack')->getCurrentRequest()->attributes->get('user');
+    $account = User::load($uid);
+    $pollStorage = \Drupal::entityManager()->getStorage('poll');
     $pollStorage->cancelVote($this->entity, $account);
     watchdog('poll', '%user\'s vote in Poll #%poll deleted.', array(
       '%user' => $account->id(),
