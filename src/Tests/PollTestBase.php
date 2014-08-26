@@ -63,7 +63,7 @@ abstract class PollTestBase extends WebTestBase {
     // Get the form first to initialize the state of the internal browser.
     $this->drupalGet('poll/add');
 
-    $question = $this->randomName();
+    $question = $this->randomMachineName();
     $choices = $this->generateChoices($choice_count);
     list($edit, $index) = $this->pollGenerateEdit($question, $choices);
 
@@ -131,7 +131,7 @@ abstract class PollTestBase extends WebTestBase {
    *     in subsequent invocations of this function.
    */
 
-  function _pollGenerateEdit($question, array $choices, $index = 0) {
+  private function pollGenerateEdit($question, array $choices, $index = 0) {
     $max_new_choices = ($index == 0 ? 2 : 1);
     $already_submitted_choices = array_slice($choices, 0, $index);
     $new_choices = array_values(array_slice($choices, $index, $max_new_choices));
@@ -154,7 +154,7 @@ abstract class PollTestBase extends WebTestBase {
   private function generateChoices($count = 7) {
     $choices = array();
     for ($i = 1; $i <= $count; $i++) {
-      $choices[] = $this->randomName();
+      $choices[] = $this->randomMachineName();
     }
     return $choices;
   }

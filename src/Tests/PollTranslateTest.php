@@ -46,8 +46,8 @@ class PollTranslateTest extends PollTestBase {
     $admin_user = $this->drupalCreateUser(array('administer content types', 'administer languages', 'administer polls', 'translate all content'));
 
     // Set up a poll with two choices.
-    $title = $this->randomName();
-    $choices = array($this->randomName(), $this->randomName());
+    $title = $this->randomMachineName();
+    $choices = array($this->randomMachineName(), $this->randomMachineName());
     $poll_nid = $this->pollCreate($title, $choices, FALSE);
     $this->assertTrue($poll_nid, 'Poll for translation logic test created.');
 

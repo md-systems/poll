@@ -44,7 +44,7 @@ class PollCreateTest extends PollTestBase {
     //$this->assertText('Total votes: 0', 'Link to poll correct.');
 
     // Alter the question and ensure it gets saved correctly.
-    $new_question = $this->randomName();
+    $new_question = $this->randomMachineName();
     $poll->setQuestion($new_question);
     $poll->save();
 
@@ -54,7 +54,7 @@ class PollCreateTest extends PollTestBase {
 
     // Now add a new option to make sure that when we update the poll, the
     // option is displayed.
-    $vote_choice = $this->randomName();
+    $vote_choice = $this->randomMachineName();
     $vote_count = '2000';
     $poll->field_choice[0]->choice = $vote_choice;
     $poll->field_choice[0]->vote = $vote_count;

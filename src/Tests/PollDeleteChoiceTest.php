@@ -24,7 +24,7 @@ class PollDeleteChoiceTest extends PollTestBase {
    */
   function testChoiceRemoval() {
     // Set up a poll with three choices.
-    $title = $this->randomName();
+    $title = $this->randomMachineName();
     $choices = array('First choice', 'Second choice', 'Third choice');
     $poll_nid = $this->pollCreate($title, $choices, FALSE);
     $this->assertTrue($poll_nid, 'Poll for choice deletion logic test created.');

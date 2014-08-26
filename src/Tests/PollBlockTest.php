@@ -45,7 +45,7 @@ class PollBlockTest extends PollTestBase {
     $this->drupalPlaceBlock('poll_block');
 
     // Create a poll which should appear in recent polls block.
-    $title = $this->randomName();
+    $title = $this->randomMachineName();
 
     $choices = $this->_generateChoices(7);
     $poll_nid = $this->pollCreate($title, $choices, TRUE);

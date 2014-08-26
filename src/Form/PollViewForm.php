@@ -238,8 +238,7 @@ class PollViewForm extends FormBase {
     $options['hostname'] = \Drupal::request()->getClientIp();
     $options['timestamp'] = REQUEST_TIME;
     // save vote
-    $pollStorage = \Drupal::entityManager()
-      ->getStorage($form_state->getValue('poll')->id());
+    $pollStorage = \Drupal::entityManager()->getStorage('poll');
     $pollStorage->saveVote($options);
     // @todo: confirm vote has been saved.
     drupal_set_message($this->t('Your vote has been recorded.'));
