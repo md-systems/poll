@@ -42,13 +42,10 @@ class PollBlockTest extends PollTestBase {
    */
   function testRecentBlock() {
     // Enable the recent poll block.
-    $this->drupalPlaceBlock('poll_block');
+    $this->drupalPlaceBlock('poll_recent_block');
 
     // Create a poll which should appear in recent polls block.
-    $title = $this->randomMachineName();
-
-    $choices = $this->_generateChoices(7);
-    $poll_nid = $this->pollCreate($title, $choices, TRUE);
+    $poll = $this->poll;
 
     // Verify poll appears in a block.
     // View user page so we're not matching the poll node on front page.
@@ -57,7 +54,7 @@ class PollBlockTest extends PollTestBase {
 
     // If a 'block' view not generated, this title would not appear even though
     // the choices might.
-    $this->assertText($title, String::format('@title Poll appears in block.', array('@title' => $title)));
+    $this->assertText($poll->label(), String::format('@title Poll appears in block.', array('@title' => $poll->label())));
 
     // Logout and login back in as a user who can vote.
     $this->drupalLogout();
@@ -82,9 +79,9 @@ class PollBlockTest extends PollTestBase {
     $content_user = $this->drupalCreateUser(array('access polls', 'administer polls'));
     $this->drupalLogout();
     $this->drupalLogin($content_user);
-    $close_edit = array('status' => 0);
-    $this->pollUpdate($poll_nid, $title, $close_edit);
+    $poll->close();
+    $poll->save();
     $this->drupalGet('user/' . $content_user->id());
-    $this->assertNoText($title, 'Poll no longer appears in block.');
+    $this->assertNoText($poll->label(), 'Poll no longer appears in block.');
   }
 }

@@ -146,6 +146,15 @@ interface PollInterface extends ContentEntityInterface {
    */
   public function setActive($active);
 
+  /**
+   * Sets the poll to closed.
+   */
+  public function close();
+
+  /**
+   * Sets the poll to open.
+   */
+  public function open();
 
   /**
    * @todo: Refactor - doesn't belong here.

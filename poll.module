@@ -118,10 +118,10 @@ function poll_uri($poll) {
  * Implements hook_cron().
  */
 function poll_cron() {
-  // Unpublish expired polls if their $duration isn't "Unlimited".
+  // Close expired polls.
   $polls = \Drupal::entityManager()->getStorage('poll')->getExpiredPolls();
   foreach ($polls as $poll) {
-    $poll->status->value = 0;
+    $poll->close();
     $poll->save();
   }
 }

@@ -30,6 +30,7 @@ class PollTranslateTest extends PollTestBase {
   }
 
   public function setUp() {
+    parent::setUp();
     $language = new Language(array(
       'id' => 'zh-hans',
     ));
