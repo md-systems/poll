@@ -11,15 +11,10 @@ use Drupal\poll\Entity\Poll;
 
 /**
  * Tests the expiration of polls.
+ *
+ * @group poll
  */
 class PollExpirationTest extends PollTestBase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Poll expiration',
-      'description' => 'Test the poll auto-expiration logic.',
-      'group' => 'Poll',
-    );
-  }
 
   /**
    * Tests the expiration of a poll.

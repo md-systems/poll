@@ -11,6 +11,8 @@ use Drupal\Component\Utility\String;
 
 /**
  * Tests the recent poll block.
+ *
+ * @group poll
  */
 class PollBlockTest extends PollTestBase {
 
@@ -20,14 +22,6 @@ class PollBlockTest extends PollTestBase {
    * @var array
    */
   public static $modules = array('block');
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Block availability',
-      'description' => 'Check if the most recent poll block is available.',
-      'group' => 'Poll',
-    );
-  }
 
   function setUp() {
     parent::setUp();

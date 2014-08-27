@@ -9,15 +9,10 @@ namespace Drupal\poll\Tests;
 
 /**
  * Tests the removal of poll choices.
+ *
+ * @group poll
  */
 class PollDeleteChoiceTest extends PollTestBase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Poll choice deletion',
-      'description' => 'Test the poll choice deletion logic.',
-      'group' => 'Poll',
-    );
-  }
 
   /**
    * Tests removing a choice from a poll.

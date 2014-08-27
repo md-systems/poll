@@ -9,15 +9,10 @@ namespace Drupal\poll\Tests;
 
 /**
  * Tests poll token replacements in strings.
+ *
+ * @group poll
  */
 class PollTokenReplaceTest extends PollTestBase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Poll token replacement',
-      'description' => 'Generates text using placeholders for dummy content to check poll token replacement.',
-      'group' => 'Poll',
-    );
-  }
 
   /**
    * Creates a poll, then tests the tokens generated from it.

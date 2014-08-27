@@ -6,19 +6,13 @@
  */
 
 namespace Drupal\poll\Tests;
-use Drupal\poll\Entity\Poll;
 
 /**
  * Tests creating a poll.
+ *
+ * @group poll
  */
 class PollCreateTest extends PollTestBase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Poll create',
-      'description' => 'Adds "more choices", previews and creates a poll.',
-      'group' => 'Poll'
-    );
-  }
 
   /**
    * Tests creating and editing a poll.

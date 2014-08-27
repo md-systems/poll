@@ -11,6 +11,8 @@ use Drupal\Core\Language\Language;
 
 /**
  * Tests poll translation logic.
+ *
+ * @group poll
  */
 class PollTranslateTest extends PollTestBase {
 
@@ -21,14 +23,9 @@ class PollTranslateTest extends PollTestBase {
    */
   public static $modules = array('language', 'content_translation');
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Poll translation',
-      'description' => 'Test the poll translation logic.',
-      'group' => 'Poll',
-    );
-  }
-
+  /**
+   * {@inheritdoc}
+   */
   public function setUp() {
     parent::setUp();
     $language = new Language(array(
