@@ -95,6 +95,9 @@ function poll_permission() {
     'access polls' => array(
       'title' => t('View polls'),
     ),
+    'cancel own vote' => array(
+      'title' => t('Cancel own vote'),
+    ),
   );
 }
 

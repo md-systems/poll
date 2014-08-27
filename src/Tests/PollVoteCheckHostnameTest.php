@@ -19,9 +19,8 @@ class PollVoteCheckHostnameTest extends PollTestBase {
 
     // Allow anonymous users to vote on polls.
     user_role_change_permissions(DRUPAL_ANONYMOUS_RID, array(
-//      'access content' => TRUE,
 //      'vote on polls' => TRUE,
-//      'cancel own vote' => TRUE,
+      'cancel own vote' => TRUE,
       'access polls' => TRUE,
     ));
 

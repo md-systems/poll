@@ -38,7 +38,7 @@ abstract class PollTestBase extends WebTestBase {
     parent::setUp();
 
     $this->admin_user = $this->drupalCreateUser(array('administer polls', 'access polls'));
-    $this->web_user = $this->drupalCreateUser(array('access polls'));
+    $this->web_user = $this->drupalCreateUser(array('access polls', 'cancel own vote'));
     $this->poll = $this->pollCreate();
   }
 
