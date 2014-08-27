@@ -13,6 +13,7 @@ use Drupal\Core\Language\Language;
  * Tests poll translation logic.
  *
  * @group poll
+ * @requires module test_skipped_not_ported
  */
 class PollTranslateTest extends PollTestBase {
 
