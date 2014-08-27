@@ -107,19 +107,18 @@ abstract class PollTestBase extends WebTestBase {
    * @return
    *   An indexed array containing:
    *   - The generated POST values, suitable for
-   *     Drupal\simpletest\WebTestBase::drupalPostFrom().
+   *     Drupal\simpletest\WebTestBase::drupalPostForm().
    *   - The number of poll choices contained in 'edit', for potential re-usage
    *     in subsequent invocations of this function.
    */
 
   private function pollGenerateEdit($question, array $choices, $index = 0) {
-    $max_new_choices = ($index == 0 ? 2 : 1);
+    $max_new_choices = 1;
     $already_submitted_choices = array_slice($choices, 0, $index);
     $new_choices = array_values(array_slice($choices, $index, $max_new_choices));
     $edit = array(
       'question[0][value]' => $question,
     );
-    $this->drupalPostForm(NULL, NULL, t('Add another item'));
     foreach ($already_submitted_choices as $k => $text) {
       $edit['field_choice[' . $k . '][choice]'] = $text;
     }

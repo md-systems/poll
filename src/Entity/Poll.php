@@ -152,16 +152,8 @@ class Poll extends ContentEntityBase implements PollInterface {
   /**
    * {@inheritdoc}
    */
-  public function isActive() {
+  public function isOpen() {
     return (bool) $this->get('status')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setActive($active) {
-    $this->set('status', $active ? POLL_PUBLISHED : POLL_NOT_PUBLISHED);
-    return $this;
   }
 
   /**

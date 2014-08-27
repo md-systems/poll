@@ -66,7 +66,6 @@ class PollVoteTest extends PollTestBase {
 //    $this->assertText($title, 'Poll appears in poll list.');
 //    $this->assertText('0 votes', 'Poll has 0 votes.');
 
-
     // Log in as a user who can only vote on polls.
 //    $this->drupalLogout();
 //    $this->drupalLogin($restricted_vote_user);
@@ -78,7 +77,6 @@ class PollVoteTest extends PollTestBase {
     $this->drupalPostForm('poll/' . $this->poll->id(), $edit, t('Vote'));
     $this->assertText('Your vote has been recorded.', 'Your vote was recorded.');
     $this->assertText('Total votes:  1', 'Vote count updated correctly.');
-
     $elements = $this->xpath('//input[@value="Cancel your vote"]');
     $this->assertTrue(empty($elements), "'Cancel your vote' button does not appear.");
   }

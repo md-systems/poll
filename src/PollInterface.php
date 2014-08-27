@@ -126,25 +126,12 @@ interface PollInterface extends ContentEntityInterface {
   public function setResultVoteAllow($result_vote_allow);
 
   /**
-   * Returns the node published status indicator.
-   *
-   * Unpublished nodes are only visible to their authors and to administrators.
+   * Returns if the poll is open.
    *
    * @return bool
-   *   TRUE if the node is published.
+   *   TRUE if the poll is open.
    */
-  public function isActive();
-
-  /**
-   * Sets the published status of a node..
-   *
-   * @param bool $published
-   *   TRUE to set this node to published, FALSE to set it to unpublished.
-   *
-   * @return \Drupal\node\NodeInterface
-   *   The called node entity.
-   */
-  public function setActive($active);
+  public function isOpen();
 
   /**
    * Sets the poll to closed.

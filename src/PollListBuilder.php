@@ -52,7 +52,7 @@ class PollListBuilder extends DraggableListBuilder {
       '#account' => $entity->getOwner(),
     );
     $row['votes'] = $pollStorage->getTotalVotes($entity);
-    $row['status'] = ($entity->isActive()) ? t('Y') : t('N');
+    $row['status'] = ($entity->isOpen()) ? t('Y') : t('N');
     $row['created'] = ($entity->getCreated()) ? Drupal::service('date.formatter')
       ->format($entity->getCreated(), 'long') : t('n/a');
     return $row + parent::buildRow($entity);
