@@ -6,19 +6,13 @@
  */
 
 namespace Drupal\poll\Tests;
-use Drupal\poll\Entity\Poll;
 
 /**
  * Tests creating a poll.
+ *
+ * @group poll
  */
 class PollCreateTest extends PollTestBase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Poll create',
-      'description' => 'Adds "more choices", previews and creates a poll.',
-      'group' => 'Poll'
-    );
-  }
 
   /**
    * Tests creating and editing a poll.
@@ -32,8 +26,16 @@ class PollCreateTest extends PollTestBase {
     $this->drupalGet('poll/' . $poll->id() . '/edit');
     $this->assertText($poll->label(), 'Correct poll loaded from database.');
 
+    // Verify poll appears on 'poll' page.
+    $this->drupalGet('admin/structure/poll');
+    $this->assertText($poll->label(), 'Poll appears in poll list.');
+    $this->assertText('Y', 'Poll is active.');
+
+    // Click on the poll question to go to poll page.
+    $this->clickLink($poll->label());
+
     // Alter the question and ensure it gets saved correctly.
-    $new_question = $this->randomName();
+    $new_question = $this->randomMachineName();
     $poll->setQuestion($new_question);
     $poll->save();
 
@@ -43,7 +45,7 @@ class PollCreateTest extends PollTestBase {
 
     // Now add a new option to make sure that when we update the poll, the
     // option is displayed.
-    $vote_choice = $this->randomName();
+    $vote_choice = $this->randomMachineName();
     $vote_count = '2000';
     $poll->field_choice[0]->choice = $vote_choice;
     $poll->field_choice[0]->vote = $vote_count;

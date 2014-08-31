@@ -9,22 +9,15 @@ namespace Drupal\poll\Tests;
 
 /**
  * Tests voting on a poll.
+ *
+ * @group poll
  */
 class PollVoteTest extends PollTestBase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Poll vote',
-      'description' => 'Vote on a poll',
-      'group' => 'Poll'
-    );
-  }
 
   /**
    * Tests voting on a poll.
    */
   function testPollVote() {
-
-    $this->pollCreate();
 
     $this->drupalLogin($this->web_user);
 

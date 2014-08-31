@@ -22,7 +22,7 @@ use Drupal\user\UserInterface;
  * @ContentEntityType(
  *   id = "poll",
  *   label = @Translation("Poll"),
- *   controllers = {
+ *   handlers = {
  *     "storage" = "Drupal\poll\PollStorage",
  *     "translation" = "Drupal\content_translation\ContentTranslationHandler",
  *     "list_builder" = "Drupal\poll\PollListBuilder",
@@ -39,11 +39,12 @@ use Drupal\user\UserInterface;
  *   links = {
  *     "canonical" = "poll.poll_view",
  *     "edit-form" = "poll.poll_edit",
- *     "delete-form" = "poll.poll_delete",
- *     "admin-form" = "poll.poll_list"
+ *     "delete-form" = "poll.poll_delete"
  *   },
- *   base_table = "poll_poll",
+ *   base_table = "poll",
+ *   data_table = "poll_field_data",
  *   fieldable = TRUE,
+ *   field_ui_base_route = "poll.poll_list",
  *   translatable = TRUE,
  *   entity_keys = {
  *     "id" = "id",
@@ -151,16 +152,8 @@ class Poll extends ContentEntityBase implements PollInterface {
   /**
    * {@inheritdoc}
    */
-  public function isActive() {
+  public function isOpen() {
     return (bool) $this->get('status')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setActive($active) {
-    $this->set('status', $active ? POLL_PUBLISHED : POLL_NOT_PUBLISHED);
-    return $this;
   }
 
   /**
@@ -228,7 +221,8 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setLabel(t('User ID'))
       ->setDescription(t('The user ID of the poll author.'))
       ->setSetting('target_type', 'user')
-      ->setSetting('default_value', 0);
+      ->setTranslatable(TRUE)
+      ->setDefaultValue(0);
 
     $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
@@ -239,6 +233,7 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setLabel(t('Question'))
       ->setDescription(t('The poll question.'))
       ->setRequired(TRUE)
+      ->setTranslatable(TRUE)
       ->setSetting('max_length', 255)
       ->setDisplayOptions('form', array(
         'type' => 'string',

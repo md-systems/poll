@@ -38,7 +38,7 @@ abstract class PollTestBase extends WebTestBase {
     parent::setUp();
 
     $this->admin_user = $this->drupalCreateUser(array('administer polls', 'access polls'));
-    $this->web_user = $this->drupalCreateUser(array('access polls'));
+    $this->web_user = $this->drupalCreateUser(array('access polls', 'cancel own vote'));
     $this->poll = $this->pollCreate();
   }
 
@@ -63,7 +63,7 @@ abstract class PollTestBase extends WebTestBase {
     // Get the form first to initialize the state of the internal browser.
     $this->drupalGet('poll/add');
 
-    $question = $this->randomName();
+    $question = $this->randomMachineName();
     $choices = $this->generateChoices($choice_count);
     list($edit, $index) = $this->pollGenerateEdit($question, $choices);
 
@@ -90,7 +90,6 @@ abstract class PollTestBase extends WebTestBase {
     $this->assertTrue($poll->id, 'Poll has been found in the database.');
 
     return $poll instanceof PollInterface ? $poll : FALSE;
-
   }
 
   /**
@@ -108,16 +107,15 @@ abstract class PollTestBase extends WebTestBase {
    * @return
    *   An indexed array containing:
    *   - The generated POST values, suitable for
-   *     Drupal\simpletest\WebTestBase::drupalPost().
+   *     Drupal\simpletest\WebTestBase::drupalPostForm().
    *   - The number of poll choices contained in 'edit', for potential re-usage
    *     in subsequent invocations of this function.
    */
-  private function pollGenerateEdit($question, array &$choices, $index = 0) {
 
+  private function pollGenerateEdit($question, array $choices, $index = 0) {
     $max_new_choices = 1;
     $already_submitted_choices = array_slice($choices, 0, $index);
     $new_choices = array_values(array_slice($choices, $index, $max_new_choices));
-
     $edit = array(
       'question[0][value]' => $question,
     );
@@ -136,7 +134,7 @@ abstract class PollTestBase extends WebTestBase {
   private function generateChoices($count = 7) {
     $choices = array();
     for ($i = 1; $i <= $count; $i++) {
-      $choices[] = $this->randomName();
+      $choices[] = $this->randomMachineName();
     }
     return $choices;
   }
@@ -162,13 +160,13 @@ abstract class PollTestBase extends WebTestBase {
     $weight = 0;
     foreach ($choices as $id => $label) {
       if ($id < $index) {
-        // The expected weight of each choice is higher than the previous one.
-        $weight++;
         // Directly assert the weight form element value for this choice.
-        $this->assertFieldByName('choice[chid:' . $id . '][weight]', $weight, format_string('Found choice @id with weight @weight.', array(
+        $this->assertFieldByName('field_choice[' . $id . '][_weight]', $weight, format_string('Found field_choice @id with weight @weight.', array(
           '@id' => $id,
           '@weight' => $weight,
         )));
+        // The expected weight of each choice is higher than the previous one.
+        $weight++;
         // Append to our (to be reversed) stack of labels.
         $expected[$weight] = $label;
       }
@@ -202,12 +200,4 @@ abstract class PollTestBase extends WebTestBase {
     }
   }
 
-  /**
-   * Tests updating a poll.
-   */
-  function pollUpdate($nid, $title, $edit) {
-    // Edit the poll node.
-    $this->drupalPost('node/' . $nid . '/edit', $edit, t('Save'));
-    $this->assertText(t('@type @title has been updated.', array('@type' => node_type_get_label('poll'), '@title' => $title)), 'Poll has been updated.');
-  }
 }

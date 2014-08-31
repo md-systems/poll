@@ -7,23 +7,20 @@
 
 namespace Drupal\poll\Tests;
 
+/**
+ * Check that users and anonymous users from specified ip-address can only vote once.
+ *
+ * @group poll
+ */
 class PollVoteCheckHostnameTest extends PollTestBase {
-  public static function getInfo() {
-    return array(
-      'name' => 'User poll vote capability',
-      'description' => 'Check that users and anonymous users from specified ip-address can only vote once.',
-      'group' => 'Poll'
-    );
-  }
 
   function setUp() {
     parent::setUp();
 
     // Allow anonymous users to vote on polls.
     user_role_change_permissions(DRUPAL_ANONYMOUS_RID, array(
-//      'access content' => TRUE,
 //      'vote on polls' => TRUE,
-//      'cancel own vote' => TRUE,
+      'cancel own vote' => TRUE,
       'access polls' => TRUE,
     ));
 
