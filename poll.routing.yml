@@ -1,5 +1,5 @@
 poll.poll_list:
-  path: '/admin/structure/poll'
+  path: '/admin/content/poll'
   defaults:
     _entity_list: 'poll'
     _title: 'Polls'

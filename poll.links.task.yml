@@ -16,3 +16,8 @@ poll.poll_votes:
   base_route: poll.poll_view
   title: Votes
   weight: 10
+poll.poll_overview:
+  route_name: poll.poll_list
+  base_route: system.admin_content
+  title: 'Polls'
+  description: 'Manage polls for your site.'
