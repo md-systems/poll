@@ -29,7 +29,7 @@ class PollDeleteChoiceTest extends PollTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
     // Click on the poll title to go to poll page.
-    $this->drupalGet('admin/structure/poll');
+    $this->drupalGet('admin/content/poll');
     $this->clickLink($this->poll->label());
 
     // Check the first poll choice is deleted, while the others remain.

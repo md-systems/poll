@@ -27,7 +27,7 @@ class PollCreateTest extends PollTestBase {
     $this->assertText($poll->label(), 'Correct poll loaded from database.');
 
     // Verify poll appears on 'poll' page.
-    $this->drupalGet('admin/structure/poll');
+    $this->drupalGet('admin/content/poll');
     $this->assertText($poll->label(), 'Poll appears in poll list.');
     $this->assertText('Y', 'Poll is active.');
 
