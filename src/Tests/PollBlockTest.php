@@ -7,8 +7,12 @@
 
 namespace Drupal\poll\Tests;
 
+use Drupal\Component\Utility\String;
+
 /**
  * Tests the recent poll block.
+ *
+ * @group poll
  */
 class PollBlockTest extends PollTestBase {
 
@@ -19,20 +23,11 @@ class PollBlockTest extends PollTestBase {
    */
   public static $modules = array('block');
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Block availability',
-      'description' => 'Check if the most recent poll block is available.',
-      'group' => 'Poll',
-    );
-  }
-
   function setUp() {
     parent::setUp();
 
     // Enable the recent poll block.
-    $label = $this->poll->label();
-    $this->drupalPlaceBlock('poll_recent_block', array('label' => $label));
+    $this->drupalPlaceBlock('poll_recent_block');
   }
 
   /**
@@ -44,15 +39,12 @@ class PollBlockTest extends PollTestBase {
     $user = $this->web_user;
 
     // Verify poll appears in a block.
-    // View user page so we're not matching the poll node on front page.
     $this->drupalLogin($user);
     $this->drupalGet('user');
 
     // If a 'block' view not generated, this title would not appear even though
     // the choices might.
-    debug($poll->label());
-    $this->assertText($poll->label(), 'Poll title appears in block.');
-
+    $this->assertText($poll->label(), String::format('@title Poll appears in block.', array('@title' => $this->poll->label())));
     $options = $poll->getOptions();
     foreach ($options as $option) {
       $this->assertText($option, 'Poll option appears in block.');

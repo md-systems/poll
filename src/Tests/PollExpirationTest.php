@@ -11,15 +11,10 @@ use Drupal\poll\Entity\Poll;
 
 /**
  * Tests the expiration of polls.
+ *
+ * @group poll
  */
 class PollExpirationTest extends PollTestBase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Poll expiration',
-      'description' => 'Test the poll auto-expiration logic.',
-      'group' => 'Poll',
-    );
-  }
 
   /**
    * Tests the expiration of a poll.
@@ -50,9 +45,9 @@ class PollExpirationTest extends PollTestBase {
     $this->assertTrue(isset($elements[0]['value']) && $elements[0]['value'] == $runtime, 'Poll expiration set to one week.');
 
     // Force a cron run. Since the expiration date has not yet been reached,
-    // the poll should remain active.
+    // the poll should remain open.
     $this->cronRun();
-    $this->assertTrue($poll->isActive(), 'Poll remains active after cron.');
+    $this->assertTrue($poll->isOpen(), 'Poll remains open after cron.');
 
     $created = $poll->getCreated();
     $offset = $created - ($runtime * 1.01);

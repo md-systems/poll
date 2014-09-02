@@ -9,40 +9,32 @@ namespace Drupal\poll\Tests;
 
 /**
  * Tests the removal of poll choices.
+ *
+ * @group poll
  */
 class PollDeleteChoiceTest extends PollTestBase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Poll choice deletion',
-      'description' => 'Test the poll choice deletion logic.',
-      'group' => 'Poll',
-    );
-  }
 
   /**
    * Tests removing a choice from a poll.
    */
   function testChoiceRemoval() {
     // Set up a poll with three choices.
-    $title = $this->randomName();
     $choices = array('First choice', 'Second choice', 'Third choice');
-    $poll_nid = $this->pollCreate($title, $choices, FALSE);
-    $this->assertTrue($poll_nid, 'Poll for choice deletion logic test created.');
+    $this->assertTrue($this->poll->id(), 'Poll for choice deletion logic test created.');
     // @TODO need to fix the poll nid and not hard code poll/1
 
     // Edit the poll, and try to delete first poll choice.
-    $this->drupalGet("poll/1");
-    $edit['choice[chid:1][chtext]'] = '';
-    $this->drupalPostForm('poll/1', $edit, t('Save'));
+    $this->drupalGet("poll/" . $this->poll->id() . "/edit");
+    $edit['field_choice[0][choice]'] = '';
+    $this->drupalPostForm(NULL, $edit, t('Save'));
 
-    // Click on the poll title to go to node page.
-    //$this->drupalGet('poll');
-    //$this->clickLink($title);
+    // Click on the poll title to go to poll page.
+    $this->drupalGet('admin/structure/poll');
+    $this->clickLink($this->poll->label());
 
     // Check the first poll choice is deleted, while the others remain.
-    $this->drupalGet('poll/1');
-    $this->assertNoText('First choice', 'First choice removed.');
-    $this->assertText('Second choice', 'Second choice remains.');
-    $this->assertText('Third choice', 'Third choice remains.');
+    $this->assertNoText($this->poll->field_choice[0]->choice, 'First choice removed.');
+    $this->assertText($this->poll->field_choice[1]->choice, 'Second choice remains.');
+    $this->assertText($this->poll->field_choice[2]->choice, 'Third choice remains.');
   }
 }

@@ -95,6 +95,9 @@ function poll_permission() {
     'access polls' => array(
       'title' => t('View polls'),
     ),
+    'cancel own vote' => array(
+      'title' => t('Cancel own vote'),
+    ),
   );
 }
 
@@ -118,18 +121,11 @@ function poll_uri($poll) {
  * Implements hook_cron().
  */
 function poll_cron() {
-  $pids = db_query('SELECT p.id FROM {poll_poll} p WHERE (p.created + p.runtime) < :request_time AND p.status = :status AND p.runtime <> :runtime', array(
-      ':request_time' => REQUEST_TIME,
-      ':status' => 1,
-      ':runtime' => 0
-    ))->fetchCol();
-
-  if (!empty($pids)) {
-    $polls = Poll::loadMultiple($pids);
-    foreach ($polls as $poll) {
-      $poll->close();
-      $poll->save();
-    }
+  // Close expired polls.
+  $polls = \Drupal::entityManager()->getStorage('poll')->getExpiredPolls();
+  foreach ($polls as $poll) {
+    $poll->close();
+    $poll->save();
   }
 }
 

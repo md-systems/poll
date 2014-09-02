@@ -7,6 +7,7 @@
 
 namespace Drupal\poll\Form;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\poll\PollInterface;
@@ -32,7 +33,7 @@ class PollViewForm extends FormBase {
     $form['poll']['#value'] = $poll;
 
     if ($this->showResults($poll, $form_state)) {
-      $form['results']['#markup'] = $this->showPollResults($poll);
+      $form['results'] = $this->showPollResults($poll);
     }
     else {
       $options = $poll->getOptions();
@@ -59,6 +60,10 @@ class PollViewForm extends FormBase {
     }
 
     $form['actions'] = $this->actions($form, $form_state, $poll);
+
+    $form['#cache'] = array(
+      'tags' => $poll->getCacheTag(),
+    );
 
     return $form;
   }
@@ -96,7 +101,7 @@ class PollViewForm extends FormBase {
     $actions = array();
     if ($this->showResults($poll, $form_state)) {
       // Allow user to cancel their vote.
-      if ($poll->hasUserVoted() && $poll->getCancelVoteAllow()) {
+      if ($this->isCancelAllowed($poll)) {
         $actions['#type'] = 'actions';
         $actions['cancel']['#type'] = 'submit';
         $actions['cancel']['#button_type'] = 'primary';
@@ -137,12 +142,12 @@ class PollViewForm extends FormBase {
   /**
    * Display a themed poll results.
    *
-   * @param $poll
+   * @param \Drupal\poll\PollInterface $poll
    * @param bool $block
    *
    * @return false|string
    */
-  function showPollResults($poll, $block = FALSE) {
+  function showPollResults(PollInterface $poll, $block = FALSE) {
     $total_votes = 0;
     foreach ($poll->votes as $vote) {
       $total_votes += $vote;
@@ -175,11 +180,11 @@ class PollViewForm extends FormBase {
       '#votes' => $total_votes,
       '#raw_links' => isset($poll->links) ? $poll->links : array(),
       '#block' => $block,
-      '#nid' => $poll->pid,
-      '#vote' => isset($poll->vote) ? $poll->vote : NULL
+      '#pid' => $poll->id(),
+      '#vote' => isset($poll->vote) ? $poll->vote : NULL,
     );
 
-    return drupal_render($output);
+    return $output;
   }
 
   /**
@@ -226,16 +231,26 @@ class PollViewForm extends FormBase {
   public function save(array $form, FormStateInterface $form_state) {
     $options = array();
     $options['chid'] = $form_state->getValue('choice');
-    $options['uid'] = \Drupal::currentUser()->id();
+    $options['uid'] = $this->currentUser()->id();
     $options['pid'] = $form_state->getValue('poll')->id();
     $options['hostname'] = \Drupal::request()->getClientIp();
     $options['timestamp'] = REQUEST_TIME;
     // save vote
-    $pollStorage = \Drupal::entityManager()
-      ->getStorage($form_state->getValue('poll')->id());
+    $pollStorage = \Drupal::entityManager()->getStorage('poll');
     $pollStorage->saveVote($options);
     // @todo: confirm vote has been saved.
     drupal_set_message($this->t('Your vote has been recorded.'));
+
+    Cache::invalidateTags($form_state->getValue('poll')->getCacheTag());
+
+    if ($this->currentUser()->isAnonymous()) {
+      // The vote is recorded so the user gets the result view instead of the
+      // voting form when viewing the poll. Saving a value in $_SESSION has the
+      // convenient side effect of preventing the user from hitting the page
+      // cache. When anonymous voting is allowed, the page cache should only
+      // contain the voting form, not the results.
+      $_SESSION['poll_vote'][$form_state->getValue('poll')->id()] = $form_state->getValue('choice');
+    }
 
     $form_state->setRedirectUrl($form_state->getValue('poll')->urlInfo());
   }
@@ -250,6 +265,24 @@ class PollViewForm extends FormBase {
         $form_state->setErrorByName('choice', $this->t('Your vote could not be recorded because you did not select any of the choices.'));
       }
     }
+  }
+
+  /**
+   * Checks if the current user is allowed to cancel on the given poll.
+   * @param \Drupal\poll\PollInterface $poll
+   *
+   * @return bool
+   *   TRUE if the user can can cancel.
+   */
+  protected function isCancelAllowed(PollInterface $poll) {
+    // Allow access if the user has voted.
+    return $poll->hasUserVoted()
+      // And the poll allows to cancel votes.
+      && $poll->getCancelVoteAllow()
+      // And the user has the cancel own vote permission.
+      && $this->currentUser()->hasPermission('cancel own vote')
+      // And the user is authenticated or his session contains the voted flag.
+      && (\Drupal::currentUser()->isAuthenticated() || !empty($_SESSION['poll_vote'][$poll->id()]));
   }
 
 
