@@ -13,7 +13,7 @@ poll.poll_add:
   options:
     _admin_route: TRUE
   requirements:
-    _permission: 'administer polls'
+    _entity_create_access: 'poll'
 poll.poll_edit:
   path: '/poll/{poll}/edit'
   options:
@@ -21,25 +21,25 @@ poll.poll_edit:
   defaults:
     _entity_form: 'poll.edit'
   requirements:
-    _permission: 'administer polls'
+    _entity_access: 'poll.update'
 poll.poll_delete:
   path: '/poll/{poll}/delete'
   defaults:
     _entity_form: 'poll.delete'
     _title: 'Delete form'
   requirements:
-    _permission: 'administer polls'
+    _entity_access: 'poll.delete'
 poll.poll_view:
   path: '/poll/{poll}'
   defaults:
     _content: '\Drupal\poll\Controller\PollController::viewPoll'
     _title_callback: '\Drupal\poll\Controller\PollController::pollTitle'
   requirements:
-    _permission: 'access polls'
+    _entity_access: 'poll.view'
 poll.poll_vote_delete:
   path: '/poll/{poll}/delete/vote/{user}'
   defaults:
     _entity_form: 'poll.delete_vote'
     _title: 'Delete vote'
   requirements:
-    _permission: 'access polls'
+    _entity_access: 'poll.update'

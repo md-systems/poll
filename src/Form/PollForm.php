@@ -5,7 +5,7 @@
  * Contains \Drupal\poll\PollFormController.
  */
 
-namespace Drupal\poll;
+namespace Drupal\poll\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Language\LanguageInterface;
@@ -14,7 +14,7 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Form controller for the poll edit forms.
  */
-class PollFormController extends ContentEntityForm {
+class PollForm extends ContentEntityForm {
 
   /**
    * {@inheritdoc}

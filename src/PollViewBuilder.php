@@ -20,6 +20,7 @@ class PollViewBuilder extends EntityViewBuilder {
    * {@inheritdoc}
    */
   public function view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
+
     $form = \Drupal::formBuilder()->getForm('Drupal\poll\Form\PollViewForm', $entity);
     return $form;
   }
