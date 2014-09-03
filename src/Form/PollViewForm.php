@@ -106,7 +106,7 @@ class PollViewForm extends FormBase {
         $actions['cancel']['#type'] = 'submit';
         $actions['cancel']['#button_type'] = 'primary';
         $actions['cancel']['#value'] = t('Cancel vote');
-        $actions['cancel']['#submit'] = array(array($this, 'cancel'));
+        $actions['cancel']['#submit'] = array('::cancel');
         $actions['cancel']['#weight'] = '0';
       }
       if (!$poll->hasUserVoted()) {
@@ -114,7 +114,7 @@ class PollViewForm extends FormBase {
         $actions['back']['#type'] = 'submit';
         $actions['back']['#button_type'] = 'primary';
         $actions['back']['#value'] = t('View poll');
-        $actions['back']['#submit'] = array(array($this, 'back'));
+        $actions['back']['#submit'] = array('::back');
         $actions['back']['#weight'] = '0';
       }
     }
@@ -131,7 +131,7 @@ class PollViewForm extends FormBase {
         $actions['result']['#type'] = 'submit';
         $actions['result']['#button_type'] = 'primary';
         $actions['result']['#value'] = t('View results');
-        $actions['result']['#submit'] = array(array($this, 'result'));
+        $actions['result']['#submit'] = array('::result');
         $actions['result']['#weight'] = '1';
       }
     }
