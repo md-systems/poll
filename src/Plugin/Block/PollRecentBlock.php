@@ -29,9 +29,9 @@ class PollRecentBlock extends BlockBase {
   protected $record;
 
   /**
-   * Overrides \Drupal\block\BlockBase::settings().
+   * {@inheritdoc}
    */
-  public function settings() {
+  public function defaultConfiguration() {
     return array(
       'properties' => array(
         'administrative' => TRUE,
@@ -47,7 +47,7 @@ class PollRecentBlock extends BlockBase {
   }
 
   /**
-   * Implements \Drupal\block\BlockBase::build().
+   * {@inheritdoc}
    */
   public function build() {
     $polls = \Drupal::entityManager()->getStorage('poll')->getMostRecentPoll();
