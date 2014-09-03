@@ -176,7 +176,7 @@ class PollViewForm extends FormBase {
 
     $output = array(
       '#theme' => 'poll_results',
-      '#raw_title' => $poll->label(),
+      '#raw_question' => $poll->label(),
       '#results' => $poll_results,
       '#votes' => $total_votes,
       '#raw_links' => isset($poll->links) ? $poll->links : array(),
