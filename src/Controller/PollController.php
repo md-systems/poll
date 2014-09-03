@@ -49,9 +49,4 @@ class PollController extends ControllerBase {
     return Xss::filter($poll->label());
   }
 
-  public function viewPoll(PollInterface $poll) {
-    $output = entity_view($poll, 'default');
-    return $output;
-  }
-
 }
