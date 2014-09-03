@@ -55,13 +55,14 @@ function poll_theme() {
     'poll_results' => array(
       'template' => 'poll-results',
       'variables' => array(
-        'raw_title' => NULL,
+        'raw_question' => NULL,
         'results' => NULL,
         'votes' => NULL,
         'raw_links' => NULL,
         'block' => NULL,
-        'nid' => NULL,
-        'vote' => NULL
+        'pid' => NULL,
+        'vote' => NULL,
+        'show_question' => FALSE,
       ),
     ),
     'poll_meter' => array(
@@ -130,19 +131,15 @@ function poll_cron() {
 }
 
 /**
- * Implements template_preprocess_HOOK() for poll-vote.tpl.php.
+ * Implements template_preprocess_HOOK() for poll-vote.html.twig.
  */
 function template_preprocess_poll_vote(&$variables) {
   $form = $variables['form'];
-  $variables['title'] = String::checkPlain($form['#entity']->label());
+  $variables['question'] = String::checkPlain($form['#entity']->label());
   $variables['choice'] = drupal_render($form['choice']);
   $variables['vote'] = drupal_render($form['actions']);
   $variables['rest'] = drupal_render_children($form);
-  // @todo:
-  if (isset($form['#block'])) {
-    $variables['block'] = $form['#block'];
-    $variables['theme_hook_suggestions'][] = 'poll_vote__block';
-  }
+  $variables['show_question'] = !empty($form['#show_question']);
 }
 
 /**
@@ -181,7 +178,7 @@ function template_preprocess_poll_meter(&$variables) {
 }
 
 /**
- * Implements template_preprocess_HOOK() for poll-results.tpl.php.
+ * Implements template_preprocess_HOOK() for poll-results.html.twig.
  *
  * @param $variables
  *   An associative array containing:
@@ -198,15 +195,14 @@ function template_preprocess_poll_meter(&$variables) {
  *   are left in with a different name for that purpose.
  *
  * @see poll-results.tpl.php
- * @see poll-results--block.tpl.php
  */
 function template_preprocess_poll_results(&$variables) {
   $links = array(
     '#theme' => 'links__poll_results',
-    '#links' => $variables['raw_links']
+    '#links' => $variables['raw_links'],
   );
-  $variables['links'] = drupal_render($links);
-  $variables['title'] = String::checkPlain($variables['raw_title']);
+  $variables['links'] = $links;
+  $variables['question'] = String::checkPlain($variables['raw_question']);
   $variables['results_title'] = t('Results');
 }
 
