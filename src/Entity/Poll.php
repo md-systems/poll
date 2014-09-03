@@ -22,7 +22,7 @@ use Drupal\user\UserInterface;
  * @ContentEntityType(
  *   id = "poll",
  *   label = @Translation("Poll"),
- *   controllers = {
+ *   handlers = {
  *     "access" = "\Drupal\poll\PollAccessControlHandler",
  *     "storage" = "Drupal\poll\PollStorage",
  *     "translation" = "Drupal\content_translation\ContentTranslationHandler",
