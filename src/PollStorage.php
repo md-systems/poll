@@ -7,16 +7,16 @@
 
 namespace Drupal\poll;
 
-use Drupal\Core\Entity\ContentEntityDatabaseStorage;
+use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
 use Drupal\Core\Session\AccountInterface;
 
 /**
  * Controller class for polls.
  *
- * This extends the Drupal\Core\Entity\ContentEntityDatabaseStorage class,
+ * This extends the default content entity storage class,
  * adding required special handling for poll entities.
  */
-class PollStorage extends ContentEntityDatabaseStorage implements PollStorageInterface {
+class PollStorage extends SqlContentEntityStorage implements PollStorageInterface {
 
   /**
    * {@inheritdoc}
