@@ -195,9 +195,17 @@ class PollViewForm extends FormBase {
    */
   public function cancel(array $form, FormStateInterface $form_state) {
     $form_state->setRedirect('poll.poll_vote_delete', array(
-        'poll' => $form_state['values']['poll']->id(),
+        'poll' => $form_state->getValue('poll')->id(),
         'user' => \Drupal::currentUser()->id(),
-    ));
+      ),
+      array(
+        'query' => array(
+          // Ensure that the cancel form will redirect back to the current page,
+          // as the poll might be displayed as a block on any page.
+          'destination' => current_path(),
+        ),
+      )
+    );
   }
 
   /**
@@ -235,13 +243,10 @@ class PollViewForm extends FormBase {
     $options['pid'] = $form_state->getValue('poll')->id();
     $options['hostname'] = \Drupal::request()->getClientIp();
     $options['timestamp'] = REQUEST_TIME;
-    // save vote
-    $pollStorage = \Drupal::entityManager()->getStorage('poll');
-    $pollStorage->saveVote($options);
-    // @todo: confirm vote has been saved.
+    // Save vote.
+    $poll_storage = \Drupal::entityManager()->getStorage('poll');
+    $poll_storage->saveVote($options);
     drupal_set_message($this->t('Your vote has been recorded.'));
-
-    Cache::invalidateTags($form_state->getValue('poll')->getCacheTag());
 
     if ($this->currentUser()->isAnonymous()) {
       // The vote is recorded so the user gets the result view instead of the
@@ -252,12 +257,13 @@ class PollViewForm extends FormBase {
       $_SESSION['poll_vote'][$form_state->getValue('poll')->id()] = $form_state->getValue('choice');
     }
 
-    $form_state->setRedirectUrl($form_state->getValue('poll')->urlInfo());
+    // No explicit redirect, so that we stay on the current page, which might
+    // be the poll form or another page that is displaying this poll, for
+    // example as a block.
   }
 
   /**
    * {@inheritdoc}
-   *
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     if ($form_state->getValue('op') == 'Vote') {
