@@ -9,7 +9,6 @@ namespace Drupal\poll;
 
 use Drupal\Core\Entity\EntityFormBuilderInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
-use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Defines a service for poll post render cache callbacks.
@@ -24,23 +23,13 @@ class PollPostRenderCache {
   protected $entityManager;
 
   /**
-   * The entity form builder service.
-   *
-   * @var \Drupal\Core\Entity\EntityFormBuilderInterface
-   */
-  protected $entityFormBuilder;
-
-  /**
    * Constructs a new PollPostRenderCache object.
    *
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager service.
-   * @param \Drupal\Core\Entity\EntityFormBuilderInterface $entity_form_builder
-   *   The entity form builder service.
    */
-  public function __construct(EntityManagerInterface $entity_manager, EntityFormBuilderInterface $entity_form_builder) {
+  public function __construct(EntityManagerInterface $entity_manager) {
     $this->entityManager = $entity_manager;
-    $this->entityFormBuilder = $entity_form_builder;
   }
 
   /**
