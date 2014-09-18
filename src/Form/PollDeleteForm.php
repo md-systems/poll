@@ -47,7 +47,7 @@ class PollDeleteForm extends ContentEntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->entity->delete();
     watchdog('poll', 'Poll %poll deleted.', array('%poll' => $this->entity->label()));
     drupal_set_message($this->t('The poll %poll has been deleted.', array('%poll' => $this->entity->label())));

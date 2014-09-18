@@ -42,4 +42,6 @@ poll.poll_vote_delete:
     _entity_form: 'poll.delete_vote'
     _title: 'Delete vote'
   requirements:
-    _entity_access: 'poll.update'
+    # @todo Add custom access check to verify that user is allowed to delete
+    #   the vote of that user.
+    _permission: 'access polls'

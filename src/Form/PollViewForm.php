@@ -53,10 +53,10 @@ class PollViewForm extends FormBase {
       $form['#entity'] = $poll;
       // Set form caching because we could have multiple of these forms on
       // the same page, and we want to ensure the right one gets picked.
-      $form_state['cache'] = TRUE;
+      $form_state->setCached(TRUE);
       // Set a flag to hide results which will be removed if we want to view
       // results when the form is rebuilt.
-      $form_state['input']['show_results'] = FALSE;
+      $form_state->set('show_results', FALSE);
     }
 
     $form['actions'] = $this->actions($form, $form_state, $poll);
@@ -80,7 +80,7 @@ class PollViewForm extends FormBase {
     $account = $this->currentUser();
     switch (TRUE) {
       // The "View results" button, when available, has been clicked.
-      case (isset($form_state['input']) && isset($form_state['input']['show_results']) && $form_state['input']['show_results']):
+      case $form_state->get('show_results'):
         return TRUE;
       // The poll is closed.
       case ($poll->isClosed()):
@@ -106,7 +106,7 @@ class PollViewForm extends FormBase {
         $actions['cancel']['#type'] = 'submit';
         $actions['cancel']['#button_type'] = 'primary';
         $actions['cancel']['#value'] = t('Cancel vote');
-        $actions['cancel']['#submit'] = array(array($this, 'cancel'));
+        $actions['cancel']['#submit'] = array('::cancel');
         $actions['cancel']['#weight'] = '0';
       }
       if (!$poll->hasUserVoted()) {
@@ -114,7 +114,7 @@ class PollViewForm extends FormBase {
         $actions['back']['#type'] = 'submit';
         $actions['back']['#button_type'] = 'primary';
         $actions['back']['#value'] = t('View poll');
-        $actions['back']['#submit'] = array(array($this, 'back'));
+        $actions['back']['#submit'] = array('::back');
         $actions['back']['#weight'] = '0';
       }
     }
@@ -131,7 +131,7 @@ class PollViewForm extends FormBase {
         $actions['result']['#type'] = 'submit';
         $actions['result']['#button_type'] = 'primary';
         $actions['result']['#value'] = t('View results');
-        $actions['result']['#submit'] = array(array($this, 'result'));
+        $actions['result']['#submit'] = array('::result');
         $actions['result']['#weight'] = '1';
       }
     }
@@ -195,7 +195,7 @@ class PollViewForm extends FormBase {
    */
   public function cancel(array $form, FormStateInterface $form_state) {
     $form_state->setRedirect('poll.poll_vote_delete', array(
-        'poll' => $form_state['values']['poll']->id(),
+        'poll' => $form_state->getValue('poll')->id(),
         'user' => \Drupal::currentUser()->id(),
     ));
   }
@@ -207,8 +207,8 @@ class PollViewForm extends FormBase {
    * @param array $form_state
    */
   public function result(array $form, FormStateInterface $form_state) {
-    $form_state['input']['show_results'] = TRUE;
-    $form_state['rebuild'] = TRUE;
+    $form_state->set('show_results', TRUE);
+    $form_state->setRebuild(TRUE);
   }
 
   /**
@@ -218,8 +218,8 @@ class PollViewForm extends FormBase {
    * @param array $form_state
    */
   public function back(array $form, FormStateInterface $form_state) {
-    $form_state['input']['show_results'] = FALSE;
-    $form_state['rebuild'] = TRUE;
+    $form_state->set('show_results', FALSE);
+    $form_state->setRebuild(TRUE);
   }
 
   /**
