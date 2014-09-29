@@ -12,7 +12,7 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
  */
 function poll_install() {
   $field_storage = entity_create('field_storage_config', array(
-    'name' => 'field_choice',
+    'field_name' => 'field_choice',
     'entity_type' => 'poll',
     'type' => 'poll_choice',
     'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
@@ -20,11 +20,10 @@ function poll_install() {
   ));
   $field_storage->save();
 
-  $instance = entity_create('field_instance_config', array(
+  $instance = entity_create('field_config', array(
     'field_storage' => $field_storage,
     'bundle' => 'poll',
     'label' => 'Choice',
-    'bundle' => 'poll',
     'description' => t('Enter a poll choice and default vote.'),
     'required' => FALSE,
     'settings' => array(

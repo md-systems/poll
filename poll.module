@@ -86,23 +86,6 @@ function poll_theme() {
 }
 
 /**
- * Implements hook_permission().
- */
-function poll_permission() {
-  return array(
-    'administer polls' => array(
-      'title' => t('Administer polls'),
-    ),
-    'access polls' => array(
-      'title' => t('View polls'),
-    ),
-    'cancel own vote' => array(
-      'title' => t('Cancel own vote'),
-    ),
-  );
-}
-
-/**
  * Implements hook_page_build().
  */
 function poll_page_build(&$page) {
