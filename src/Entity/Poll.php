@@ -44,7 +44,6 @@ use Drupal\user\UserInterface;
  *   base_table = "poll",
  *   data_table = "poll_field_data",
  *   admin_permission = "administer polls",
- *   fieldable = TRUE,
  *   field_ui_base_route = "poll.poll_list",
  *   translatable = TRUE,
  *   entity_keys = {
