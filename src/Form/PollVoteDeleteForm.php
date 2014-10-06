@@ -49,7 +49,7 @@ class PollVoteDeleteForm extends ContentEntityConfirmFormBase implements Contain
     $account = User::load($uid);
     $pollStorage = \Drupal::entityManager()->getStorage('poll');
     $pollStorage->cancelVote($this->entity, $account);
-    watchdog('poll', '%user\'s vote in Poll #%poll deleted.', array(
+    \Drupal::logger('poll')->notice('%user\'s vote in Poll #%poll deleted.', array(
       '%user' => $account->id(),
       '%poll' => $this->entity->id()
     ));
