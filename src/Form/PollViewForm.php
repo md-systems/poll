@@ -147,8 +147,7 @@ class PollViewForm extends FormBase {
   function showPollResults(PollInterface $poll, $block = FALSE) {
 
     // Ensure that a page that shows poll results can not be cached.
-    // @todo Use the new cache policy service when available.
-    drupal_page_is_cacheable(FALSE);
+    \Drupal::service('page_cache_kill_switch')->trigger();
 
     $total_votes = 0;
     foreach ($poll->votes as $vote) {
