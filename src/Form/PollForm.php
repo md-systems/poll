@@ -5,7 +5,7 @@
  * Contains \Drupal\poll\PollFormController.
  */
 
-namespace Drupal\poll;
+namespace Drupal\poll\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Language\LanguageInterface;
@@ -14,7 +14,7 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Form controller for the poll edit forms.
  */
-class PollFormController extends ContentEntityForm {
+class PollForm extends ContentEntityForm {
 
   /**
    * {@inheritdoc}
@@ -72,7 +72,7 @@ class PollFormController extends ContentEntityForm {
       drupal_set_message($this->t('The poll %poll has been updated.', array('%poll' => $poll->label())));
     }
     else {
-      watchdog('poll', 'Poll %poll added.', array('%poll' => $poll->label()), WATCHDOG_NOTICE, l($this->t('View'), 'admin/config/services/aggregator'));
+      \Drupal::logger('poll')->notice('Poll %poll added.', array('%poll' => $poll->label()), WATCHDOG_NOTICE, $poll->link($poll->label()));
       drupal_set_message($this->t('The poll %poll has been added.', array('%poll' => $poll->label())));
     }
 

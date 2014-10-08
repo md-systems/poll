@@ -22,24 +22,6 @@ use Drupal\Core\Session\AccountInterface;
 class PollRecentBlock extends BlockBase {
 
   /**
-   * Stores the node ID of the latest poll.
-   *
-   * @var int
-   */
-  protected $record;
-
-  /**
-   * Overrides \Drupal\block\BlockBase::settings().
-   */
-  public function settings() {
-    return array(
-      'properties' => array(
-        'administrative' => TRUE,
-      ),
-    );
-  }
-
-  /**
    * {@inheritdoc}
    */
   protected function blockAccess(AccountInterface $account) {
@@ -47,7 +29,7 @@ class PollRecentBlock extends BlockBase {
   }
 
   /**
-   * Implements \Drupal\block\BlockBase::build().
+   * {@inheritdoc}
    */
   public function build() {
     $polls = \Drupal::entityManager()->getStorage('poll')->getMostRecentPoll();

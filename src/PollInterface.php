@@ -14,8 +14,6 @@ use Drupal\Core\Entity\ContentEntityInterface;
  */
 interface PollInterface extends ContentEntityInterface {
 
-  public function getId();
-
   /**
    * Sets the question for the poll.
    *
@@ -134,6 +132,14 @@ interface PollInterface extends ContentEntityInterface {
   public function isOpen();
 
   /**
+   * Returns if the poll is closed.
+   *
+   * @return bool
+   *   TRUE if the poll is closed.
+   */
+  public function isClosed();
+
+  /**
    * Sets the poll to closed.
    */
   public function close();
@@ -162,14 +168,4 @@ interface PollInterface extends ContentEntityInterface {
    */
   public function getOptionValues();
 
-  /**
-   * Remove 'entity/' from the generted uri for this entity.
-   *
-   * @return mixed
-   */
-  public function normaliseUri();
-
-  public function isClosed();
-
-  public function label();
 }

@@ -23,14 +23,14 @@ use Drupal\user\UserInterface;
  *   id = "poll",
  *   label = @Translation("Poll"),
  *   handlers = {
+ *     "access" = "\Drupal\poll\PollAccessControlHandler",
  *     "storage" = "Drupal\poll\PollStorage",
  *     "translation" = "Drupal\content_translation\ContentTranslationHandler",
  *     "list_builder" = "Drupal\poll\PollListBuilder",
  *     "view_builder" = "Drupal\poll\PollViewBuilder",
  *     "form" = {
- *       "default" = "Drupal\poll\PollFormController",
- *       "edit" = "Drupal\poll\PollFormController",
- *       "view" = "Drupal\poll\PollViewFormController",
+ *       "default" = "Drupal\poll\Form\PollForm",
+ *       "edit" = "Drupal\poll\Form\PollForm",
  *       "delete" = "Drupal\poll\Form\PollDeleteForm",
  *       "delete_vote" = "Drupal\poll\Form\PollVoteDeleteForm",
  *       "delete_items" = "Drupal\poll\Form\PollItemsDeleteForm",
@@ -43,7 +43,7 @@ use Drupal\user\UserInterface;
  *   },
  *   base_table = "poll",
  *   data_table = "poll_field_data",
- *   fieldable = TRUE,
+ *   admin_permission = "administer polls",
  *   field_ui_base_route = "poll.poll_list",
  *   translatable = TRUE,
  *   entity_keys = {
@@ -54,17 +54,6 @@ use Drupal\user\UserInterface;
  * )
  */
 class Poll extends ContentEntityBase implements PollInterface {
-
-  public function getId() {
-    return $this->getEntityType()->id();
-  }
-
-  /**
-   * Implements Drupal\Core\Entity\EntityInterface::label().
-   */
-  public function label() {
-    return $this->get('question')->value;
-  }
 
   /**
    * {@inheritdoc}
@@ -397,16 +386,6 @@ class Poll extends ContentEntityBase implements PollInterface {
     foreach ($entities as $entity) {
       $storage->deleteVotes($entity);
     }
-  }
-
-  /**
-   * Remove 'entity/' from the generted uri for this entity.
-   *
-   * @return mixed
-   */
-  public function normaliseUri() {
-    $uri = $this->uri();
-    return str_replace('entity/', '', $uri);
   }
 
 }

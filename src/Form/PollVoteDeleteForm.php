@@ -44,12 +44,12 @@ class PollVoteDeleteForm extends ContentEntityConfirmFormBase implements Contain
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $uid = $this->container->get('request_stack')->getCurrentRequest()->attributes->get('user');
     $account = User::load($uid);
     $pollStorage = \Drupal::entityManager()->getStorage('poll');
     $pollStorage->cancelVote($this->entity, $account);
-    watchdog('poll', '%user\'s vote in Poll #%poll deleted.', array(
+    \Drupal::logger('poll')->notice('%user\'s vote in Poll #%poll deleted.', array(
       '%user' => $account->id(),
       '%poll' => $this->entity->id()
     ));
