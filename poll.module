@@ -58,7 +58,6 @@ function poll_theme() {
         'raw_question' => NULL,
         'results' => NULL,
         'votes' => NULL,
-        'raw_links' => NULL,
         'block' => NULL,
         'pid' => NULL,
         'vote' => NULL,
@@ -168,7 +167,6 @@ function template_preprocess_poll_meter(&$variables) {
  *   - raw_title: A string for the title of the poll.
  *   - results: The results of the poll.
  *   - votes: The total results in the poll.
- *   - raw_links: Array containing links in the poll.
  *   - block: A boolean to define if the poll is a block.
  *   - nid: The node ID of the poll.
  *   - vote: The choice number of the current user's vote.
@@ -177,14 +175,9 @@ function template_preprocess_poll_meter(&$variables) {
  *   that the title and the links may be overridden by the theme layer, so they
  *   are left in with a different name for that purpose.
  *
- * @see poll-results.tpl.php
+ * @see poll-results.html.twig
  */
 function template_preprocess_poll_results(&$variables) {
-  $links = array(
-    '#theme' => 'links__poll_results',
-    '#links' => $variables['raw_links'],
-  );
-  $variables['links'] = $links;
   $variables['question'] = String::checkPlain($variables['raw_question']);
   $variables['results_title'] = t('Results');
 }
