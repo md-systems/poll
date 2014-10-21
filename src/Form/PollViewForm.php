@@ -179,7 +179,6 @@ class PollViewForm extends FormBase {
       '#raw_question' => $poll->label(),
       '#results' => $poll_results,
       '#votes' => $total_votes,
-      '#raw_links' => isset($poll->links) ? $poll->links : array(),
       '#block' => $block,
       '#pid' => $poll->id(),
       '#vote' => isset($poll->vote) ? $poll->vote : NULL,
