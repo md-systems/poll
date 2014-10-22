@@ -62,7 +62,7 @@ class PollViewForm extends FormBase {
     $form['actions'] = $this->actions($form, $form_state, $poll);
 
     $form['#cache'] = array(
-      'tags' => $poll->getCacheTag(),
+      'tags' => $poll->getCacheTags(),
     );
 
     return $form;
@@ -241,7 +241,7 @@ class PollViewForm extends FormBase {
     // @todo: confirm vote has been saved.
     drupal_set_message($this->t('Your vote has been recorded.'));
 
-    Cache::invalidateTags($form_state->getValue('poll')->getCacheTag());
+    Cache::invalidateTags($form_state->getValue('poll')->getCacheTags());
 
     if ($this->currentUser()->isAnonymous()) {
       // The vote is recorded so the user gets the result view instead of the
