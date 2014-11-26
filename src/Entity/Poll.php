@@ -225,7 +225,7 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setTranslatable(TRUE)
       ->setSetting('max_length', 255)
       ->setDisplayOptions('form', array(
-        'type' => 'string',
+        'type' => 'string_textfield',
         'weight' => -100,
       ));
 
