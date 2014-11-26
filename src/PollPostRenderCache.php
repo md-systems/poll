@@ -59,8 +59,6 @@ class PollPostRenderCache {
         $form['#show_question'] = TRUE;
       }
     }
-    // @todo This only works as long as assets are still tracked in a global
-    //   static variable, see https://drupal.org/node/2238835
     $markup = drupal_render($form);
 
     $callback = 'poll.post_render_cache:renderViewForm';
