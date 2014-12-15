@@ -9,6 +9,7 @@ namespace Drupal\poll\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\poll\PollInterface;
 use Drupal\Component\Utility\String;
 
@@ -204,7 +205,7 @@ class PollViewForm extends FormBase {
         'query' => array(
           // Ensure that the cancel form will redirect back to the current page,
           // as the poll might be displayed as a block on any page.
-          'destination' => current_path(),
+          'destination' => Url::fromRoute('<current>')->getInternalPath(),
         ),
       )
     );
