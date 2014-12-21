@@ -47,19 +47,25 @@ class PollPostRenderCache {
   public function renderViewForm(array $element, array $context) {
     $poll = $this->entityManager->getStorage('poll')->load($context['id']);
 
-    $form = \Drupal::formBuilder()->getForm('Drupal\poll\Form\PollViewForm', $poll);
-    // For all view modes except full and block (as block displays it as the
-    // block title, display the question.
-    $form['#view_mode'] = $context['view_mode'];
-    if ($context['view_mode'] != 'full' && $context['view_mode'] != 'block') {
-      if (isset($form['results'])) {
-        $form['results']['#show_question'] = TRUE;
+    if ($poll) {
+      $form = \Drupal::formBuilder()->getForm('Drupal\poll\Form\PollViewForm', $poll);
+      // For all view modes except full and block (as block displays it as the
+      // block title, display the question.
+      $form['#view_mode'] = $context['view_mode'];
+      if ($context['view_mode'] != 'full' && $context['view_mode'] != 'block') {
+        if (isset($form['results'])) {
+          $form['results']['#show_question'] = TRUE;
+        }
+        else {
+          $form['#show_question'] = TRUE;
+        }
       }
-      else {
-        $form['#show_question'] = TRUE;
-      }
+      $markup = drupal_render($form);
+
     }
-    $markup = drupal_render($form);
+    else {
+      $markup = '';
+    }
 
     $callback = 'poll.post_render_cache:renderViewForm';
     $placeholder = drupal_render_cache_generate_placeholder($callback, $context);
