@@ -51,6 +51,7 @@ use Drupal\user\UserInterface;
  *     "id" = "id",
  *     "label" = "question",
  *     "uuid" = "uuid",
+ *     "langcode" = "langcode"
  *   }
  * )
  */
