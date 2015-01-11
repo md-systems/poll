@@ -120,10 +120,10 @@ abstract class PollTestBase extends WebTestBase {
       'question[0][value]' => $question,
     );
     foreach ($already_submitted_choices as $k => $text) {
-      $edit['field_choice[' . $k . '][choice]'] = $text;
+      $edit['choice[' . $k . '][choice]'] = $text;
     }
     foreach ($new_choices as $k => $text) {
-      $edit['field_choice[' . $k . '][choice]'] = $text;
+      $edit['choice[' . $k . '][choice]'] = $text;
     }
     return array($edit, count($already_submitted_choices) + count($new_choices));
   }
@@ -161,7 +161,7 @@ abstract class PollTestBase extends WebTestBase {
     foreach ($choices as $id => $label) {
       if ($id < $index) {
         // Directly assert the weight form element value for this choice.
-        $this->assertFieldByName('field_choice[' . $id . '][_weight]', $weight, format_string('Found field_choice @id with weight @weight.', array(
+        $this->assertFieldByName('choice[' . $id . '][_weight]', $weight, format_string('Found choice @id with weight @weight.', array(
           '@id' => $id,
           '@weight' => $weight,
         )));

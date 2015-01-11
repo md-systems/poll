@@ -10,6 +10,7 @@ namespace Drupal\poll\Entity;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Symfony\Component\DependencyInjection\Container;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\poll\PollInterface;
@@ -233,6 +234,17 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setLabel(t('Language code'))
       ->setDescription(t('The poll language code.'));
 
+    $fields['choice'] = BaseFieldDefinition::create('poll_choice')
+      ->setLabel(t('Choice'))
+      ->setDescription(t('Enter a poll choice and default vote.'))
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setSetting('max_length', 255)
+      ->setDisplayOptions('form', [
+        'type' => 'poll_choice_default',
+        'settings' => [],
+        'weight' => -10,
+      ]);
+
     // Poll attributes
     $duration = array(
       // 1-6 days.
@@ -345,8 +357,8 @@ class Poll extends ContentEntityBase implements PollInterface {
    */
   public function getOptions() {
     $options = array();
-    if (count($this->field_choice)) {
-      foreach ($this->field_choice as $option) {
+    if (count($this->choice)) {
+      foreach ($this->choice as $option) {
         $options[$option->chid] = String::checkPlain($option->choice);
       }
     }
@@ -360,8 +372,8 @@ class Poll extends ContentEntityBase implements PollInterface {
    */
   public function getOptionValues() {
     $options = array();
-    if (count($this->field_choice)) {
-      foreach ($this->field_choice as $option) {
+    if (count($this->choice)) {
+      foreach ($this->choice as $option) {
         $options[$option->chid] = $option->vote;
       }
     }

@@ -4,46 +4,6 @@
  * @file
  * Install, update, and uninstall functions for the Poll module.
  */
-use Drupal\Core\Language\Language;
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
-
-/**
- * Implements hook_install().
- */
-function poll_install() {
-  $field_storage = entity_create('field_storage_config', array(
-    'field_name' => 'field_choice',
-    'entity_type' => 'poll',
-    'type' => 'poll_choice',
-    'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
-    'locked' => FALSE,
-  ));
-  $field_storage->save();
-
-  $instance = entity_create('field_config', array(
-    'field_storage' => $field_storage,
-    'bundle' => 'poll',
-    'label' => 'Choice',
-    'description' => t('Enter a poll choice and default vote.'),
-    'required' => FALSE,
-    'settings' => array(
-      'max_length' => 255,
-    ),
-  ));
-  $instance->save();
-
-  // Assign form display settings for the 'default' view mode.
-  entity_get_form_display('poll', 'poll', 'default')
-    ->setComponent('field_choice', array(
-      'type' => 'poll_choice_default',
-      'settings' => array(
-        'size' => '60',
-        'placeholder' => '',
-      ),
-      'weight' => -10,
-    ))
-    ->save();
-}
 
 /**
  * Implements hook_schema().

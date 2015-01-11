@@ -25,7 +25,7 @@ class PollDeleteChoiceTest extends PollTestBase {
 
     // Edit the poll, and try to delete first poll choice.
     $this->drupalGet("poll/" . $this->poll->id() . "/edit");
-    $edit['field_choice[0][choice]'] = '';
+    $edit['choice[0][choice]'] = '';
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
     // Click on the poll title to go to poll page.
@@ -33,8 +33,8 @@ class PollDeleteChoiceTest extends PollTestBase {
     $this->clickLink($this->poll->label());
 
     // Check the first poll choice is deleted, while the others remain.
-    $this->assertNoText($this->poll->field_choice[0]->choice, 'First choice removed.');
-    $this->assertText($this->poll->field_choice[1]->choice, 'Second choice remains.');
-    $this->assertText($this->poll->field_choice[2]->choice, 'Third choice remains.');
+    $this->assertNoText($this->poll->choice[0]->choice, 'First choice removed.');
+    $this->assertText($this->poll->choice[1]->choice, 'Second choice remains.');
+    $this->assertText($this->poll->choice[2]->choice, 'Third choice remains.');
   }
 }
