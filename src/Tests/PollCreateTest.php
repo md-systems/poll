@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Definition of Drupal\poll\Tests\PollCreateTest.
+ * Contains Drupal\\poll\Tests\PollCreateTest.
  */
 
 namespace Drupal\poll\Tests;

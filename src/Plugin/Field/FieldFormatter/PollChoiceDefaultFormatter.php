@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Definition of Drupal\poll\Plugin\field\FieldFormatter\PollChoiceDefaultFormatter.
+ * Contains Drupal\\poll\Plugin\field\FieldFormatter\PollChoiceDefaultFormatter.
  */
 
 namespace Drupal\poll\Plugin\Field\FieldFormatter;

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Definition of Drupal\poll\Tests\PollDeleteChoiceTest.
+ * Contains Drupal\\poll\Tests\PollDeleteChoiceTest.
  */
 
 namespace Drupal\poll\Tests;
