@@ -55,6 +55,6 @@ class PollVoteDeleteForm extends ContentEntityConfirmFormBase implements Contain
     ));
     drupal_set_message($this->t('Your vote was cancelled.'));
     // Display the original poll.
-    $form_state->setRedirect('poll.poll_view', array('poll' => $this->entity->id()));
+    $form_state->setRedirect('entity.poll.canonical', array('poll' => $this->entity->id()));
   }
 }

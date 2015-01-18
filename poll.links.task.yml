@@ -1,19 +1,19 @@
-poll.poll_view:
-  route_name: poll.poll_view
-  base_route: poll.poll_view
+entity.poll.canonical:
+  route_name: entity.poll.canonical
+  base_route: entity.poll.canonical
   title: View
-poll.poll_edit:
-  route_name: poll.poll_edit
-  base_route: poll.poll_view
+entity.poll.edit_form:
+  route_name: entity.poll.edit_form
+  base_route: entity.poll.canonical
   title: Edit
-poll.poll_delete:
-  route_name: poll.poll_delete
-  base_route: poll.poll_view
+entity.poll.delete_form:
+  route_name: entity.poll.delete_form
+  base_route: entity.poll.canonical
   title: Delete
   weight: 8
 poll.poll_votes:
-  route_name: poll.poll_delete
-  base_route: poll.poll_view
+  route_name: entity.poll.delete_form
+  base_route: entity.poll.canonical
   title: Votes
   weight: 10
 poll.poll_overview:
