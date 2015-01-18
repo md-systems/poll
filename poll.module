@@ -85,9 +85,9 @@ function poll_theme() {
 }
 
 /**
- * Implements hook_page_build().
+ *  Implements hook_page_attachments().
  */
-function poll_page_build(&$page) {
+function poll_page_attachments(array &$page) {
   $page['#attached']['library'][] = 'poll/drupal.poll-links';
 }
 

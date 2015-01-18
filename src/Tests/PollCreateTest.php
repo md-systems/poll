@@ -47,14 +47,14 @@ class PollCreateTest extends PollTestBase {
     // option is displayed.
     $vote_choice = $this->randomMachineName();
     $vote_count = '2000';
-    $poll->field_choice[0]->choice = $vote_choice;
-    $poll->field_choice[0]->vote = $vote_count;
+    $poll->choice[0]->choice = $vote_choice;
+    $poll->choice[0]->vote = $vote_count;
     $poll->save();
 
     // Check the new choice has taken effect.
     $this->drupalGet('poll/' . $poll->id() . '/edit');
-    $this->assertFieldByXPath("//input[@name='field_choice[0][choice]']", $vote_choice, 'Choice successfully changed.');
-    $this->assertFieldByXPath("//input[@name='field_choice[0][vote]']", $vote_count, 'Vote successfully changed.');
+    $this->assertFieldByXPath("//input[@name='choice[0][choice]']", $vote_choice, 'Choice successfully changed.');
+    $this->assertFieldByXPath("//input[@name='choice[0][vote]']", $vote_count, 'Vote successfully changed.');
 
   }
 

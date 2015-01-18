@@ -8,7 +8,7 @@ poll.poll_list:
 poll.poll_add:
   path: '/poll/add'
   defaults:
-    _content: '\Drupal\poll\Controller\PollController::pollAdd'
+    _controller: '\Drupal\poll\Controller\PollController::pollAdd'
     _title: 'Add poll'
   options:
     _admin_route: TRUE
