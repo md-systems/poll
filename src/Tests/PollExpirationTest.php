@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Definition of Drupal\poll\Tests\PollExpirationTest.
+ * Contains Drupal\\poll\Tests\PollExpirationTest.
  */
 
 namespace Drupal\poll\Tests;

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Definition of Drupal\poll\Tests\PollVoteCheckHostnameTest.
+ * Contains Drupal\\poll\Tests\PollVoteCheckHostnameTest.
  */
 
 namespace Drupal\poll\Tests;

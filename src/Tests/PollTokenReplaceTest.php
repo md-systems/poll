@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Definition of Drupal\poll\Tests\PollTokenReplaceTest.
+ * Contains Drupal\\poll\Tests\PollTokenReplaceTest.
  */
 
 namespace Drupal\poll\Tests;

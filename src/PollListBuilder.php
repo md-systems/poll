@@ -1,33 +1,20 @@
 <?php
 
 /**
- * Definition of Drupal\poll\PollListController.
+ * Contains \Drupal\poll\PollListController.
  */
 
 namespace Drupal\poll;
 
-use Drupal;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Config\Entity\DraggableListBuilder;
+use Drupal\Core\Entity\EntityListBuilder;
 
 /**
  * Defines a class to build a listing of user role entities.
  *
  * @see \Drupal\user\Entity\Role
  */
-class PollListBuilder extends DraggableListBuilder {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function load() {
-    $entities = $this->storage->loadMultiple();
-
-    // Sort the entities using the entity class's sort() method.
-    // See \Drupal\Core\Config\Entity\ConfigEntityBase::sort().
-    uasort($entities, array($this->entityType->getClass(), 'sort'));
-    return $entities;
-  }
+class PollListBuilder extends EntityListBuilder {
 
   /**
    * {@inheritdoc}
@@ -37,7 +24,7 @@ class PollListBuilder extends DraggableListBuilder {
   }
 
   /**
-   * Overrides Drupal\Core\Entity\EntityListController::buildHeader().
+   * {@inheritdoc}
    */
   public function buildHeader() {
 
@@ -51,7 +38,7 @@ class PollListBuilder extends DraggableListBuilder {
   }
 
   /**
-   * Overrides Drupal\Core\Entity\EntityListController::buildRow().
+   * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
     $pollStorage = \Drupal::entityManager()->getStorage('poll');
@@ -63,36 +50,9 @@ class PollListBuilder extends DraggableListBuilder {
     );
     $row['votes'] = $pollStorage->getTotalVotes($entity);
     $row['status'] = ($entity->isOpen()) ? t('Y') : t('N');
-    $row['created'] = ($entity->getCreated()) ? Drupal::service('date.formatter')
+    $row['created'] = ($entity->getCreated()) ? \Drupal::service('date.formatter')
       ->format($entity->getCreated(), 'long') : t('n/a');
     return $row + parent::buildRow($entity);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getOperations(EntityInterface $entity) {
-    $operations = parent::getOperations($entity);
-
-    if ($entity->hasLinkTemplate('canonical')) {
-      $operations['view'] = array(
-          'title' => t('View'),
-          'weight' => 0,
-        ) + $entity->urlInfo('canonical')->toArray();
-    }
-    if ($entity->hasLinkTemplate('edit-form')) {
-      $operations['edit'] = array(
-          'title' => t('Edit'),
-          'weight' => 1,
-        ) + $entity->urlInfo('edit-form')->toArray();
-    }
-    if ($entity->hasLinkTemplate('delete-form')) {
-      $operations['delete'] = array(
-          'title' => t('Delete'),
-          'weight' => 2,
-        ) + $entity->urlInfo('delete-form')->toArray();
-    }
-    return $operations;
   }
 
 }

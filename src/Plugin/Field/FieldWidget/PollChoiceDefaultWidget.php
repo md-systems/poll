@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Definition of Drupal\poll\Plugin\field\FieldWidget\PollChoiceDefaultWidget.
+ * Contains Drupal\\poll\Plugin\field\FieldWidget\PollChoiceDefaultWidget.
  */
 
 namespace Drupal\poll\Plugin\Field\FieldWidget;
