@@ -26,7 +26,7 @@ class PollVoteCheckHostnameTest extends PollTestBase {
 
     // Enable page cache to verify that the result page is not saved in the
     // cache when anonymous voting is allowed.
-    \Drupal::config('system.performance')
+    $this->config('system.performance')
       ->set('cache.page.use_internal', 1)
       ->set('cache.page.max_age', 60)
       ->save();

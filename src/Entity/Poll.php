@@ -11,7 +11,6 @@ use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Symfony\Component\DependencyInjection\Container;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\poll\PollInterface;
 use Drupal\Component\Utility\String;
@@ -38,9 +37,9 @@ use Drupal\user\UserInterface;
  *     }
  *   },
  *   links = {
- *     "canonical" = "poll.poll_view",
- *     "edit-form" = "poll.poll_edit",
- *     "delete-form" = "poll.poll_delete"
+ *     "canonical" = "/poll/{poll}",
+ *     "edit-form" = "/poll/{poll}/edit",
+ *     "delete-form" = "/poll/{poll}/delete"
  *   },
  *   base_table = "poll",
  *   data_table = "poll_field_data",
@@ -213,7 +212,7 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setDescription(t('The user ID of the poll author.'))
       ->setSetting('target_type', 'user')
       ->setTranslatable(TRUE)
-      ->setDefaultValue(0);
+      ->setDefaultValueCallback('Drupal\poll\Entity\Poll::getCurrentUserId');
 
     $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
@@ -277,6 +276,7 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setSetting('unsigned', TRUE)
       ->setRequired(TRUE)
       ->setSetting('allowed_values', $period)
+      ->setDefaultValue(0)
       ->setDisplayOptions('form', array(
         'type' => 'options_select',
         'weight' => 0,
@@ -288,6 +288,7 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setSetting('unsigned', TRUE)
       ->setRequired(TRUE)
       ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
+      ->setDefaultValue(0)
       ->setDisplayOptions('form', array(
         'type' => 'options_select',
         'weight' => 1,
@@ -297,6 +298,7 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setLabel(t('Allow cancel votes'))
       ->setDescription(t('A flag indicating whether users may cancel their vote.'))
       ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
+      ->setDefaultValue(1)
       ->setRequired(TRUE)
       ->setDisplayOptions('form', array(
         'type' => 'options_select',
@@ -307,6 +309,7 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setLabel(t('Allow view results'))
       ->setDescription(t('A flag indicating whether users may see the results before voting.'))
       ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
+      ->setDefaultValue(0)
       ->setRequired(TRUE)
       ->setDisplayOptions('form', array(
         'type' => 'options_select',
@@ -318,18 +321,29 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setDescription(t('A flag indicating whether the poll is active.'))
       ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
       ->setRequired(TRUE)
+      ->setDefaultValue(1)
       ->setDisplayOptions('form', array(
         'type' => 'options_select',
         'weight' => 4,
       ));
 
-    // This is updated by the fetcher and not when the feed is saved, therefore
-    // it's a timestamp and not a changed field.
-    $fields['created'] = BaseFieldDefinition::create('timestamp')
+    $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
       ->setDescription(t('When the poll was created, as a Unix timestamp.'));
 
     return $fields;
+  }
+
+  /**
+   * Default value callback for 'uid' base field definition.
+   *
+   * @see ::baseFieldDefinitions()
+   *
+   * @return array
+   *   An array of default values.
+   */
+  public static function getCurrentUserId() {
+    return array(\Drupal::currentUser()->id());
   }
 
   /**

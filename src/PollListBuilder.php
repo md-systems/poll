@@ -8,9 +8,7 @@ namespace Drupal\poll;
 
 use Drupal;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Config\Entity\DraggableListBuilder;
-use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
  * Defines a class to build a listing of user role entities.
@@ -18,6 +16,18 @@ use Drupal\Core\Entity\EntityStorageInterface;
  * @see \Drupal\user\Entity\Role
  */
 class PollListBuilder extends DraggableListBuilder {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function load() {
+    $entities = $this->storage->loadMultiple();
+
+    // Sort the entities using the entity class's sort() method.
+    // See \Drupal\Core\Config\Entity\ConfigEntityBase::sort().
+    uasort($entities, array($this->entityType->getClass(), 'sort'));
+    return $entities;
+  }
 
   /**
    * {@inheritdoc}
