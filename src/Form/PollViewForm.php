@@ -7,13 +7,11 @@
 
 namespace Drupal\poll\Form;
 
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\poll\PollInterface;
 use Drupal\Component\Utility\String;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Displays banned IP addresses.
@@ -72,8 +70,7 @@ class PollViewForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // Leaving empty
-    $this->save($form, $form_state);
+
   }
 
   public function showResults(PollInterface $poll, FormStateInterface $form_state) {
@@ -123,7 +120,8 @@ class PollViewForm extends FormBase {
       $actions['submit']['#type'] = 'submit';
       $actions['submit']['#button_type'] = 'primary';
       $actions['submit']['#value'] = t('Vote');
-//      $actions['submit']['#submit'] = array(array($this, 'save'));
+      $actions['submit']['#validate'] = array('::validateVote');
+      $actions['submit']['#submit'] = array('::save');
       $actions['submit']['#weight'] = '0';
 
       // view results before voting
@@ -148,6 +146,9 @@ class PollViewForm extends FormBase {
    * @return false|string
    */
   function showPollResults(PollInterface $poll, $block = FALSE) {
+
+    // Ensure that a page that shows poll results can not be cached.
+    \Drupal::service('page_cache_kill_switch')->trigger();
 
     $total_votes = 0;
     foreach ($poll->votes as $vote) {
@@ -187,6 +188,8 @@ class PollViewForm extends FormBase {
     return $output;
   }
 
+
+
   /**
    * Cancel vote submit function.
    *
@@ -197,7 +200,15 @@ class PollViewForm extends FormBase {
     $form_state->setRedirect('poll.poll_vote_delete', array(
         'poll' => $form_state->getValue('poll')->id(),
         'user' => \Drupal::currentUser()->id(),
-    ));
+      ),
+      array(
+        'query' => array(
+          // Ensure that the cancel form will redirect back to the current page,
+          // as the poll might be displayed as a block on any page.
+          'destination' => Url::fromRoute('<current>')->getInternalPath(),
+        ),
+      )
+    );
   }
 
   /**
@@ -229,19 +240,28 @@ class PollViewForm extends FormBase {
    * @param array $form_state
    */
   public function save(array $form, FormStateInterface $form_state) {
+
+    // Check if the user already voted. We do this in save() and not validate
+    // so that the form is considered submitted and displays the result
+    // when built again.
+    if ($form_state->getValue('poll')->hasUserVoted()) {
+      // If this happened, then the form submission was likely a cached page.
+      // Force a session for this user so he can see the results.
+      drupal_set_message($this->t('Your vote for this poll has already been submitted.'), 'error');
+      $_SESSION['poll_vote'][$form_state->getValue('poll')->id()] = FALSE;
+      return;
+    }
+
     $options = array();
     $options['chid'] = $form_state->getValue('choice');
     $options['uid'] = $this->currentUser()->id();
     $options['pid'] = $form_state->getValue('poll')->id();
     $options['hostname'] = \Drupal::request()->getClientIp();
     $options['timestamp'] = REQUEST_TIME;
-    // save vote
-    $pollStorage = \Drupal::entityManager()->getStorage('poll');
-    $pollStorage->saveVote($options);
-    // @todo: confirm vote has been saved.
+    // Save vote.
+    $poll_storage = \Drupal::entityManager()->getStorage('poll');
+    $poll_storage->saveVote($options);
     drupal_set_message($this->t('Your vote has been recorded.'));
-
-    Cache::invalidateTags($form_state->getValue('poll')->getCacheTags());
 
     if ($this->currentUser()->isAnonymous()) {
       // The vote is recorded so the user gets the result view instead of the
@@ -252,18 +272,17 @@ class PollViewForm extends FormBase {
       $_SESSION['poll_vote'][$form_state->getValue('poll')->id()] = $form_state->getValue('choice');
     }
 
-    $form_state->setRedirectUrl($form_state->getValue('poll')->urlInfo());
+    // No explicit redirect, so that we stay on the current page, which might
+    // be the poll form or another page that is displaying this poll, for
+    // example as a block.
   }
 
   /**
-   * {@inheritdoc}
-   *
+   * Validates the vote action.
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-    if ($form_state->getValue('op') == 'Vote') {
-      if (!$form_state->hasValue('choice')) {
-        $form_state->setErrorByName('choice', $this->t('Your vote could not be recorded because you did not select any of the choices.'));
-      }
+  public function validateVote(array &$form, FormStateInterface $form_state) {
+    if (!$form_state->hasValue('choice')) {
+      $form_state->setErrorByName('choice', $this->t('Your vote could not be recorded because you did not select any of the choices.'));
     }
   }
 
