@@ -75,22 +75,11 @@ class PollListBuilder extends DraggableListBuilder {
     $operations = parent::getOperations($entity);
 
     if ($entity->hasLinkTemplate('canonical')) {
-      $operations['view'] = array(
+      $operations= ['view' => [
           'title' => t('View'),
           'weight' => 0,
-        ) + $entity->urlInfo('canonical')->toArray();
-    }
-    if ($entity->hasLinkTemplate('edit-form')) {
-      $operations['edit'] = array(
-          'title' => t('Edit'),
-          'weight' => 1,
-        ) + $entity->urlInfo('edit-form')->toArray();
-    }
-    if ($entity->hasLinkTemplate('delete-form')) {
-      $operations['delete'] = array(
-          'title' => t('Delete'),
-          'weight' => 2,
-        ) + $entity->urlInfo('delete-form')->toArray();
+          'url' => $entity->urlInfo('canonical'),
+        ]] + $operations;
     }
     return $operations;
   }

@@ -8,7 +8,6 @@
 namespace Drupal\poll\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
-use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
@@ -21,28 +20,10 @@ class PollForm extends ContentEntityForm {
    */
   public function form(array $form, FormStateInterface $form_state) {
     $poll = $this->entity;
-    // @todo: convert to a language selection widget defined in the base field.
-    //   Blocked on https://drupal.org/node/2226493 which adds a generic
-    //   language widget.
-    $form['langcode'] = array(
-      '#title' => $this->t('Language'),
-      '#type' => 'language_select',
-      '#default_value' => $poll->language()->getId(),
-      '#languages' => LanguageInterface::STATE_ALL,
-      '#weight' => -4,
-    );
+
+    $form['#title'] = $this->t('Edit @label', ['@label' => $poll->label()]);
 
     return parent::form($form, $form_state, $poll);
-  }
-
-  public function buildEntity(array $form, FormStateInterface $form_state) {
-    /** @var \Drupal\poll\PollInterface $entity */
-    $entity = parent::buildEntity($form, $form_state);
-
-    if ($entity->isNew()) {
-      $entity->setCreated(REQUEST_TIME);
-    }
-    return $entity;
   }
 
   /**
