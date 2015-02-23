@@ -28,6 +28,7 @@ use Drupal\user\UserInterface;
  *     "translation" = "Drupal\content_translation\ContentTranslationHandler",
  *     "list_builder" = "Drupal\poll\PollListBuilder",
  *     "view_builder" = "Drupal\poll\PollViewBuilder",
+ *     "views_data" = "Drupal\views\EntityViewsData",
  *     "form" = {
  *       "default" = "Drupal\poll\Form\PollForm",
  *       "edit" = "Drupal\poll\Form\PollForm",
