@@ -41,7 +41,7 @@ function poll_token_info() {
 function poll_tokens($type, $tokens, array $data = array(), array $options = array()) {
   $sanitize = !empty($options['sanitize']);
   if (isset($options['langcode'])) {
-    $url_options['language'] = language_load($options['langcode']);
+    $url_options['language'] = \Drupal::languageManager()->getLanguage($options['langcode']);
     $langcode = $options['langcode'];
   }
   else {
