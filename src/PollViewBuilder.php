@@ -33,6 +33,9 @@ class PollViewBuilder extends EntityViewBuilder {
         ),
       ),
       '#markup' => $placeholder,
+      '#cache' => array(
+        'tags' => $entity->getCacheTags(),
+      ),
     );
 
     return $output;

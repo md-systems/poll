@@ -31,6 +31,13 @@ class PollRecentBlock extends BlockBase {
   /**
    * {@inheritdoc}
    */
+  public function getCacheTags() {
+    return array('poll_list');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function build() {
     $polls = \Drupal::entityManager()->getStorage('poll')->getMostRecentPoll();
     if ($polls) {
