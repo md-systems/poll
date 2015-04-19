@@ -7,6 +7,7 @@
 
 namespace Drupal\poll\Plugin\Block;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Session\AccountInterface;
 
@@ -25,7 +26,7 @@ class PollRecentBlock extends BlockBase {
    * {@inheritdoc}
    */
   protected function blockAccess(AccountInterface $account) {
-    return $account->hasPermission('access polls');
+    return AccessResult::allowedIfHasPermission($account, 'access polls');
   }
 
   /**
