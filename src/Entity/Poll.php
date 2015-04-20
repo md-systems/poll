@@ -7,13 +7,13 @@
 
 namespace Drupal\poll\Entity;
 
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\poll\PollInterface;
-use Drupal\Component\Utility\String;
 use Drupal\user\UserInterface;
 
 /**
@@ -375,7 +375,7 @@ class Poll extends ContentEntityBase implements PollInterface {
     $options = array();
     if (count($this->choice)) {
       foreach ($this->choice as $option) {
-        $options[$option->chid] = String::checkPlain($option->choice);
+        $options[$option->chid] = SafeMarkup::checkPlain($option->choice);
       }
     }
     return $options;

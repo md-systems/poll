@@ -7,11 +7,11 @@
 
 namespace Drupal\poll\Form;
 
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\poll\PollInterface;
-use Drupal\Component\Utility\String;
 
 /**
  * Displays banned IP addresses.
@@ -164,7 +164,7 @@ class PollViewForm extends FormBase {
 
       $poll_results[] = array(
         '#theme' => 'poll_meter',
-        '#prefix' => '<dt class="choice-title">' . String::checkPlain($options[$pid]) . "</dt>\n" . '<dd class="choice-result">',
+        '#prefix' => '<dt class="choice-title">' . SafeMarkup::checkPlain($options[$pid]) . "</dt>\n" . '<dd class="choice-result">',
         '#suffix' => "</dd>\n",
         '#display_value' => t('!percentage%', array('!percentage' => $percentage)) . $display_votes,
         '#min' => 0,

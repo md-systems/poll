@@ -5,8 +5,8 @@
  * Collects votes on different topics in the form of multiple choice questions.
  */
 
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\poll\Entity\Poll;
-use Drupal\Component\Utility\String;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Routing\RouteMatchInterface;
 
@@ -117,7 +117,7 @@ function poll_cron() {
  */
 function template_preprocess_poll_vote(&$variables) {
   $form = $variables['form'];
-  $variables['question'] = String::checkPlain($form['#entity']->label());
+  $variables['question'] = SafeMarkup::checkPlain($form['#entity']->label());
   $variables['choice'] = drupal_render($form['choice']);
   $variables['vote'] = drupal_render($form['actions']);
   $variables['rest'] = drupal_render_children($form);
@@ -178,7 +178,7 @@ function template_preprocess_poll_meter(&$variables) {
  * @see poll-results.html.twig
  */
 function template_preprocess_poll_results(&$variables) {
-  $variables['question'] = String::checkPlain($variables['raw_question']);
+  $variables['question'] = SafeMarkup::checkPlain($variables['raw_question']);
   $variables['results_title'] = t('Results');
 }
 

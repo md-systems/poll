@@ -7,7 +7,7 @@
 
 namespace Drupal\poll\Tests;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Tests the recent poll block.
@@ -44,7 +44,7 @@ class PollBlockTest extends PollTestBase {
 
     // If a 'block' view not generated, this title would not appear even though
     // the choices might.
-    $this->assertText($poll->label(), String::format('@title Poll appears in block.', array('@title' => $this->poll->label())));
+    $this->assertText($poll->label(), SafeMarkup::format('@title Poll appears in block.', array('@title' => $this->poll->label())));
     $options = $poll->getOptions();
     foreach ($options as $option) {
       $this->assertText($option, 'Poll option appears in block.');
