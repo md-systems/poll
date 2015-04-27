@@ -61,7 +61,7 @@ class PollListBuilder extends DraggableListBuilder {
       '#theme' => 'username',
       '#account' => $entity->getOwner(),
     );
-    $row['votes'] = $pollStorage->getTotalVotes($entity);
+    // $row['votes'] = $pollStorage->getTotalVotes($entity);
     $row['status'] = ($entity->isOpen()) ? t('Y') : t('N');
     $row['created'] = ($entity->getCreated()) ? Drupal::service('date.formatter')
       ->format($entity->getCreated(), 'long') : t('n/a');
@@ -74,13 +74,6 @@ class PollListBuilder extends DraggableListBuilder {
   public function getOperations(EntityInterface $entity) {
     $operations = parent::getOperations($entity);
 
-    if ($entity->hasLinkTemplate('canonical')) {
-      $operations= ['view' => [
-          'title' => t('View'),
-          'weight' => 0,
-          'url' => $entity->urlInfo('canonical'),
-        ]] + $operations;
-    }
     return $operations;
   }
 

@@ -72,5 +72,48 @@ class PollVoteTest extends PollTestBase {
     $this->assertText('Total votes:  1', 'Vote count updated correctly.');
     $elements = $this->xpath('//input[@value="Cancel your vote"]');
     $this->assertTrue(empty($elements), "'Cancel your vote' button does not appear.");
+
+    $this->drupalLogin($this->admin_user);
+
+    $this->drupalGet('admin/content/poll');
+    $this->assertText($this->poll->label());
+
+    // Test for the overview page.
+    $field_status = $this->xpath('//table/tbody/tr[1]');
+    $active = (string) $field_status[0]->td[1];
+    $this->assertEqual(trim($active), 'Yes');
+
+    $anonymous_votes = trim((string) $field_status[0]->td[2]);
+    $this->assertEqual($anonymous_votes, 'Off');
+
+    // Edit the poll.
+    $this->clickLink($this->poll->label());
+    $this->clickLink('Edit');
+
+    // Add the runtime date and allow anonymous to vote.
+    $edit = array(
+      'runtime' => 172800,
+      'anonymous_vote_allow[value]' => TRUE,
+    );
+
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+
+    // Assert that editing was successful.
+    $this->assertText('The poll ' . $this->poll->label() . ' has been updated.');
+
+    // Check if the active label is correct.
+    $field_status = $this->xpath('//table/tbody/tr[1]');
+    $active = trim((string) $field_status[0]->td[1]);
+    $date = \Drupal::service('date.formatter')->format($this->poll->getCreated() + 172800, 'short');
+    $output = 'Yes (until ' . rtrim(strstr($date, '-', true)) . ')';
+    $this->assertEqual($active, $output);
+
+    // Check if allow anonymous voting is on.
+    $anonymous_votes = trim((string) $field_status[0]->td[2]);
+    $this->assertEqual($anonymous_votes, 'On');
+
+    // Check the number of total votes.
+    $total_votes = trim((string) $field_status[0]->td[4]);
+    $this->assertEqual($total_votes, '1');
   }
 }

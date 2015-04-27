@@ -28,7 +28,7 @@ use Drupal\user\UserInterface;
  *     "translation" = "Drupal\content_translation\ContentTranslationHandler",
  *     "list_builder" = "Drupal\poll\PollListBuilder",
  *     "view_builder" = "Drupal\poll\PollViewBuilder",
- *     "views_data" = "Drupal\views\EntityViewsData",
+ *     "views_data" = "Drupal\poll\PollViewData",
  *     "form" = {
  *       "default" = "Drupal\poll\Form\PollForm",
  *       "edit" = "Drupal\poll\Form\PollForm",
@@ -209,11 +209,22 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setSetting('unsigned', TRUE);
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('User ID'))
-      ->setDescription(t('The user ID of the poll author.'))
+      ->setLabel(t('Author'))
+      ->setDescription(t('The poll author.'))
       ->setSetting('target_type', 'user')
       ->setTranslatable(TRUE)
-      ->setDefaultValueCallback('Drupal\poll\Entity\Poll::getCurrentUserId');
+      ->setDefaultValueCallback('Drupal\poll\Entity\Poll::getCurrentUserId')
+      ->setDisplayOptions('form', array(
+        'type' => 'entity_reference_autocomplete',
+        'weight' => -10,
+        'settings' => array(
+          'match_operator' => 'CONTAINS',
+          'size' => '60',
+          'autocomplete_type' => 'tags',
+          'placeholder' => '',
+        ),
+      ))
+      ->setDisplayConfigurable('form', TRUE);
 
     $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
@@ -243,7 +254,7 @@ class Poll extends ContentEntityBase implements PollInterface {
       ->setDisplayOptions('form', [
         'type' => 'poll_choice_default',
         'settings' => [],
-        'weight' => -10,
+        'weight' => -20,
       ]);
 
     // Poll attributes
@@ -283,49 +294,52 @@ class Poll extends ContentEntityBase implements PollInterface {
         'weight' => 0,
       ));
 
-    $fields['anonymous_vote_allow'] = BaseFieldDefinition::create('list_integer')
+    $fields['anonymous_vote_allow'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Allow anonymous votes'))
       ->setDescription(t('A flag indicating whether anonymous users are allowed to vote.'))
-      ->setSetting('unsigned', TRUE)
-      ->setRequired(TRUE)
-      ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
       ->setDefaultValue(0)
       ->setDisplayOptions('form', array(
-        'type' => 'options_select',
+        'type' => 'boolean_checkbox',
+        'settings' => array(
+          'display_label' => TRUE,
+        ),
         'weight' => 1,
       ));
 
-    $fields['cancel_vote_allow'] = BaseFieldDefinition::create('list_integer')
+    $fields['cancel_vote_allow'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Allow cancel votes'))
       ->setDescription(t('A flag indicating whether users may cancel their vote.'))
-      ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
       ->setDefaultValue(1)
-      ->setRequired(TRUE)
       ->setDisplayOptions('form', array(
-        'type' => 'options_select',
+        'type' => 'boolean_checkbox',
+        'settings' => array(
+          'display_label' => TRUE,
+        ),
         'weight' => 2,
       ));
 
-    $fields['result_vote_allow'] = BaseFieldDefinition::create('list_integer')
+    $fields['result_vote_allow'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Allow view results'))
       ->setDescription(t('A flag indicating whether users may see the results before voting.'))
-      ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
       ->setDefaultValue(0)
-      ->setRequired(TRUE)
       ->setDisplayOptions('form', array(
-        'type' => 'options_select',
+        'type' => 'boolean_checkbox',
+        'settings' => array(
+          'display_label' => TRUE,
+        ),
         'weight' => 3,
       ));
 
-    $fields['status'] = BaseFieldDefinition::create('list_integer')
-      ->setLabel(t('Active?'))
+    $fields['status'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Active'))
       ->setDescription(t('A flag indicating whether the poll is active.'))
-      ->setSetting('allowed_values', array(0 => t('No'), 1 => t('Yes')))
-      ->setRequired(TRUE)
       ->setDefaultValue(1)
       ->setDisplayOptions('form', array(
-        'type' => 'options_select',
-        'weight' => 4,
+        'type' => 'boolean_checkbox',
+        'settings' => array(
+          'display_label' => TRUE,
+        ),
+        'weight' => -5,
       ));
 
     $fields['created'] = BaseFieldDefinition::create('created')
