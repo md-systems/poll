@@ -7,7 +7,6 @@
 
 namespace Drupal\poll;
 
-use Drupal\Core\Entity\EntityFormBuilderInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 
 /**
@@ -35,24 +34,23 @@ class PollPostRenderCache {
   /**
    * Callback for #post_render_cache; replaces placeholder with poll view form.
    *
-   * @param array $element
-   *   The renderable array that contains the to be replaced placeholder.
-   * @param array $context
-   *   An array with the following keys:
-   *   - id: the poll ID
+   * @param int $id
+   *   The poll ID.
+   * @param string $view_mode
+   *   The view mode the poll should be rendered with.
    *
    * @return array
    *   A renderable array containing the poll form.
    */
-  public function renderViewForm(array $element, array $context) {
-    $poll = $this->entityManager->getStorage('poll')->load($context['id']);
+  public function renderViewForm($id, $view_mode) {
+    $poll = $this->entityManager->getStorage('poll')->load($id);
 
     if ($poll) {
       $form = \Drupal::formBuilder()->getForm('Drupal\poll\Form\PollViewForm', $poll);
       // For all view modes except full and block (as block displays it as the
       // block title, display the question.
-      $form['#view_mode'] = $context['view_mode'];
-      if ($context['view_mode'] != 'full' && $context['view_mode'] != 'block') {
+      $form['#view_mode'] = $view_mode;
+      if ($view_mode != 'full' && $view_mode != 'block') {
         if (isset($form['results'])) {
           $form['results']['#show_question'] = TRUE;
         }
@@ -60,18 +58,13 @@ class PollPostRenderCache {
           $form['#show_question'] = TRUE;
         }
       }
-      $markup = drupal_render($form);
+      $markup = $form;
 
     }
     else {
-      $markup = '';
+      $markup = ['#markup' => ''];
     }
-
-    $callback = 'poll.post_render_cache:renderViewForm';
-    $placeholder = drupal_render_cache_generate_placeholder($callback, $context);
-    $element['#markup'] = str_replace($placeholder, $markup, $element['#markup']);
-
-    return $element;
+    return $markup;
   }
 
 }
