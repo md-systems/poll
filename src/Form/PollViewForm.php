@@ -106,7 +106,7 @@ class PollViewForm extends FormBase {
         $actions['cancel']['#submit'] = array('::cancel');
         $actions['cancel']['#weight'] = '0';
       }
-      if (!$poll->hasUserVoted()) {
+      if (!$poll->hasUserVoted() && $poll->isOpen()) {
         $actions['#type'] = 'actions';
         $actions['back']['#type'] = 'submit';
         $actions['back']['#button_type'] = 'primary';
