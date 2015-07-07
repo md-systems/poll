@@ -29,7 +29,7 @@ class PollForm extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, FormStateInterface $form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state) {
     $poll = $this->buildEntity($form, $form_state);
     // Check for duplicate titles.
     $poll_storage = $this->entityManager->getStorage('poll');
@@ -39,7 +39,7 @@ class PollForm extends ContentEntityForm {
         $form_state->setErrorByName('question', $this->t('A feed named %feed already exists. Enter a unique question.', array('%feed' => $poll->label())));
       }
     }
-    parent::validate($form, $form_state);
+    parent::validateForm($form, $form_state);
   }
 
   /**
