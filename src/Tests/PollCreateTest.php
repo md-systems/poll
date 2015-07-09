@@ -74,6 +74,10 @@ class PollCreateTest extends PollTestBase {
     $elements = $this->xpath('//input[@value="Vote"]');
     $this->assertTrue(empty($elements), "Vote button doesn't appear.");
 
+    // Verify 'View Poll' button no longer appears.
+    $elements = $this->xpath('value="View poll"');
+    $this->assertTrue(empty($elements), "View poll button doesn't appear.");
+
     // Edit the poll and re-activate.
     $poll->open();
     $poll->save();
