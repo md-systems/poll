@@ -12,6 +12,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\poll\PollInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Displays banned IP addresses.
@@ -25,12 +26,27 @@ class PollViewForm extends FormBase {
     return 'poll_view_form';
   }
 
-  public function buildForm(array $form, FormStateInterface $form_state, $poll = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, PollInterface $poll = NULL, Request $request = NULL) {
     // Add the poll to the form.
     $form['poll']['#type'] = 'value';
     $form['poll']['#value'] = $poll;
 
     if ($this->showResults($poll, $form_state)) {
+
+      // Check if the user already voted. The form is still being built but
+      // the Vote button won't be added so the submit callbacks will not be
+      // called. Directly check for the request method and use the raw user
+      // input.
+      if ($request->isMethod('POST') && $poll->hasUserVoted()) {
+        $input = $form_state->getUserInput();
+        if (isset($input['op']) && $input['op'] == $this->t('Vote')) {
+          // If this happened, then the form submission was likely a cached page.
+          // Force a session for this user so he can see the results.
+          drupal_set_message($this->t('Your vote for this poll has already been submitted.'), 'error');
+          $_SESSION['poll_vote'][$poll->id()] = FALSE;
+        }
+      }
+
       $form['results'] = $this->showPollResults($poll);
     }
     else {
@@ -237,18 +253,6 @@ class PollViewForm extends FormBase {
    * @param array $form_state
    */
   public function save(array $form, FormStateInterface $form_state) {
-
-    // Check if the user already voted. We do this in save() and not validate
-    // so that the form is considered submitted and displays the result
-    // when built again.
-    if ($form_state->getValue('poll')->hasUserVoted()) {
-      // If this happened, then the form submission was likely a cached page.
-      // Force a session for this user so he can see the results.
-      drupal_set_message($this->t('Your vote for this poll has already been submitted.'), 'error');
-      $_SESSION['poll_vote'][$form_state->getValue('poll')->id()] = FALSE;
-      return;
-    }
-
     $options = array();
     $options['chid'] = $form_state->getValue('choice');
     $options['uid'] = $this->currentUser()->id();
