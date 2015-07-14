@@ -49,9 +49,6 @@ class PollViewForm extends FormBase {
 
       $form['#theme'] = 'poll_vote';
       $form['#entity'] = $poll;
-      // Set form caching because we could have multiple of these forms on
-      // the same page, and we want to ensure the right one gets picked.
-      $form_state->setCached(TRUE);
       // Set a flag to hide results which will be removed if we want to view
       // results when the form is rebuilt.
       $form_state->set('show_results', FALSE);
