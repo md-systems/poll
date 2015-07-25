@@ -9,3 +9,4 @@ dependencies:
   - node
   - options
   - views
+  - user
