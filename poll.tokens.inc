@@ -5,6 +5,8 @@
  * Builds placeholder replacement tokens for values specific to Poll nodes.
  */
 
+use Drupal\Core\Render\BubbleableMetadata;
+
 /**
  * Implements hook_token_info().
  */
@@ -38,7 +40,7 @@ function poll_token_info() {
 /**
  * Implements hook_tokens().
  */
-function poll_tokens($type, $tokens, array $data = array(), array $options = array()) {
+function poll_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
   $sanitize = !empty($options['sanitize']);
   if (isset($options['langcode'])) {
     $url_options['language'] = \Drupal::languageManager()->getLanguage($options['langcode']);
