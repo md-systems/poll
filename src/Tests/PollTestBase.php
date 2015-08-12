@@ -9,6 +9,7 @@ namespace Drupal\poll\Tests;
 
 use Drupal\poll\PollInterface;
 use Drupal\simpletest\WebTestBase;
+use InvalidArgumentException;
 
 /**
  * Defines a base class for testing the Poll module.
@@ -68,8 +69,8 @@ abstract class PollTestBase extends WebTestBase {
     list($edit, $index) = $this->pollGenerateEdit($question, $choices);
 
     // Re-submit the form until all choices are filled in.
-    if (count($choices) > 1) {
-      while ($index < count($choices)) {
+    if (count($choices) > 0) {
+      for ($delta = 0; $delta <= count($choices); $delta++) {
         $this->drupalPostForm(NULL, $edit, t('Add another item'));
         list($edit, $index) = $this->pollGenerateEdit($question, $choices, $index);
       }
@@ -84,7 +85,9 @@ abstract class PollTestBase extends WebTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
     // Load the first node returned from the database.
-    $polls = entity_load_multiple_by_properties('poll', array('question' => $question));
+    $polls = \Drupal::entityManager()
+      ->getStorage('poll')
+      ->loadByProperties(array('question' => $question));
     $poll = reset($polls);
     $this->assertText(t('The poll @question has been added.', array('@question' => $question)), 'Poll has been created.');
     $this->assertTrue($poll->id, 'Poll has been found in the database.');
@@ -198,6 +201,31 @@ abstract class PollTestBase extends WebTestBase {
         )));
       }
     }
+  }
+
+  /**
+   * Get the Choice ID of a poll.
+   *
+   * @param \Drupal\poll\PollInterface $poll
+   *    The poll of the choice.
+   * @param int $delta
+   *    The number of the choice.
+   *
+   * @return int
+   *    Returns the choice chid or an error.
+   *
+   * @throws InvalidArgumentException
+   *    Throws it if the poll does not have the choice delta.
+   */
+  protected function getChoiceId(PollInterface $poll, $delta) {
+    $options = $poll->getOptions();
+    $keys = array_keys($options);
+    foreach ($keys as $id => $key) {
+      if ($delta == $id + 1) {
+        return $key;
+      }
+    }
+    throw new InvalidArgumentException();
   }
 
 }

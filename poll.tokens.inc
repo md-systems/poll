@@ -5,35 +5,36 @@
  * Builds placeholder replacement tokens for values specific to Poll nodes.
  */
 
+use Drupal\Component\Utility\Xss;
 use Drupal\Core\Render\BubbleableMetadata;
 
 /**
  * Implements hook_token_info().
  */
 function poll_token_info() {
-  $node['poll-votes'] = array(
+  $node['votes'] = array(
     'name' => t("Poll votes"),
     'description' => t("The number of votes that have been cast on a poll."),
   );
-  $node['poll-winner'] = array(
+  $node['winner'] = array(
     'name' => t("Poll winner"),
     'description' => t("The winning poll answer."),
   );
-  $node['poll-winner-votes'] = array(
+  $node['winner-votes'] = array(
     'name' => t("Poll winner votes"),
     'description' => t("The number of votes received by the winning poll answer."),
   );
-  $node['poll-winner-percent'] = array(
+  $node['winner-percent'] = array(
     'name' => t("Poll winner percent"),
     'description' => t("The percentage of votes received by the winning poll answer."),
   );
-  $node['poll-duration'] = array(
+  $node['duration'] = array(
     'name' => t("Poll duration"),
     'description' => t("The length of time the poll is set to run."),
   );
 
   return array(
-    'tokens' => array('node' => $node),
+    'tokens' => array('poll' => $node),
   );
 }
 
@@ -42,55 +43,51 @@ function poll_token_info() {
  */
 function poll_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
   $sanitize = !empty($options['sanitize']);
-  if (isset($options['langcode'])) {
-    $url_options['language'] = \Drupal::languageManager()->getLanguage($options['langcode']);
-    $langcode = $options['langcode'];
-  }
-  else {
-    $langcode = NULL;
-  }
-
   $replacements = array();
 
-  if ($type == 'node' && !empty($data['node']) && $data['node']->type == 'poll') {
-    $node = $data['node'];
+  if ($type == 'poll' && !empty($data['poll'])) {
+    /** @var \Drupal\poll\Entity\Poll $poll */
+    $poll = $data['poll'];
 
     $total_votes = 0;
     $highest_votes = 0;
-    foreach ($node->choice as $choice) {
-      if ($choice['chvotes'] > $highest_votes) {
-        $winner = $choice;
-        $highest_votes = $choice['chvotes'];
+    foreach ($poll->votes as $vote) {
+      $total_votes += $vote;
+    }
+    $options = $poll->getOptions();
+    foreach ($poll->votes as $pid => $vote) {
+      if ($vote > $highest_votes) {
+        $winner = $options[$pid];
+        $highest_votes = $vote;
       }
-      $total_votes = $total_votes + $choice['chvotes'];
     }
     foreach ($tokens as $name => $original) {
       switch ($name) {
-        case 'poll-votes':
+        case 'votes':
           $replacements[$original] = $total_votes;
           break;
 
-        case 'poll-winner':
+        case 'winner':
           if (isset($winner)) {
-            $replacements[$original] = $sanitize ? filter_xss($winner['chtext']) : $winner['chtext'];
+            $replacements[$original] = $sanitize ? Xss::filter($winner) : $winner;
           }
           else {
             $replacements[$original] = '';
           }
           break;
 
-        case 'poll-winner-votes':
+        case 'winner-votes':
           if (isset($winner)) {
-            $replacements[$original] = $winner['chvotes'];
+            $replacements[$original] = $highest_votes;
           }
           else {
             $replacements[$original] = '';
           }
           break;
 
-        case 'poll-winner-percent':
+        case 'winner-percent':
           if (isset($winner)) {
-            $percent = ($winner['chvotes'] / $total_votes) * 100;
+            $percent = ($highest_votes / $total_votes) * 100;
             $replacements[$original] = number_format($percent, 0);
           }
           else {
@@ -98,8 +95,8 @@ function poll_tokens($type, $tokens, array $data, array $options, BubbleableMeta
           }
           break;
 
-        case 'poll-duration':
-          $replacements[$original] = format_interval($node->runtime, 1, $langcode);
+        case 'duration':
+          $replacements[$original] = \Drupal::service('date.formatter')->formatInterval($poll->getRuntime());
           break;
       }
     }
