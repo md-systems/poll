@@ -20,37 +20,57 @@ use Symfony\Component\HttpFoundation\Request;
 class PollViewForm extends FormBase {
 
   /**
+   * The Poll of the form.
+   *
+   * @var PollInterface
+   */
+  protected $poll;
+
+  /**
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'poll_view_form';
+    return 'poll_view_form_' . $this->poll->id();
   }
 
-  public function buildForm(array $form, FormStateInterface $form_state, PollInterface $poll = NULL, Request $request = NULL) {
+  /**
+   * Set the Poll of this form.
+   *
+   * @param \Drupal\poll\PollInterface $poll
+   *    The poll that will be set in the form.
+   */
+  public function setPoll(PollInterface $poll) {
+    $this->poll = $poll;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildForm(array $form, FormStateInterface $form_state, Request $request = NULL) {
     // Add the poll to the form.
     $form['poll']['#type'] = 'value';
-    $form['poll']['#value'] = $poll;
+    $form['poll']['#value'] = $this->poll;
 
-    if ($this->showResults($poll, $form_state)) {
+    if ($this->showResults($this->poll, $form_state)) {
 
       // Check if the user already voted. The form is still being built but
       // the Vote button won't be added so the submit callbacks will not be
       // called. Directly check for the request method and use the raw user
       // input.
-      if ($request->isMethod('POST') && $poll->hasUserVoted()) {
+      if ($request->isMethod('POST') && $this->poll->hasUserVoted()) {
         $input = $form_state->getUserInput();
         if (isset($input['op']) && $input['op'] == $this->t('Vote')) {
           // If this happened, then the form submission was likely a cached page.
           // Force a session for this user so he can see the results.
           drupal_set_message($this->t('Your vote for this poll has already been submitted.'), 'error');
-          $_SESSION['poll_vote'][$poll->id()] = FALSE;
+          $_SESSION['poll_vote'][$this->poll->id()] = FALSE;
         }
       }
 
-      $form['results'] = $this->showPollResults($poll);
+      $form['results'] = $this->showPollResults($this->poll);
     }
     else {
-      $options = $poll->getOptions();
+      $options = $this->poll->getOptions();
       if ($options) {
         $form['choice'] = array(
           '#type' => 'radios',
@@ -61,19 +81,19 @@ class PollViewForm extends FormBase {
       }
       // Add the poll to the form.
       $form['poll']['#type'] = 'value';
-      $form['poll']['#value'] = $poll;
+      $form['poll']['#value'] = $this->poll;
 
       $form['#theme'] = 'poll_vote';
-      $form['#entity'] = $poll;
+      $form['#entity'] = $this->poll;
       // Set a flag to hide results which will be removed if we want to view
       // results when the form is rebuilt.
       $form_state->set('show_results', FALSE);
     }
 
-    $form['actions'] = $this->actions($form, $form_state, $poll);
+    $form['actions'] = $this->actions($form, $form_state, $this->poll);
 
     $form['#cache'] = array(
-      'tags' => $poll->getCacheTags(),
+      'tags' => $this->poll->getCacheTags(),
     );
 
     return $form;

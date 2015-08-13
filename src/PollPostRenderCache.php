@@ -46,7 +46,10 @@ class PollPostRenderCache {
     $poll = $this->entityManager->getStorage('poll')->load($id);
 
     if ($poll) {
-      $form = \Drupal::formBuilder()->getForm('Drupal\poll\Form\PollViewForm', $poll, \Drupal::request());
+      /** @var \Drupal\poll\Form\PollViewForm $form_object */
+      $form_object = \Drupal::service('class_resolver')->getInstanceFromDefinition('Drupal\poll\Form\PollViewForm');
+      $form_object->setPoll($poll);
+      $form = \Drupal::formBuilder()->getForm($form_object, \Drupal::request());
       // For all view modes except full and block (as block displays it as the
       // block title, display the question.
       $form['#view_mode'] = $view_mode;
