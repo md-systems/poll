@@ -16,13 +16,19 @@ use InvalidArgumentException;
  */
 abstract class PollTestBase extends WebTestBase {
 
-  /** @var \Drupal\user\UserInterface $entity */
+  /**
+   * @var \Drupal\user\UserInterface $entity
+   */
   protected $admin_user;
 
-  /** @var \Drupal\user\UserInterface $entity */
+  /**
+   * @var \Drupal\user\UserInterface $entity
+   */
   protected $web_user;
 
-  /** @var \Drupal\poll\PollInterface $entity */
+  /**
+   * @var \Drupal\poll\PollInterface $entity
+   */
   protected $poll;
 
   /**
@@ -30,13 +36,16 @@ abstract class PollTestBase extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('poll', 'node');
+  public static $modules = array('poll', 'node', 'block');
 
   /**
    * {@inheritdoc}
    */
   protected function setUp() {
     parent::setUp();
+
+    $this->drupalPlaceBlock('local_tasks_block');
+    $this->drupalPlaceBlock('local_actions_block');
 
     $this->admin_user = $this->drupalCreateUser(array('administer polls', 'access polls'));
     $this->web_user = $this->drupalCreateUser(array('access polls', 'cancel own vote'));
