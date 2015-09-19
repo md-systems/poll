@@ -413,21 +413,21 @@ class Poll extends ContentEntityBase implements PollInterface {
   /**
    * {@inheritdoc}
    */
-  public static function postLoad(EntityStorageInterface $storage, array &$entities) {
-    foreach ($entities as $entity) {
-      $entity->votes = $storage->getVotes($entity);
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public static function postDelete(EntityStorageInterface $storage, array $entities) {
     parent::postDelete($storage, $entities);
 
     foreach ($entities as $entity) {
       $storage->deleteVotes($entity);
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getVotes() {
+    /** @var \Drupal\poll\PollStorage $poll_storage_controller */
+    $poll_storage_controller = \Drupal::entityManager()->getStorage('poll');
+    return $poll_storage_controller->getVotes($this);
   }
 
 }

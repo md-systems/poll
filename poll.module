@@ -117,6 +117,7 @@ function poll_cron() {
  */
 function template_preprocess_poll_vote(&$variables) {
   $form = $variables['form'];
+  $variables['poll'] = $form['#entity'];
   $variables['question'] = SafeMarkup::checkPlain($form['#entity']->label());
   $variables['choice'] = drupal_render($form['choice']);
   $variables['vote'] = drupal_render($form['actions']);

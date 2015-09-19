@@ -51,11 +51,11 @@ function poll_tokens($type, $tokens, array $data, array $options, BubbleableMeta
 
     $total_votes = 0;
     $highest_votes = 0;
-    foreach ($poll->votes as $vote) {
+    foreach ($poll->getVotes() as $vote) {
       $total_votes += $vote;
     }
     $options = $poll->getOptions();
-    foreach ($poll->votes as $pid => $vote) {
+    foreach ($poll->getVotes() as $pid => $vote) {
       if ($vote > $highest_votes) {
         $winner = $options[$pid];
         $highest_votes = $vote;

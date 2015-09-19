@@ -85,6 +85,7 @@ class PollViewForm extends FormBase {
 
       $form['#theme'] = 'poll_vote';
       $form['#entity'] = $this->poll;
+      $form['#action'] = $this->poll->url('canonical', ['query' => \Drupal::destination()->getAsArray()]);
       // Set a flag to hide results which will be removed if we want to view
       // results when the form is rebuilt.
       $form_state->set('show_results', FALSE);
@@ -96,6 +97,25 @@ class PollViewForm extends FormBase {
       'tags' => $this->poll->getCacheTags(),
     );
 
+    return $form;
+  }
+
+  /**
+   * Handles vote submit.
+   *
+   * @param array $form
+   *   The previous form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return array
+   *   The new form.
+   */
+  public function ajaxReplaceVoteResult(array $form, FormStateInterface $form_state) {
+
+    $form['choice'] = $this->showPollResults($this->poll);
+    $form['actions'] = $this->actions($form, $form_state, $this->poll);
+    unset($form['#action']);
     return $form;
   }
 
@@ -112,15 +132,19 @@ class PollViewForm extends FormBase {
       // The "View results" button, when available, has been clicked.
       case $form_state->get('show_results'):
         return TRUE;
+
       // The poll is closed.
       case ($poll->isClosed()):
         return TRUE;
+
       // Anonymous user is trying to view a poll they aren't allowed to vote in.
       case ($account->isAnonymous() && !$poll->getAnonymousVoteAllow()):
         return TRUE;
+
       // The user has already voted.
       case ($poll->hasUserVoted()):
         return TRUE;
+
       default:
         return FALSE;
     }
@@ -155,9 +179,14 @@ class PollViewForm extends FormBase {
       $actions['submit']['#value'] = t('Vote');
       $actions['submit']['#validate'] = array('::validateVote');
       $actions['submit']['#submit'] = array('::save');
+      $actions['submit']['#ajax'] = array(
+        'callback' => '::ajaxReplaceVoteResult',
+        'wrapper' => 'poll-' . $this->poll->id(),
+        'method' => 'replace',
+      );
       $actions['submit']['#weight'] = '0';
 
-      // view results before voting
+      // View results before voting.
       if ($poll->result_vote_allow->value) {
         $actions['result']['#type'] = 'submit';
         $actions['result']['#button_type'] = 'primary';
@@ -184,13 +213,13 @@ class PollViewForm extends FormBase {
     \Drupal::service('page_cache_kill_switch')->trigger();
 
     $total_votes = 0;
-    foreach ($poll->votes as $vote) {
+    foreach ($poll->getVotes() as $vote) {
       $total_votes += $vote;
     }
 
     $options = $poll->getOptions();
     $poll_results = array();
-    foreach ($poll->votes as $pid => $vote) {
+    foreach ($poll->getVotes() as $pid => $vote) {
       $percentage = round($vote * 100 / max($total_votes, 1));
       $display_votes = (!$block) ? ' (' . \Drupal::translation()
           ->formatPlural($vote, '1 vote', '@count votes') . ')' : '';

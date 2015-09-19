@@ -155,17 +155,26 @@ interface PollInterface extends ContentEntityInterface {
    * @return mixed
    */
   public function hasUserVoted();
+
   /**
    * Get all options for this poll.
    *
    * @return array
    */
   public function getOptions();
+
   /**
    * Get the values of each vote option for this poll.
    *
    * @return array
    */
   public function getOptionValues();
+
+  /**
+   * Get all the votes of this poll.
+   *
+   * @return array
+   */
+  public function getVotes();
 
 }

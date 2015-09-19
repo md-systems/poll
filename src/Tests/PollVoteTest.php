@@ -105,7 +105,7 @@ class PollVoteTest extends PollTestBase {
     $field_status = $this->xpath('//table/tbody/tr[1]');
     $active = trim((string) $field_status[0]->td[1]);
     $date = \Drupal::service('date.formatter')->format($this->poll->getCreated() + 172800, 'short');
-    $output = 'Yes (until ' . rtrim(strstr($date, '-', true)) . ')';
+    $output = 'Yes (until ' . rtrim(strstr($date, '-', TRUE)) . ')';
     $this->assertEqual($active, $output);
 
     // Check if allow anonymous voting is on.
@@ -116,4 +116,23 @@ class PollVoteTest extends PollTestBase {
     $total_votes = trim((string) $field_status[0]->td[4]);
     $this->assertEqual($total_votes, '1');
   }
+
+  /**
+   * Tests voting on a poll using AJAX.
+   */
+  public function testAjaxPollVote() {
+
+    $this->drupalLogin($this->web_user);
+
+    // Record a vote for the first choice.
+    $edit = array(
+      'choice' => '1',
+    );
+    $this->drupalPostAjaxForm('poll/' . $this->poll->id(), $edit, array('op' => 'Vote'), NULL, array(), array(), 'poll-view-form-1');
+    $this->assertText('Your vote has been recorded.', 'Your vote was recorded.');
+    $this->assertText('Total votes:  1', 'Vote count updated correctly.');
+    $elements = $this->xpath('//input[@value="Cancel vote"]');
+    $this->assertTrue(isset($elements[0]), "'Cancel your vote' button appears.");
+  }
+
 }
