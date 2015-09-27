@@ -228,7 +228,7 @@ class PollViewForm extends FormBase {
         '#theme' => 'poll_meter',
         '#prefix' => '<dt class="choice-title">' . SafeMarkup::checkPlain($options[$pid]) . "</dt>\n" . '<dd class="choice-result">',
         '#suffix' => "</dd>\n",
-        '#display_value' => t('!percentage%', array('!percentage' => $percentage)) . $display_votes,
+        '#display_value' => t('@percentage%', array('@percentage' => $percentage)) . $display_votes,
         '#min' => 0,
         '#max' => $total_votes,
         '#value' => $vote,
