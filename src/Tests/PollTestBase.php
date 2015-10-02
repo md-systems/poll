@@ -46,6 +46,7 @@ abstract class PollTestBase extends WebTestBase {
 
     $this->drupalPlaceBlock('local_tasks_block');
     $this->drupalPlaceBlock('local_actions_block');
+    $this->drupalPlaceBlock('page_title_block');
 
     $this->admin_user = $this->drupalCreateUser(array('administer polls', 'access polls'));
     $this->web_user = $this->drupalCreateUser(array('access polls', 'cancel own vote'));
