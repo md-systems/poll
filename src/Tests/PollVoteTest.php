@@ -7,6 +7,9 @@
 
 namespace Drupal\poll\Tests;
 
+use Drupal\Core\Database\Database;
+use Drupal\user\RoleInterface;
+
 /**
  * Tests voting on a poll.
  *
@@ -133,6 +136,46 @@ class PollVoteTest extends PollTestBase {
     $this->assertText('Total votes:  1', 'Vote count updated correctly.');
     $elements = $this->xpath('//input[@value="Cancel vote"]');
     $this->assertTrue(isset($elements[0]), "'Cancel your vote' button appears.");
+  }
+
+  /**
+   * Test that anonymous user just remove it's own vote.
+   */
+  protected function testAnonymousCancelVote() {
+    // Now grant anonymous users permission to view the polls, vote and delete
+    // it's own vote.
+    user_role_grant_permissions(RoleInterface::ANONYMOUS_ID, array('cancel own vote', 'access polls'));
+    $this->poll->setAnonymousVoteAllow(TRUE)->save();
+    $this->drupalLogout();
+    // First anonymous user votes.
+    $edit = array(
+      'choice' => '1',
+    );
+    $this->drupalPostForm('poll/' . $this->poll->id(), $edit, t('Vote'));
+
+    // Change the IP of first user.
+    Database::getConnection()->update('poll_vote')
+      ->fields(array('hostname' => '240.0.0.1'))
+      ->condition('uid', \Drupal::currentUser()->id())
+      ->execute();
+
+    // Logged user votes.
+    $this->drupalLogin($this->web_user);
+    $this->drupalPostForm('poll/' . $this->poll->id(), $edit, t('Vote'));
+    $this->assertText(t('Total votes:  @votes', array('@votes' => 2)), 'Vote did correctly.');
+
+    // Second anonymous user votes from same IP than the logged.
+    $this->drupalLogout();
+    $this->drupalPostForm('poll/' . $this->poll->id(), $edit, t('Vote'));
+    $this->assertText(t('Total votes:  @votes', array('@votes' => 3)), 'Vote did correctly.');
+
+    // Second anonymous user cancels own vote.
+    $this->drupalPostForm(NULL, array(), t('Cancel vote'));
+    $this->drupalPostForm(NULL, array(), t('Delete'));
+
+    // Vote again to see the results, resulting in three votes again.
+    $this->drupalPostForm('poll/' . $this->poll->id(), $edit, t('Vote'));
+    $this->assertText(t('Total votes:  @votes', array('@votes' => 3)), 'Just your vote deleted.');
   }
 
 }
