@@ -94,11 +94,19 @@ class PollStorage extends SqlContentEntityStorage implements PollStorageInterfac
    * {@inheritdoc}
    */
   public function cancelVote(PollInterface $poll, AccountInterface $account = NULL) {
-    $this->database->delete('poll_vote')
-      ->condition('pid', $poll->id())
-      ->condition('uid', (!$account instanceof AccountInterface) ? \Drupal::currentUser()
-        ->id() : $account->id())
-      ->execute();
+    if ($account->id()) {
+      $this->database->delete('poll_vote')
+        ->condition('pid', $poll->id())
+        ->condition('uid', $account->id())
+        ->execute();
+    }
+    else {
+      $this->database->delete('poll_vote')
+        ->condition('pid', $poll->id())
+        ->condition('uid', \Drupal::currentUser()->id())
+        ->condition('hostname', \Drupal::request()->getClientIp())
+        ->execute();
+    }
   }
 
   /**
