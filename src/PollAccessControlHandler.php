@@ -22,7 +22,7 @@ class PollAccessControlHandler extends EntityAccessControlHandler {
   /**
    * {@inheritdoc}
    */
-  protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
+  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     // Allow view access if the user has the access polls permission.
     if ($operation == 'view' && $account->hasPermission('access polls')) {
       return AccessResult::allowedIfHasPermission($account, $account->hasPermission('access polls'));
@@ -30,7 +30,7 @@ class PollAccessControlHandler extends EntityAccessControlHandler {
 
     // Otherwise fall back to the parent which checks the administer polls
     // permission.
-    return parent::checkAccess($entity, $operation, $langcode, $account);
+    return parent::checkAccess($entity, $operation, $account);
   }
 
 }
